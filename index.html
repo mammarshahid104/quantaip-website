@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<!-- saved from url=(0056)file:///C:/Users/ammar/Downloads/quantaip_landing_8.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUANTAIP — Quantum AI Pakistan</title>
+<link href="./QUANTAIP — Quantum AI Pakistan_files/css2" rel="stylesheet">
+<style>
+:root {
+  --gold: #b8960a;
+  --gold-lt: #d4aa30;
+  --gold-pale: #f5e8c0;
+  --navy: #080f1e;
+  --navy-mid: #0d1628;
+  --navy-light: #1a2a4a;
+  --blue: #4a7acc;
+  --cream: #f0e8cc;
+  --grey: #6b7280;
+  --grey-light: #a8c8e8;
+  --white: #ffffff;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Jost',sans-serif;background:var(--navy);color:var(--cream);overflow-x:hidden;}
+
+/* WhatsApp Floating Button */
+.wa-float{position:fixed;bottom:28px;right:28px;z-index:999;display:flex;flex-direction:column;align-items:flex-end;gap:10px;}
+.wa-btn{width:56px;height:56px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 20px rgba(37,211,102,0.35);transition:all 0.3s;animation:pulse-wa 2s infinite;}
+.wa-btn:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(37,211,102,0.5);}
+.wa-btn svg{width:28px;height:28px;fill:white;}
+.wa-label{background:var(--navy-mid);border:1px solid rgba(37,211,102,0.3);color:#25D366;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;padding:6px 14px;border-radius:20px;white-space:nowrap;opacity:0;transform:translateX(10px);transition:all 0.3s;}
+.wa-float:hover .wa-label{opacity:1;transform:translateX(0);}
+@keyframes pulse-wa{0%,100%{box-shadow:0 4px 20px rgba(37,211,102,0.35)}50%{box-shadow:0 4px 32px rgba(37,211,102,0.6)}}
+
+/* Badges */
+.badges{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:20px;}
+.badge{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--gold);border:1px solid rgba(184,150,10,0.35);padding:5px 12px;border-radius:2px;background:rgba(184,150,10,0.06);}
+
+/* Two path buttons */
+.hero-paths{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:20px;}
+.path-btn{padding:16px 28px;font-family:'Jost',sans-serif;font-size:11px;font-weight:500;letter-spacing:3px;text-transform:uppercase;text-decoration:none;border-radius:2px;transition:all 0.3s;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.path-physics{background:rgba(184,150,10,0.1);border:1px solid var(--gold);color:var(--gold);}
+.path-physics:hover{background:var(--gold);color:var(--navy);}
+.path-business{background:rgba(74,122,204,0.1);border:1px solid var(--blue);color:var(--blue);}
+.path-business:hover{background:var(--blue);color:var(--white);}
+.path-sub{font-size:9px;letter-spacing:1px;opacity:0.7;font-weight:300;}
+
+/* Grid bg */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(184,150,10,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(184,150,10,0.04) 1px,transparent 1px);
+  background-size:60px 60px;pointer-events:none;z-index:0;
+}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:20px 60px;display:flex;align-items:center;justify-content:space-between;background:rgba(8,15,30,0.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(184,150,10,0.15);}
+.nav-brand{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;text-decoration:none;letter-spacing:2px;}
+.nav-brand .q{color:var(--cream);}.nav-brand .aip{color:var(--gold);}
+.nav-links{display:flex;gap:36px;list-style:none;align-items:center;}
+.nav-links a{font-size:10px;font-weight:400;letter-spacing:3px;text-transform:uppercase;color:rgba(168,200,232,0.7);text-decoration:none;transition:color 0.2s;}
+.nav-links a:hover{color:var(--gold);}
+.nav-cta{border:1px solid var(--gold) !important;color:var(--gold) !important;padding:10px 22px;}
+.nav-cta:hover{background:var(--gold) !important;color:var(--navy) !important;}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:120px 60px 80px;text-align:center;position:relative;overflow:hidden;}
+
+/* Animated atom */
+.atom-wrap{position:relative;width:200px;height:200px;margin:0 auto 48px;}
+.orbit{position:absolute;inset:0;border:1px solid rgba(184,150,10,0.35);border-radius:50%;}
+.orbit-1{transform:rotate(-28deg) scaleY(0.35);animation:spin1 8s linear infinite;}
+.orbit-2{transform:rotate(28deg) scaleY(0.35);border-color:rgba(74,122,204,0.35);animation:spin2 10s linear infinite;}
+.orbit-3{transform:rotate(85deg) scaleY(0.35);border-color:rgba(184,150,10,0.18);animation:spin3 14s linear infinite;}
+.nucleus{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:32px;height:32px;background:radial-gradient(circle at 35% 35%,#fff8d0,var(--gold));border-radius:50%;box-shadow:0 0 20px rgba(184,150,10,0.4);}
+.electron{position:absolute;width:8px;height:8px;border-radius:50%;top:50%;left:50%;}
+.e1{background:var(--gold);margin:-4px;animation:e-orbit1 8s linear infinite;}
+.e2{background:var(--blue);margin:-4px;animation:e-orbit2 10s linear infinite;}
+@keyframes spin1{from{transform:rotate(-28deg) scaleY(0.35)}to{transform:rotate(332deg) scaleY(0.35)}}
+@keyframes spin2{from{transform:rotate(28deg) scaleY(0.35)}to{transform:rotate(388deg) scaleY(0.35)}}
+@keyframes spin3{from{transform:rotate(85deg) scaleY(0.35)}to{transform:rotate(445deg) scaleY(0.35)}}
+@keyframes e-orbit1{
+  0%{transform:translate(96px,0) translateX(-50%) translateY(-50%)}
+  25%{transform:translate(0,40px) translateX(-50%) translateY(-50%)}
+  50%{transform:translate(-96px,0) translateX(-50%) translateY(-50%)}
+  75%{transform:translate(0,-40px) translateX(-50%) translateY(-50%)}
+  100%{transform:translate(96px,0) translateX(-50%) translateY(-50%)}
+}
+@keyframes e-orbit2{
+  0%{transform:translate(-80px,32px) translateX(-50%) translateY(-50%)}
+  50%{transform:translate(80px,-32px) translateX(-50%) translateY(-50%)}
+  100%{transform:translate(-80px,32px) translateX(-50%) translateY(-50%)}
+}
+
+.hero-eyebrow{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:6px;color:var(--gold);text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:16px;justify-content:center;opacity:0;animation:fadeUp 0.8s ease 0.2s forwards;}
+.hero-eyebrow::before,.hero-eyebrow::after{content:'';width:40px;height:1px;background:var(--gold);opacity:0.5;}
+.hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(48px,7vw,96px);font-weight:300;line-height:1.0;letter-spacing:-1px;margin-bottom:12px;opacity:0;animation:fadeUp 1s ease 0.3s forwards;}
+.hero-title em{font-style:italic;color:var(--gold);}
+.hero-sub{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:6px;color:var(--grey-light);text-transform:uppercase;margin-bottom:32px;opacity:0;animation:fadeUp 0.8s ease 0.5s forwards;}
+.hero-divider{display:flex;align-items:center;gap:16px;justify-content:center;margin-bottom:28px;opacity:0;animation:fadeUp 0.8s ease 0.6s forwards;}
+.hero-divider-line{width:60px;height:1px;background:var(--gold);opacity:0.4;}
+.hero-divider-dot{width:5px;height:5px;background:var(--gold);transform:rotate(45deg);}
+.hero-desc{font-size:14px;font-weight:300;line-height:1.9;color:var(--grey-light);max-width:560px;margin:0 auto 44px;opacity:0;animation:fadeUp 0.8s ease 0.7s forwards;}
+.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;opacity:0;animation:fadeUp 0.8s ease 0.8s forwards;}
+.btn-gold{background:var(--gold);color:var(--navy);padding:15px 36px;font-family:'Jost',sans-serif;font-size:10px;font-weight:600;letter-spacing:4px;text-transform:uppercase;text-decoration:none;border:1px solid var(--gold);transition:all 0.3s;}
+.btn-gold:hover{background:transparent;color:var(--gold);}
+.btn-outline{background:transparent;color:var(--cream);padding:15px 36px;font-family:'Jost',sans-serif;font-size:10px;font-weight:400;letter-spacing:4px;text-transform:uppercase;text-decoration:none;border:1px solid rgba(240,232,204,0.25);transition:all 0.3s;}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold);}
+
+/* Stats */
+.hero-stats{display:flex;gap:0;justify-content:center;margin-top:60px;border-top:1px solid rgba(184,150,10,0.15);border-bottom:1px solid rgba(184,150,10,0.15);opacity:0;animation:fadeUp 0.8s ease 1s forwards;}
+.stat-item{padding:24px 44px;text-align:center;border-right:1px solid rgba(184,150,10,0.12);}
+.stat-item:last-child{border-right:none;}
+.stat-num{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:600;color:var(--cream);line-height:1;}
+.stat-num span{color:var(--gold);}
+.stat-label{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;color:rgba(168,200,232,0.5);text-transform:uppercase;margin-top:4px;}
+
+/* SECTION BASE */
+.section{padding:110px 60px;position:relative;}
+.section-eyebrow{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:5px;color:var(--gold);text-transform:uppercase;text-align:center;margin-bottom:16px;}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,4vw,60px);font-weight:300;text-align:center;color:var(--cream);margin-bottom:14px;line-height:1.1;}
+.section-title em{font-style:italic;color:var(--gold);}
+.section-divider{display:flex;align-items:center;gap:14px;justify-content:center;margin-bottom:56px;}
+.section-divider-line{width:50px;height:1px;background:var(--gold);opacity:0.4;}
+.section-divider-dot{width:4px;height:4px;background:var(--gold);transform:rotate(45deg);}
+.section-sub{text-align:center;font-size:13px;font-weight:300;color:var(--grey-light);max-width:480px;margin:0 auto 56px;line-height:1.85;}
+
+/* SERVICES */
+.services-section{background:var(--navy);}
+.services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(184,150,10,0.1);}
+.service-card{background:var(--navy-mid);padding:48px 36px;position:relative;overflow:hidden;transition:background 0.3s;}
+.service-card::before{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold-lt));transform:scaleX(0);transform-origin:left;transition:transform 0.4s ease;}
+.service-card:hover{background:#101d35;}
+.service-card:hover::before{transform:scaleX(1);}
+.service-num{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:rgba(184,150,10,0.5);margin-bottom:22px;}
+.service-icon{width:48px;height:48px;margin-bottom:22px;}
+.service-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--cream);margin-bottom:12px;line-height:1.2;}
+.service-desc{font-size:12px;font-weight:300;color:var(--grey-light);line-height:1.8;margin-bottom:20px;}
+.service-price{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--gold);}
+.service-arrow{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:2px;color:rgba(184,150,10,0.5);text-transform:uppercase;margin-top:20px;transition:color 0.2s;}
+.service-card:hover .service-arrow{color:var(--gold);}
+.service-arrow::after{content:'→';transition:transform 0.2s;}
+.service-card:hover .service-arrow::after{transform:translateX(4px);}
+
+/* PORTFOLIO */
+.portfolio-section{background:#060c18;}
+.portfolio-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.portfolio-card{background:var(--navy-mid);border:1px solid rgba(184,150,10,0.1);padding:36px;position:relative;overflow:hidden;transition:all 0.3s;}
+.portfolio-card:hover{border-color:rgba(184,150,10,0.4);transform:translateY(-4px);}
+.portfolio-tag{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:14px;}
+.portfolio-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--cream);margin-bottom:10px;}
+.portfolio-desc{font-size:12px;font-weight:300;color:var(--grey-light);line-height:1.75;}
+.portfolio-icon{position:absolute;top:24px;right:24px;width:36px;height:36px;opacity:0.2;}
+.portfolio-tech{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px;}
+.tech-tag{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;color:var(--blue);border:1px solid rgba(74,122,204,0.3);padding:3px 8px;}
+
+/* INTERNATIONAL */
+.intl-section{background:var(--navy-mid);position:relative;overflow:hidden;}
+.intl-section::before{content:'GLOBAL';position:absolute;font-family:'Cormorant Garamond',serif;font-size:280px;font-weight:700;color:rgba(184,150,10,0.03);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;white-space:nowrap;}
+.intl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;max-width:900px;margin:0 auto;}
+.intl-card{background:var(--navy);border:1px solid rgba(184,150,10,0.12);padding:40px;text-align:center;transition:all 0.3s;position:relative;}
+.intl-card:hover{border-color:rgba(184,150,10,0.4);}
+.intl-flag{font-size:40px;margin-bottom:14px;}
+.intl-country{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:var(--cream);margin-bottom:8px;}
+.intl-currency{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--gold);margin-bottom:12px;}
+.intl-desc{font-size:12px;font-weight:300;color:var(--grey-light);line-height:1.75;}
+.intl-badge{position:absolute;top:16px;right:16px;background:rgba(184,150,10,0.12);border:1px solid rgba(184,150,10,0.3);font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--gold);padding:4px 8px;}
+
+/* ABOUT */
+.about-section{background:var(--navy);}
+.about-wrap{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;max-width:1100px;margin:0 auto;}
+.about-left{}
+.about-eyebrow{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:5px;color:var(--gold);margin-bottom:18px;}
+.about-title{font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:300;color:var(--cream);line-height:1.1;margin-bottom:18px;}
+.about-title em{font-style:italic;color:var(--gold);}
+.about-line{width:48px;height:1px;background:var(--gold);margin-bottom:24px;}
+.about-desc{font-size:13px;font-weight:300;color:var(--grey-light);line-height:1.9;margin-bottom:32px;}
+.about-right{display:flex;flex-direction:column;gap:20px;}
+.about-stat-card{background:var(--navy-mid);border:1px solid rgba(184,150,10,0.12);padding:28px;transition:border-color 0.3s;}
+.about-stat-card:hover{border-color:rgba(184,150,10,0.35);}
+.about-stat-num{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:300;color:var(--gold);line-height:1;}
+.about-stat-label{font-size:11px;font-weight:300;color:var(--grey-light);margin-top:4px;}
+.about-values{display:flex;flex-direction:column;gap:12px;margin-top:8px;}
+.about-value{display:flex;align-items:flex-start;gap:14px;font-size:12px;font-weight:300;color:var(--grey-light);line-height:1.7;}
+.about-value-dot{width:5px;height:5px;background:var(--gold);border-radius:50%;flex-shrink:0;margin-top:6px;}
+
+/* PHILOSOPHY */
+.phil-section{background:#060c18;}
+.phil-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid rgba(184,150,10,0.1);}
+.phil-card{padding:48px 36px;border-right:1px solid rgba(184,150,10,0.1);position:relative;transition:background 0.3s;}
+.phil-card:last-child{border-right:none;}
+.phil-card:hover{background:rgba(184,150,10,0.03);}
+.phil-num{font-family:'Cormorant Garamond',serif;font-size:72px;font-weight:300;color:rgba(184,150,10,0.08);line-height:1;margin-bottom:16px;}
+.phil-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--cream);margin-bottom:12px;}
+.phil-desc{font-size:12px;font-weight:300;color:var(--grey-light);line-height:1.8;}
+
+/* TESTIMONIALS */
+.testimonials-section{background:var(--navy-mid);}
+.testimonials-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
+.testimonial-card{background:var(--navy);border:1px solid rgba(184,150,10,0.1);padding:36px;transition:border-color 0.3s;}
+.testimonial-card:hover{border-color:rgba(184,150,10,0.3);}
+.testimonial-quote{font-family:'Cormorant Garamond',serif;font-size:48px;color:var(--gold);opacity:0.3;line-height:0.8;margin-bottom:12px;}
+.testimonial-text{font-family:'Cormorant Garamond',serif;font-size:16px;font-style:italic;color:var(--cream);line-height:1.7;margin-bottom:20px;}
+.testimonial-author{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--gold);}
+.testimonial-role{font-size:11px;color:var(--grey-light);margin-top:4px;}
+
+/* ENROLL */
+.enroll-section{background:var(--navy);padding:110px 60px;}
+.enroll-wrap{display:grid;grid-template-columns:1fr 1fr;gap:60px;max-width:1100px;margin:0 auto;}
+.form-card{background:var(--navy-mid);border:1px solid rgba(184,150,10,0.15);padding:48px;}
+.form-card-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:var(--cream);margin-bottom:6px;}
+.form-card-title em{font-style:italic;color:var(--gold);}
+.form-card-sub{font-size:11px;color:var(--grey-light);margin-bottom:28px;font-weight:300;}
+.form-group{margin-bottom:18px;}
+.form-label{display:block;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:rgba(168,200,232,0.6);margin-bottom:8px;}
+.form-input,.form-select{width:100%;padding:12px 0;font-family:'Jost',sans-serif;font-size:13px;font-weight:300;color:var(--cream);background:transparent;border:none;border-bottom:1px solid rgba(184,150,10,0.2);outline:none;transition:border-color 0.2s;appearance:none;}
+.form-input:focus,.form-select:focus{border-color:var(--gold);}
+.form-input::placeholder{color:rgba(168,200,232,0.3);}
+textarea.form-input{resize:vertical;min-height:80px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.btn-submit{width:100%;padding:16px;background:var(--gold);color:var(--navy);font-family:'Jost',sans-serif;font-size:10px;font-weight:600;letter-spacing:5px;text-transform:uppercase;border:none;cursor:none;transition:all 0.3s;margin-top:8px;}
+.btn-submit:hover{background:var(--gold-lt);}
+.success-msg{display:none;text-align:center;padding:28px;background:rgba(184,150,10,0.08);border:1px solid rgba(184,150,10,0.3);margin-top:14px;}
+.success-msg h3{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--cream);margin-bottom:6px;}
+.success-msg p{font-size:12px;color:var(--grey-light);font-weight:300;}
+
+/* CONTACT STRIP */
+.contact-strip{background:var(--navy-mid);padding:48px 60px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;border-top:1px solid rgba(184,150,10,0.1);}
+.contact-brand{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;letter-spacing:2px;}
+.contact-brand .q{color:var(--cream);}.contact-brand .aip{color:var(--gold);}
+.contact-items{display:flex;gap:32px;flex-wrap:wrap;}
+.contact-item-label{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:3px;color:rgba(184,150,10,0.6);text-transform:uppercase;margin-bottom:4px;}
+.contact-item-val{font-size:12px;font-weight:300;color:var(--grey-light);}
+
+/* FOOTER */
+footer{background:#040810;padding:20px 60px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.footer-copy{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;color:rgba(168,200,232,0.2);}
+.footer-powered{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(184,150,10,0.3);}
+
+/* Reveal */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity 0.7s ease,transform 0.7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:768px){
+  nav{padding:16px 24px;}
+  .nav-links{display:none;}
+  .hero{padding:100px 24px 60px;}
+  .hero-stats{flex-wrap:wrap;}
+  .stat-item{border-right:none;border-bottom:1px solid rgba(184,150,10,0.1);width:50%;}
+  .section{padding:60px 24px;}
+  .services-grid,.portfolio-grid,.phil-grid,.testimonials-grid,.intl-grid{grid-template-columns:1fr;}
+  .about-wrap,.enroll-wrap{grid-template-columns:1fr;}
+  .form-row{grid-template-columns:1fr;}
+  .contact-strip{flex-direction:column;}
+  footer{flex-direction:column;gap:6px;padding:18px 24px;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="file:///C:/Users/ammar/Downloads/quantaip_landing_8.html#" class="nav-brand"><span class="q">QUANT</span><span class="aip">AIP</span></a>
+  <ul class="nav-links">
+    <li><a href="file:///C:/Users/ammar/Downloads/quantaip_landing_8.html#services" onclick="event.preventDefault();document.getElementById(&#39;services&#39;).scrollIntoView({behavior:&#39;smooth&#39;})">Services</a></li>
+    <li><a href="file:///C:/Users/ammar/Downloads/quantaip_landing_8.html#portfolio" onclick="event.preventDefault();document.getElementById(&#39;portfolio&#39;).scrollIntoView({behavior:&#39;smooth&#39;})">Portfolio</a></li>
+    <li><a href="file:///C:/Users/ammar/Downloads/quantaip_landing_8.html#about" onclick="event.preventDefault();document.getElementById(&#39;about&#39;).scrollIntoView({behavior:&#39;smooth&#39;})">About</a></li>
+    <li><a href="file:///C:/Users/ammar/Downloads/quantaip_landing_8.html#international" onclick="event.preventDefault();document.getElementById(&#39;international&#39;).scrollIntoView({behavior:&#39;smooth&#39;})">International</a></li>
+    <li><a href="file:///C:/Users/ammar/Downloads/quantaip_landing_8.html#contact" onclick="event.preventDefault();document.getElementById(&#39;contact&#39;).scrollIntoView({behavior:&#39;smooth&#39;})" class="nav-cta">Get In Touch</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="atom-wrap">
+    <div class="orbit orbit-1"></div>
+    <div class="orbit orbit-2"></div>
+    <div class="orbit orbit-3"></div>
+    <div class="nucleus"></div>
+    <div class="electron e1"></div>
+    <div class="electron e2"></div>
+  </div>
+  <div class="hero-eyebrow">Quantum AI Pakistan</div>
+  <h1 class="hero-title">Where Physics &amp; Technology<br><em>Come Alive</em></h1>
+  <p class="hero-sub">AI-Powered Solutions for Education, Business &amp; Automation</p>
+  <div class="hero-divider">
+    <div class="hero-divider-line"></div>
+    <div class="hero-divider-dot"></div>
+    <div class="hero-divider-line"></div>
+  </div>
+  <p class="hero-desc">QUANTAIP is a Lahore-based digital studio serving students, businesses and institutions across Pakistan, UK, Australia and worldwide. We solve real problems with AI, technology and creative design.</p>
+  <div class="hero-paths">
+    <a href="file:///C:/Users/ammar/Downloads/quantaip_landing_8.html#services" class="path-btn path-physics" onclick="event.preventDefault();document.getElementById(&#39;services&#39;).scrollIntoView({behavior:&#39;smooth&#39;})">
+      ⚛️ I am a Student
+      <span class="path-sub">Physics Academy — FSc · MDCAT · ECAT</span>
+    </a>
+    <a href="file:///C:/Users/ammar/Downloads/quantaip_landing_8.html#services" class="path-btn path-business" onclick="event.preventDefault();document.getElementById(&#39;services&#39;).scrollIntoView({behavior:&#39;smooth&#39;})">
+      💼 I need Digital Services
+      <span class="path-sub">Web · Design · Marketing · Automation</span>
+    </a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat-item"><div class="stat-num">6<span>+</span></div><div class="stat-label">Services</div></div>
+    <div class="stat-item"><div class="stat-num">3<span>+</span></div><div class="stat-label">Countries</div></div>
+    <div class="stat-item"><div class="stat-num">100<span>%</span></div><div class="stat-label">Quality</div></div>
+    <div class="stat-item"><div class="stat-num">24<span>hr</span></div><div class="stat-label">Response</div></div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="section services-section" id="services">
+  <div class="section-eyebrow">What We Offer</div>
+  <h2 class="section-title">Six Services — <em>One Studio</em></h2>
+  <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-dot"></div><div class="section-divider-line"></div></div>
+
+  <div class="services-grid reveal">
+    <div class="service-card">
+      <div class="service-num">01</div>
+      <svg class="service-icon" viewBox="0 0 48 48" fill="none">
+        <ellipse cx="24" cy="24" rx="20" ry="7" stroke="#b8960a" stroke-width="1" opacity="0.6" transform="rotate(-28 24 24)"></ellipse>
+        <ellipse cx="24" cy="24" rx="20" ry="7" stroke="#4a7acc" stroke-width="0.8" opacity="0.5" transform="rotate(28 24 24)"></ellipse>
+        <circle cx="24" cy="24" r="5" fill="#b8960a" opacity="0.8"></circle>
+        <circle cx="24" cy="24" r="2.5" fill="#fffce8"></circle>
+        <circle cx="6" cy="20" r="2.5" fill="#b8960a"></circle>
+        <circle cx="42" cy="28" r="2.2" fill="#4a7acc"></circle>
+      </svg>
+      <div class="service-title">Physics Academy</div>
+      <div class="service-desc">AI + AR powered online classes for FSc, A-Level, MDCAT and ECAT. Small batches, personalised learning, cinematic glass board teaching.</div>
+      <div class="badges">
+        <span class="badge">FBISE</span>
+        <span class="badge">Punjab Board</span>
+        <span class="badge">A-Level</span>
+        <span class="badge">MDCAT</span>
+        <span class="badge">ECAT</span>
+      </div>
+      <div class="service-price" style="margin-top:14px;">PKR 4,000 / month</div>
+      <div class="service-arrow">Learn More</div>
+    </div>
+
+    <div class="service-card">
+      <div class="service-num">02</div>
+      <svg class="service-icon" viewBox="0 0 48 48" fill="none">
+        <rect x="6" y="10" width="36" height="28" rx="2" stroke="#b8960a" stroke-width="0.9" opacity="0.6"></rect>
+        <line x1="6" y1="18" x2="42" y2="18" stroke="#b8960a" stroke-width="0.5" opacity="0.4"></line>
+        <circle cx="11" cy="14" r="1.8" fill="#b8960a" opacity="0.7"></circle>
+        <circle cx="16" cy="14" r="1.8" fill="#4a7acc" opacity="0.6"></circle>
+        <rect x="10" y="22" width="10" height="10" rx="1" fill="none" stroke="#b8960a" stroke-width="0.6" opacity="0.5"></rect>
+        <line x1="24" y1="24" x2="38" y2="24" stroke="#4a7acc" stroke-width="0.6" opacity="0.5"></line>
+        <line x1="24" y1="28" x2="36" y2="28" stroke="#4a7acc" stroke-width="0.5" opacity="0.4"></line>
+        <line x1="24" y1="32" x2="34" y2="32" stroke="#4a7acc" stroke-width="0.4" opacity="0.3"></line>
+      </svg>
+      <div class="service-title">Website Making</div>
+      <div class="service-desc">Modern, fast and mobile-friendly websites for businesses, academies, clinics and shops. Complete with admin panel and WhatsApp integration.</div>
+      <div class="service-price">PKR 15,000 — 50,000</div>
+      <div class="service-arrow">Learn More</div>
+    </div>
+
+    <div class="service-card">
+      <div class="service-num">03</div>
+      <svg class="service-icon" viewBox="0 0 48 48" fill="none">
+        <polygon points="24,6 42,36 6,36" stroke="#b8960a" stroke-width="1" fill="none" opacity="0.65"></polygon>
+        <polygon points="24,14 36,32 12,32" stroke="#b8960a" stroke-width="0.6" fill="none" opacity="0.3"></polygon>
+        <circle cx="24" cy="6" r="2.5" fill="#b8960a" opacity="0.85"></circle>
+        <circle cx="6" cy="36" r="2.2" fill="#4a7acc" opacity="0.65"></circle>
+        <circle cx="42" cy="36" r="2.2" fill="#4a7acc" opacity="0.65"></circle>
+        <circle cx="24" cy="22" r="4" fill="#b8960a" opacity="0.5"></circle>
+      </svg>
+      <div class="service-title">Graphic Design</div>
+      <div class="service-desc">Logo design, brand identity, flex banners, social media graphics and visiting cards using Adobe Illustrator. Print-ready files delivered.</div>
+      <div class="service-price">PKR 5,000 — 25,000</div>
+      <div class="service-arrow">Learn More</div>
+    </div>
+
+    <div class="service-card">
+      <div class="service-num">04</div>
+      <svg class="service-icon" viewBox="0 0 48 48" fill="none">
+        <rect x="6" y="10" width="36" height="28" rx="2" stroke="#b8960a" stroke-width="0.9" opacity="0.55"></rect>
+        <polyline points="10,32 18,22 24,26 30,16 38,10" fill="none" stroke="#b8960a" stroke-width="1.4" opacity="0.85"></polyline>
+        <circle cx="10" cy="32" r="2" fill="#b8960a"></circle>
+        <circle cx="18" cy="22" r="2" fill="#b8960a"></circle>
+        <circle cx="24" cy="26" r="2" fill="#b8960a"></circle>
+        <circle cx="30" cy="16" r="2" fill="#b8960a"></circle>
+        <circle cx="38" cy="10" r="2.5" fill="#b8960a"></circle>
+        <polygon points="38,10 34,16 42,16" fill="#b8960a" opacity="0.8"></polygon>
+      </svg>
+      <div class="service-title">Digital Marketing</div>
+      <div class="service-desc">Facebook, Instagram and WhatsApp Business setup. Social media strategy, content planning, paid ads management and business growth consultation.</div>
+      <div class="service-price">PKR 8,000 — 20,000</div>
+      <div class="service-arrow">Learn More</div>
+    </div>
+
+    <div class="service-card">
+      <div class="service-num">05</div>
+      <svg class="service-icon" viewBox="0 0 48 48" fill="none">
+        <rect x="6" y="10" width="36" height="28" rx="2" stroke="#b8960a" stroke-width="0.9" opacity="0.55"></rect>
+        <line x1="10" y1="20" x2="22" y2="20" stroke="#4a7acc" stroke-width="0.9" opacity="0.6"></line>
+        <line x1="10" y1="26" x2="24" y2="26" stroke="#b8960a" stroke-width="0.9" opacity="0.55"></line>
+        <line x1="10" y1="32" x2="20" y2="32" stroke="#4a7acc" stroke-width="0.8" opacity="0.5"></line>
+        <circle cx="34" cy="24" r="7" fill="none" stroke="#b8960a" stroke-width="0.9" opacity="0.65"></circle>
+        <line x1="34" y1="31" x2="34" y2="38" stroke="#b8960a" stroke-width="0.8" opacity="0.55"></line>
+        <polygon points="34,38 30,32 38,32" fill="#b8960a" opacity="0.65"></polygon>
+      </svg>
+      <div class="service-title">Selenium Automation</div>
+      <div class="service-desc">Python-based web automation, scraping, bot development and repetitive task elimination. Full source code delivered. International clients welcome.</div>
+      <div class="service-price">$50 — $200 / project</div>
+      <div class="service-arrow">Learn More</div>
+    </div>
+
+    <div class="service-card">
+      <div class="service-num">06</div>
+      <svg class="service-icon" viewBox="0 0 48 48" fill="none">
+        <rect x="6" y="12" width="36" height="28" rx="2" stroke="#b8960a" stroke-width="0.9" opacity="0.55"></rect>
+        <line x1="6" y1="20" x2="42" y2="20" stroke="#b8960a" stroke-width="0.5" opacity="0.35"></line>
+        <line x1="12" y1="26" x2="26" y2="26" stroke="#b8960a" stroke-width="0.6" opacity="0.5"></line>
+        <line x1="12" y1="30" x2="26" y2="30" stroke="#4a7acc" stroke-width="0.6" opacity="0.5"></line>
+        <line x1="12" y1="34" x2="22" y2="34" stroke="#b8960a" stroke-width="0.5" opacity="0.4"></line>
+        <circle cx="34" cy="30" r="6" fill="none" stroke="#b8960a" stroke-width="0.9" opacity="0.65"></circle>
+        <line x1="31" y1="30" x2="37" y2="30" stroke="#b8960a" stroke-width="0.6" opacity="0.5"></line>
+        <line x1="34" y1="27" x2="34" y2="33" stroke="#b8960a" stroke-width="0.6" opacity="0.5"></line>
+        <polygon points="24,6 32,12 16,12" fill="none" stroke="#b8960a" stroke-width="0.7" opacity="0.5"></polygon>
+      </svg>
+      <div class="service-title">School Management</div>
+      <div class="service-desc">Online attendance, student and parent portals, fee management and result cards. Custom setup for schools and colleges across Pakistan.</div>
+      <div class="service-price">PKR 5,000 — 25,000 / month</div>
+      <div class="service-arrow">Learn More</div>
+    </div>
+  </div>
+</section>
+
+<!-- PORTFOLIO -->
+<section class="section portfolio-section" id="portfolio">
+  <div class="section-eyebrow">Our Work</div>
+  <h2 class="section-title">Recent <em>Projects</em></h2>
+  <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-dot"></div><div class="section-divider-line"></div></div>
+
+  <div class="portfolio-grid reveal">
+    <div class="portfolio-card">
+      <div class="portfolio-tag">E-Commerce · Web Development</div>
+      <div class="portfolio-title">Libas &amp; Co.</div>
+      <div style="background:rgba(184,150,10,0.06);border:1px dashed rgba(184,150,10,0.2);border-radius:2px;padding:20px;text-align:center;margin:14px 0;font-family:&#39;DM Mono&#39;,monospace;font-size:9px;letter-spacing:2px;color:rgba(184,150,10,0.5);">📸 SCREENSHOT COMING SOON</div>
+      <div class="portfolio-desc">A luxury clothing store website for men's and kids' fashion. Features product filtering, cart system, WhatsApp checkout and a full admin panel for the client to manage products independently.</div>
+      <div class="portfolio-tech"><span class="tech-tag">HTML/CSS</span><span class="tech-tag">JavaScript</span><span class="tech-tag">Node.js</span><span class="tech-tag">MongoDB</span><span class="tech-tag">Cloudinary</span></div>
+    </div>
+
+    <div class="portfolio-card">
+      <div class="portfolio-tag">Robotics · Arduino</div>
+      <div class="portfolio-title">QUANTAIP Smart Radar</div>
+      <div style="background:rgba(74,122,204,0.06);border:1px dashed rgba(74,122,204,0.2);border-radius:2px;padding:20px;text-align:center;margin:14px 0;font-family:&#39;DM Mono&#39;,monospace;font-size:9px;letter-spacing:2px;color:rgba(74,122,204,0.5);">📸 PHOTO COMING SOON</div>
+      <div class="portfolio-desc">A real-time radar system built with Arduino UNO, ultrasonic sensor and servo motor. Features a live Processing display with sweep animation, red dot detection and distance readout.</div>
+      <div class="portfolio-tech"><span class="tech-tag">Arduino</span><span class="tech-tag">Processing</span><span class="tech-tag">C++</span><span class="tech-tag">HC-SR04</span></div>
+    </div>
+
+    <div class="portfolio-card">
+      <div class="portfolio-tag">Brand Identity · Design</div>
+      <div class="portfolio-title">QUANTAIP Studio Brand</div>
+      <div style="background:rgba(184,150,10,0.06);border:1px dashed rgba(184,150,10,0.2);border-radius:2px;padding:20px;text-align:center;margin:14px 0;font-family:&#39;DM Mono&#39;,monospace;font-size:9px;letter-spacing:2px;color:rgba(184,150,10,0.5);">📸 OFFICE PHOTOS COMING SOON</div>
+      <div class="portfolio-desc">Complete brand identity for QUANTAIP including logo design, flex banners, glass board vinyl, social media covers, WhatsApp Business setup and a full landing website deployed on Netlify.</div>
+      <div class="portfolio-tech"><span class="tech-tag">Illustrator</span><span class="tech-tag">HTML/CSS</span><span class="tech-tag">Netlify</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- INTERNATIONAL -->
+<section class="section intl-section" id="international">
+  <div class="section-eyebrow">Global Reach</div>
+  <h2 class="section-title">Serving Clients <em>Worldwide</em></h2>
+  <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-dot"></div><div class="section-divider-line"></div></div>
+  <p class="section-sub">QUANTAIP delivers premium digital services to international clients at competitive rates. Quality without compromise — wherever you are.</p>
+
+  <div class="intl-grid reveal">
+    <div class="intl-card">
+      <div class="intl-badge">Available</div>
+      <div class="intl-flag">🇬🇧</div>
+      <div class="intl-country">United Kingdom</div>
+      <div class="intl-currency">Pricing in GBP £</div>
+      <div class="intl-desc">Competitive rates for UK businesses. Website making from GBP 250, graphic design from GBP 120. Premium quality at a fraction of UK agency costs.</div>
+    </div>
+    <div class="intl-card">
+      <div class="intl-badge">Available</div>
+      <div class="intl-flag">🇦🇺</div>
+      <div class="intl-country">Australia</div>
+      <div class="intl-currency">Pricing in AUD $</div>
+      <div class="intl-desc">Serving Australian businesses with fast delivery and clear communication. Website making from AUD 400, digital marketing from AUD 250/month.</div>
+    </div>
+    <div class="intl-card">
+      <div class="intl-badge">Available</div>
+      <div class="intl-flag">🇵🇰</div>
+      <div class="intl-country">Pakistan</div>
+      <div class="intl-currency">Pricing in PKR ₨</div>
+      <div class="intl-desc">Based in Lahore — serving businesses, schools and academies across Pakistan. Affordable rates, fast delivery and ongoing support included.</div>
+    </div>
+    <div class="intl-card">
+      <div class="intl-flag">🌍</div>
+      <div class="intl-country">Worldwide</div>
+      <div class="intl-currency">USD / Custom Pricing</div>
+      <div class="intl-desc">Open to clients from any country. Selenium automation and web development projects accepted globally. Pricing in USD for international clients.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="section about-section" id="about">
+  <div class="about-wrap reveal">
+    <div class="about-left">
+      <div class="about-eyebrow">About QUANTAIP</div>
+      <h2 class="about-title">Built on Physics,<br>Powered by <em>Innovation</em></h2>
+      <div class="about-line"></div>
+      <p class="about-desc">QUANTAIP — Quantum AI Pakistan — is a Lahore-based digital studio founded by Ammar Shahid, a Physics educator and technology innovator. We believe the same principles that govern the universe — precision, clarity, and elegance — should govern great digital work.</p>
+      <p class="about-desc">From AI-powered physics education to enterprise-grade web applications, we deliver excellence across every domain we touch.</p>
+      <div class="about-values">
+        <div class="about-value"><div class="about-value-dot"></div>Honest, transparent communication on every project.</div>
+        <div class="about-value"><div class="about-value-dot"></div>On-time delivery — no exceptions, no excuses.</div>
+        <div class="about-value"><div class="about-value-dot"></div>Quality that makes your recommendation proud.</div>
+      </div>
+    </div>
+    <div class="about-right">
+      <div class="about-stat-card">
+        <div class="about-stat-num">Ammar Shahid</div>
+        <div class="about-stat-label">Founder &amp; Director — Physics Educator, Web Developer, Tech Innovator</div>
+      </div>
+      <div class="about-stat-card">
+        <div class="about-stat-num">Lahore, Pakistan</div>
+        <div class="about-stat-label">Serving Pakistan · UK · Australia · Worldwide</div>
+      </div>
+      <div class="about-stat-card">
+        <div class="about-stat-num">quantaip.org</div>
+        <div class="about-stat-label">+92 312 1960002 · mammarshahid104@gmail.com</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PHILOSOPHY -->
+<section class="section phil-section">
+  <div class="section-eyebrow">Our Philosophy</div>
+  <h2 class="section-title">The <em>QUANTAIP</em> Way</h2>
+  <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-dot"></div><div class="section-divider-line"></div></div>
+
+  <div class="phil-grid reveal">
+    <div class="phil-card">
+      <div class="phil-num">01</div>
+      <div class="phil-title">Precision</div>
+      <div class="phil-desc">Like a Physics equation, every line of code and every pixel of design must be exactly right. We do not cut corners — ever.</div>
+    </div>
+    <div class="phil-card">
+      <div class="phil-num">02</div>
+      <div class="phil-title">Honesty</div>
+      <div class="phil-desc">We tell clients the truth — about timelines, about what is possible, about what is best for their business. Trust is everything.</div>
+    </div>
+    <div class="phil-card">
+      <div class="phil-num">03</div>
+      <div class="phil-title">Growth</div>
+      <div class="phil-desc">We learn something new every single day. Every project makes us better. Every client challenge sharpens our craft and expands our vision.</div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="section testimonials-section">
+  <div class="section-eyebrow">Client Words</div>
+  <h2 class="section-title">What Clients <em>Say</em></h2>
+  <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-dot"></div><div class="section-divider-line"></div></div>
+
+  <div class="testimonials-grid reveal">
+    <div class="testimonial-card">
+      <div class="testimonial-quote">"</div>
+      <div class="testimonial-text">Ammar delivered our clothing store website exactly as we imagined — the admin panel makes it so easy for us to add products ourselves. Highly recommended!</div>
+      <div class="testimonial-author">Akasha Shahid</div>
+      <div class="testimonial-role">Founder — Libas &amp; Co., Lahore</div>
+    </div>
+    <div class="testimonial-card">
+      <div class="testimonial-quote">"</div>
+      <div class="testimonial-text">The Smart Radar project was absolutely amazing — built in just one day using Arduino. Students were blown away. QUANTAIP is doing something truly special.</div>
+      <div class="testimonial-author">Robotics Faculty</div>
+      <div class="testimonial-role">Chand Bagh College, Sheikhupura</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT / ENROLL -->
+<section class="enroll-section" id="contact">
+  <div class="section-eyebrow">Get In Touch</div>
+  <h2 class="section-title" style="text-align:center;margin-bottom:14px;">Start Your <em>Project</em></h2>
+  <div class="section-divider" style="margin-bottom:48px;"><div class="section-divider-line"></div><div class="section-divider-dot"></div><div class="section-divider-line"></div></div>
+
+  <div class="enroll-wrap reveal">
+    <!-- Physics Enrollment -->
+    <div class="form-card">
+      <div class="form-card-title">Physics <em>Academy</em></div>
+      <div class="form-card-sub">Enroll for FSc · A-Level · MDCAT · ECAT</div>
+      <form id="enrollForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Student Name</label>
+            <input type="text" class="form-input" placeholder="Full name" required="">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Father Name</label>
+            <input type="text" class="form-input" placeholder="Father&#39;s name" required="">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">WhatsApp</label>
+            <input type="tel" class="form-input" placeholder="+92 XXX XXXXXXX" required="">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Class Level</label>
+            <select class="form-select">
+              <option value="">Select</option>
+              <option>FSc Pre-Medical</option>
+              <option>FSc Pre-Engineering</option>
+              <option>A-Level</option>
+              <option>MDCAT Preparation</option>
+              <option>ECAT Preparation</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="btn-submit">◆ Enroll Now</button>
+        <div class="success-msg" id="enrollSuccess"><h3>Enrolled!</h3><p>We'll contact you on WhatsApp within 24 hours. JazakAllah!</p></div>
+      </form>
+    </div>
+
+    <!-- Digital Services -->
+    <div class="form-card">
+      <div class="form-card-title">Digital <em>Services</em></div>
+      <div class="form-card-sub">Website · Design · Marketing · Automation · School</div>
+      <form id="servicesForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Your Name</label>
+            <input type="text" class="form-input" placeholder="Full name" required="">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Business Name</label>
+            <input type="text" class="form-input" placeholder="Optional">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">WhatsApp / Email</label>
+            <input type="text" class="form-input" placeholder="Contact details" required="">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Service Required</label>
+            <select class="form-select" required="">
+              <option value="">Select</option>
+              <option>Website Making</option>
+              <option>Graphic Design</option>
+              <option>Digital Marketing</option>
+              <option>Selenium Automation</option>
+              <option>School Management</option>
+              <option>Multiple Services</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Project Details</label>
+          <textarea class="form-input" placeholder="Tell us about your project..."></textarea>
+        </div>
+        <button type="submit" class="btn-submit">◆ Send Request</button>
+        <div class="success-msg" id="servicesSuccess"><h3>Request Received!</h3><p>We'll contact you within 24 hours. JazakAllah!</p></div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT STRIP -->
+<div class="contact-strip">
+  <div class="contact-brand"><span class="q">QUANT</span><span class="aip">AIP</span></div>
+  <div class="contact-items">
+    <div class="contact-item"><div class="contact-item-label">Location</div><div class="contact-item-val">Lahore, Pakistan</div></div>
+    <div class="contact-item"><div class="contact-item-label">WhatsApp</div><div class="contact-item-val">+92 312 1960002</div></div>
+    <div class="contact-item"><div class="contact-item-label">Email</div><div class="contact-item-val">mammarshahid104@gmail.com</div></div>
+    <div class="contact-item"><div class="contact-item-label">Services</div><div class="contact-item-val">Physics · Web · Design · Marketing · Automation · School</div></div>
+    <div class="contact-item"><div class="contact-item-label">International</div><div class="contact-item-val">UK · Australia · Worldwide</div></div>
+  </div>
+</div>
+
+<footer>
+  <span class="footer-copy">© 2026 QUANTAIP — Quantum AI Pakistan. All rights reserved.</span>
+  <span class="footer-powered">AI · PHYSICS · INNOVATION</span>
+</footer>
+
+<!-- WhatsApp Floating Button -->
+<div class="wa-float">
+  <span class="wa-label">Chat on WhatsApp</span>
+  <a href="https://wa.me/923121960002" target="_blank" class="wa-btn">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"></path>
+    </svg>
+  </a>
+</div>
+
+<script>
+// Reveal
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(r=>obs.observe(r));
+
+// Enroll form
+document.getElementById('enrollForm').addEventListener('submit',function(e){
+  e.preventDefault();
+  const i=this.querySelectorAll('input,select');
+  const msg=`⚛️ *QUANTAIP — Physics Academy Enrollment*\n\n👤 *Student:* ${i[0].value}\n👨 *Father:* ${i[1].value}\n📱 *WhatsApp:* ${i[2].value}\n📚 *Class:* ${i[3].value}\n\n_Sent via quantaip.org_`;
+  this.style.display='none';
+  document.getElementById('enrollSuccess').style.display='block';
+  window.open(`https://wa.me/923121960002?text=${encodeURIComponent(msg)}`,'_blank');
+});
+
+// Services form
+document.getElementById('servicesForm').addEventListener('submit',function(e){
+  e.preventDefault();
+  const i=this.querySelectorAll('input,select,textarea');
+  const msg=`💼 *QUANTAIP — Service Request*\n\n👤 *Name:* ${i[0].value}\n🏢 *Business:* ${i[1].value||'N/A'}\n📱 *Contact:* ${i[2].value}\n🛠️ *Service:* ${i[3].value}\n📋 *Details:* ${i[4].value||'N/A'}\n\n_Sent via quantaip.org_`;
+  this.style.display='none';
+  document.getElementById('servicesSuccess').style.display='block';
+  window.open(`https://wa.me/923121960002?text=${encodeURIComponent(msg)}`,'_blank');
+});
+</script>
+
+<!-- QUANTAIP AI Chatbot Bubble -->
+<style>
+  .chat-bubble-btn {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    background: #b8960a;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    box-shadow: 0 4px 15px rgba(184,150,10,0.4);
+    transition: all 0.3s;
+  }
+  .chat-bubble-btn:hover { background: #d4aa30; transform: scale(1.1); }
+  .chat-bubble-btn svg { width: 26px; height: 26px; fill: #080f1e; }
+  .chat-iframe-wrapper {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 370px;
+    height: 520px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(184,150,10,0.3);
+    z-index: 9998;
+    display: none;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+  .chat-iframe-wrapper iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+  @media (max-width: 480px) {
+    .chat-iframe-wrapper {
+      width: calc(100vw - 24px);
+      height: 70vh;
+      right: 12px;
+      bottom: 150px;
+    }
+  }
+</style>
+
+<div class="chat-iframe-wrapper" id="chatWindow">
+  <iframe src="https://quantaip-chatbot.onrender.com" title="QUANTAIP AI Assistant"></iframe>
+</div>
+
+<button class="chat-bubble-btn" onclick="toggleChat()" id="chatBtn" aria-label="Open AI Chat">
+  <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+</button>
+
+<script>
+  function toggleChat() {
+    const w = document.getElementById('chatWindow');
+    const btn = document.getElementById('chatBtn');
+    if (w.style.display === 'block') {
+      w.style.display = 'none';
+      btn.innerHTML = '<svg viewBox="0 0 24 24"><path fill="#080f1e" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>';
+    } else {
+      w.style.display = 'block';
+      btn.innerHTML = '<svg viewBox="0 0 24 24"><path fill="#080f1e" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
+    }
+  }
+</script>
+</body></html>
