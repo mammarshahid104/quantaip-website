@@ -679,7 +679,7 @@ footer{background:#040810;padding:20px 60px;display:flex;align-items:center;just
 </div>
 
 <!-- REVIEW FORM SECTION -->
-<section id="background:#0d1628;padding:80px 20px;text-align:center;">
+<section id="review-section" style="background:#0d1628;padding:80px 20px;text-align:center;">
   <div style="font-family:&#39;DM Mono&#39;,monospace;font-size:9px;letter-spacing:5px;color:#b8960a;text-transform:uppercase;margin-bottom:16px;">Share Your Experience</div>
   <h2 style="font-family:&#39;Cormorant Garamond&#39;,serif;font-size:clamp(28px,5vw,52px);font-weight:300;color:#f0e8cc;margin-bottom:12px;">Leave a <em style="color:#b8960a;">Review</em></h2>
   <p style="font-size:13px;color:#6b7280;margin-bottom:40px;">Your feedback helps us grow and helps others make the right decision.</p>
@@ -956,5 +956,20 @@ document.getElementById('servicesForm').addEventListener('submit',function(e){
       btn.innerHTML = '<svg viewBox="0 0 24 24"><path fill="#080f1e" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
     }
   }
+
+// Smooth scroll to section on page load
+window.addEventListener('load', function() {
+  if(window.location.hash) {
+    const hash = window.location.hash;
+    document.querySelector('html').style.scrollBehavior = 'auto';
+    setTimeout(function() {
+      const el = document.querySelector(hash);
+      if(el) {
+        el.scrollIntoView();
+        document.querySelector('html').style.scrollBehavior = 'smooth';
+      }
+    }, 1000);
+  }
+});
 </script>
 </body></html>
