@@ -937,7 +937,7 @@ document.getElementById('servicesForm').addEventListener('submit',function(e){
 </style>
 
 <div class="chat-iframe-wrapper" id="chatWindow">
-  <iframe src="./QUANTAIP — Quantum AI Pakistan_files/saved_resource.html" title="QUANTAIP AI Assistant"></iframe>
+  <iframe src="https://quantaip-chatbot.onrender.com" title="QUANTAIP AI Assistant"></iframe>
 </div>
 
 <button class="chat-bubble-btn" onclick="toggleChat()" id="chatBtn" aria-label="Open AI Chat">
@@ -946,6 +946,7 @@ document.getElementById('servicesForm').addEventListener('submit',function(e){
 
 <script>
   function toggleChat() {
+    fetch('https://quantaip-chatbot.onrender.com').catch(()=>{});
     const w = document.getElementById('chatWindow');
     const btn = document.getElementById('chatBtn');
     if (w.style.display === 'block') {
