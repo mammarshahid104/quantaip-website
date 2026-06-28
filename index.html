@@ -20,8 +20,8 @@
   --white: #ffffff;
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
-html{scroll-behavior:smooth;}
-body{font-family:'Jost',sans-serif;background:var(--navy);color:var(--cream);overflow-x:hidden;}
+html{scroll-behavior:smooth;height:100%;overflow:hidden;}
+body{font-family:'Jost',sans-serif;background:var(--navy);color:var(--cream);height:100%;overflow:hidden;}
 
 /* WhatsApp Floating Button */
 .wa-float{position:fixed;bottom:28px;right:28px;z-index:999;display:flex;flex-direction:column;align-items:flex-end;gap:10px;}
@@ -355,6 +355,28 @@ footer{background:#040810;padding:20px 60px;display:flex;align-items:center;just
   .mcq-flow{flex-direction:column;}
   .mcq-arrow{transform:rotate(90deg);}
 }
+
+/* ===== FULL-PAGE SNAP SCROLL ===== */
+.snap-container{height:100vh;overflow-y:scroll;overflow-x:hidden;scroll-snap-type:y mandatory;scroll-behavior:smooth;position:relative;-ms-overflow-style:none;scrollbar-width:none;}
+.snap-container::-webkit-scrollbar{width:0;height:0;display:none;}
+.snap-section{height:100vh;overflow-y:auto;overflow-x:hidden;scroll-snap-align:start;scroll-snap-stop:always;position:relative;-ms-overflow-style:none;scrollbar-width:none;}
+.snap-section::-webkit-scrollbar{width:0;display:none;}
+/* tall content sections scroll internally, others keep their own centering */
+.snap-section.hero{min-height:100vh;}
+.snap-info{display:flex;flex-direction:column;justify-content:flex-end;}
+
+/* Dot navigation + arrows */
+.snap-nav{position:fixed;right:22px;top:50%;transform:translateY(-50%);z-index:200;display:flex;flex-direction:column;align-items:center;gap:16px;}
+.snap-arrow{width:30px;height:30px;padding:0;border:1px solid var(--gold);background:rgba(8,15,30,0.85);color:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.3s;}
+.snap-arrow:hover{background:var(--gold);color:var(--navy);transform:scale(1.1);}
+.snap-arrow svg{width:13px;height:13px;display:block;}
+.snap-dots{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.snap-dot{position:relative;width:8px;height:8px;padding:0;border-radius:50%;border:1px solid var(--gold);background:var(--navy);cursor:pointer;transition:all 0.3s;}
+.snap-dot:hover{transform:scale(1.35);}
+.snap-dot.active{background:var(--gold);box-shadow:0 0 10px 2px rgba(184,150,10,0.7);}
+.snap-dot .dot-label{position:absolute;right:18px;top:50%;transform:translateY(-50%);white-space:nowrap;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);background:var(--navy-mid);border:1px solid rgba(184,150,10,0.3);padding:5px 11px;border-radius:2px;opacity:0;pointer-events:none;transition:opacity 0.25s;}
+.snap-dot:hover .dot-label{opacity:1;}
+@media(max-width:768px){.snap-nav{display:none;}}
 </style>
 </head>
 <body>
@@ -374,8 +396,22 @@ footer{background:#040810;padding:20px 60px;display:flex;align-items:center;just
   </ul>
 </nav>
 
+<!-- FULL-PAGE SNAP DOT NAVIGATION -->
+<div class="snap-nav" id="snapNav">
+  <button class="snap-arrow" id="snapUp" aria-label="Previous section">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M6 15l6-6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <div class="snap-dots" id="snapDots"></div>
+  <button class="snap-arrow" id="snapDown" aria-label="Next section">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+</div>
+
+<!-- SNAP CONTAINER -->
+<div class="snap-container" id="snapContainer">
+
 <!-- HERO -->
-<section class="hero">
+<section class="hero snap-section" id="hero" data-section-name="Home">
   <div class="atom-wrap">
     <div class="orbit orbit-1"></div>
     <div class="orbit orbit-2"></div>
@@ -412,7 +448,7 @@ footer{background:#040810;padding:20px 60px;display:flex;align-items:center;just
 </section>
 
 <!-- ============ PHYSICS WORLD ============ -->
-<section class="section physics-section reveal" id="physics-world">
+<section class="section physics-section reveal snap-section" id="physics-world" data-section-name="Physics">
   <div class="section-eyebrow">Physics · Education</div>
   <h2 class="section-title">The World of <em>Physics</em></h2>
   <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-dot"></div><div class="section-divider-line"></div></div>
@@ -503,7 +539,7 @@ footer{background:#040810;padding:20px 60px;display:flex;align-items:center;just
 </section>
 
 <!-- ============ OUR WORK — WEB ============ -->
-<section class="section work-section reveal" id="web-portfolio">
+<section class="section work-section reveal snap-section" id="web-portfolio" data-section-name="Web Work">
   <div class="section-eyebrow">Portfolio · Web Development</div>
   <h2 class="section-title">Sites We've <em>Built</em></h2>
   <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-dot"></div><div class="section-divider-line"></div></div>
@@ -542,7 +578,7 @@ footer{background:#040810;padding:20px 60px;display:flex;align-items:center;just
 </section>
 
 <!-- ============ OUR WORK — APPS ============ -->
-<section class="section work-section alt reveal" id="app-portfolio">
+<section class="section work-section alt reveal snap-section" id="app-portfolio" data-section-name="App Work">
   <div class="section-eyebrow">Portfolio · App Development</div>
   <h2 class="section-title">Apps We've <em>Developed</em></h2>
   <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-dot"></div><div class="section-divider-line"></div></div>
@@ -563,7 +599,7 @@ footer{background:#040810;padding:20px 60px;display:flex;align-items:center;just
 </section>
 
 <!-- SERVICES -->
-<section class="section services-section" id="services">
+<section class="section services-section snap-section" id="services" data-section-name="Services">
   <div class="section-eyebrow">What We Offer</div>
   <h2 class="section-title">Six Services — <em>One Studio</em></h2>
   <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-dot"></div><div class="section-divider-line"></div></div>
@@ -682,8 +718,52 @@ footer{background:#040810;padding:20px 60px;display:flex;align-items:center;just
   </div>
 </section>
 
+<!-- PHYSICS ACADEMY -->
+<section class="section enroll-section snap-section" id="physics-academy" data-section-name="Academy">
+  <div class="section-eyebrow">Physics Academy</div>
+  <h2 class="section-title" style="text-align:center;margin-bottom:14px;">Enroll in the <em>Academy</em></h2>
+  <div class="section-divider" style="margin-bottom:48px;"><div class="section-divider-line"></div><div class="section-divider-dot"></div><div class="section-divider-line"></div></div>
+  <div class="enroll-wrap reveal visible" style="grid-template-columns:1fr;max-width:560px;">
+    <div class="form-card">
+      <div class="form-card-title">Physics <em>Academy</em></div>
+      <div class="form-card-sub">Enroll for FSc · A-Level · MDCAT · ECAT</div>
+      <form id="enrollForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Student Name</label>
+            <input type="text" class="form-input" placeholder="Full name" required="">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Father Name</label>
+            <input type="text" class="form-input" placeholder="Father&#39;s name" required="">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">WhatsApp</label>
+            <input type="tel" class="form-input" placeholder="+92 XXX XXXXXXX" required="">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Class Level</label>
+            <select class="form-select">
+              <option value="">Select</option>
+              <option>FSc Pre-Medical</option>
+              <option>FSc Pre-Engineering</option>
+              <option>A-Level</option>
+              <option>MDCAT Preparation</option>
+              <option>ECAT Preparation</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="btn-submit">◆ Enroll Now</button>
+        <div class="success-msg" id="enrollSuccess"><h3>Enrolled!</h3><p>We'll contact you on WhatsApp within 24 hours. JazakAllah!</p></div>
+      </form>
+    </div>
+  </div>
+</section>
+
 <!-- PORTFOLIO -->
-<section class="section portfolio-section" id="portfolio">
+<section class="section portfolio-section snap-section" id="portfolio" data-section-name="Projects">
   <div class="section-eyebrow">Our Work</div>
   <h2 class="section-title">Recent <em>Projects</em></h2>
   <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-dot"></div><div class="section-divider-line"></div></div>
@@ -715,8 +795,40 @@ footer{background:#040810;padding:20px 60px;display:flex;align-items:center;just
   </div>
 </section>
 
+<!-- ABOUT -->
+<section class="section about-section snap-section" id="about" data-section-name="About">
+  <div class="about-wrap reveal visible">
+    <div class="about-left">
+      <div class="about-eyebrow">About QUANTAIP</div>
+      <h2 class="about-title">Built on Physics,<br>Powered by <em>Innovation</em></h2>
+      <div class="about-line"></div>
+      <p class="about-desc">QUANTAIP — Quantum AI Pakistan — is a Lahore-based digital studio founded by Ammar Shahid, a Physics educator and technology innovator. We believe the same principles that govern the universe — precision, clarity, and elegance — should govern great digital work.</p>
+      <p class="about-desc">From AI-powered physics education to enterprise-grade web applications, we deliver excellence across every domain we touch.</p>
+      <div class="about-values">
+        <div class="about-value"><div class="about-value-dot"></div>Honest, transparent communication on every project.</div>
+        <div class="about-value"><div class="about-value-dot"></div>On-time delivery — no exceptions, no excuses.</div>
+        <div class="about-value"><div class="about-value-dot"></div>Quality that makes your recommendation proud.</div>
+      </div>
+    </div>
+    <div class="about-right">
+      <div class="about-stat-card">
+        <div class="about-stat-num">Ammar Shahid</div>
+        <div class="about-stat-label">Founder &amp; Director — Physics Educator, Web Developer, Tech Innovator</div>
+      </div>
+      <div class="about-stat-card">
+        <div class="about-stat-num">Lahore, Pakistan</div>
+        <div class="about-stat-label">Serving Pakistan · UK · Australia · Worldwide</div>
+      </div>
+      <div class="about-stat-card">
+        <div class="about-stat-num">quantaip.org</div>
+        <div class="about-stat-label">+92 312 1960002 · mammarshahid104@gmail.com</div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- INTERNATIONAL -->
-<section class="section intl-section" id="international">
+<section class="section intl-section snap-section" id="international" data-section-name="International">
   <div class="section-eyebrow">Global Reach</div>
   <h2 class="section-title">Serving Clients <em>Worldwide</em></h2>
   <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-dot"></div><div class="section-divider-line"></div></div>
@@ -753,40 +865,8 @@ footer{background:#040810;padding:20px 60px;display:flex;align-items:center;just
   </div>
 </section>
 
-<!-- ABOUT -->
-<section class="section about-section" id="about">
-  <div class="about-wrap reveal visible">
-    <div class="about-left">
-      <div class="about-eyebrow">About QUANTAIP</div>
-      <h2 class="about-title">Built on Physics,<br>Powered by <em>Innovation</em></h2>
-      <div class="about-line"></div>
-      <p class="about-desc">QUANTAIP — Quantum AI Pakistan — is a Lahore-based digital studio founded by Ammar Shahid, a Physics educator and technology innovator. We believe the same principles that govern the universe — precision, clarity, and elegance — should govern great digital work.</p>
-      <p class="about-desc">From AI-powered physics education to enterprise-grade web applications, we deliver excellence across every domain we touch.</p>
-      <div class="about-values">
-        <div class="about-value"><div class="about-value-dot"></div>Honest, transparent communication on every project.</div>
-        <div class="about-value"><div class="about-value-dot"></div>On-time delivery — no exceptions, no excuses.</div>
-        <div class="about-value"><div class="about-value-dot"></div>Quality that makes your recommendation proud.</div>
-      </div>
-    </div>
-    <div class="about-right">
-      <div class="about-stat-card">
-        <div class="about-stat-num">Ammar Shahid</div>
-        <div class="about-stat-label">Founder &amp; Director — Physics Educator, Web Developer, Tech Innovator</div>
-      </div>
-      <div class="about-stat-card">
-        <div class="about-stat-num">Lahore, Pakistan</div>
-        <div class="about-stat-label">Serving Pakistan · UK · Australia · Worldwide</div>
-      </div>
-      <div class="about-stat-card">
-        <div class="about-stat-num">quantaip.org</div>
-        <div class="about-stat-label">+92 312 1960002 · mammarshahid104@gmail.com</div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- PHILOSOPHY -->
-<section class="section phil-section">
+<section class="section phil-section snap-section" data-section-name="Philosophy">
   <div class="section-eyebrow">Our Philosophy</div>
   <h2 class="section-title">The <em>QUANTAIP</em> Way</h2>
   <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-dot"></div><div class="section-divider-line"></div></div>
@@ -811,7 +891,7 @@ footer{background:#040810;padding:20px 60px;display:flex;align-items:center;just
 </section>
 
 <!-- TESTIMONIALS -->
-<section class="section testimonials-section">
+<section class="section testimonials-section snap-section" data-section-name="Testimonials">
   <div class="section-eyebrow">Client Words</div>
   <h2 class="section-title">What Clients <em>Say</em></h2>
   <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-dot"></div><div class="section-divider-line"></div></div>
@@ -832,50 +912,13 @@ footer{background:#040810;padding:20px 60px;display:flex;align-items:center;just
   </div>
 </section>
 
-<!-- CONTACT / ENROLL -->
-<section class="enroll-section" id="contact">
+<!-- CONTACT / SERVICE REQUEST -->
+<section class="section enroll-section snap-section" id="contact" data-section-name="Contact">
   <div class="section-eyebrow">Get In Touch</div>
   <h2 class="section-title" style="text-align:center;margin-bottom:14px;">Start Your <em>Project</em></h2>
   <div class="section-divider" style="margin-bottom:48px;"><div class="section-divider-line"></div><div class="section-divider-dot"></div><div class="section-divider-line"></div></div>
 
-  <div class="enroll-wrap reveal visible">
-    <!-- Physics Enrollment -->
-    <div class="form-card">
-      <div class="form-card-title">Physics <em>Academy</em></div>
-      <div class="form-card-sub">Enroll for FSc · A-Level · MDCAT · ECAT</div>
-      <form id="enrollForm">
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Student Name</label>
-            <input type="text" class="form-input" placeholder="Full name" required="">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Father Name</label>
-            <input type="text" class="form-input" placeholder="Father&#39;s name" required="">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">WhatsApp</label>
-            <input type="tel" class="form-input" placeholder="+92 XXX XXXXXXX" required="">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Class Level</label>
-            <select class="form-select">
-              <option value="">Select</option>
-              <option>FSc Pre-Medical</option>
-              <option>FSc Pre-Engineering</option>
-              <option>A-Level</option>
-              <option>MDCAT Preparation</option>
-              <option>ECAT Preparation</option>
-            </select>
-          </div>
-        </div>
-        <button type="submit" class="btn-submit">◆ Enroll Now</button>
-        <div class="success-msg" id="enrollSuccess"><h3>Enrolled!</h3><p>We'll contact you on WhatsApp within 24 hours. JazakAllah!</p></div>
-      </form>
-    </div>
-
+  <div class="enroll-wrap reveal visible" style="grid-template-columns:1fr;max-width:600px;">
     <!-- Digital Services -->
     <div class="form-card">
       <div class="form-card-title">Digital <em>Services</em></div>
@@ -920,20 +963,8 @@ footer{background:#040810;padding:20px 60px;display:flex;align-items:center;just
   </div>
 </section>
 
-<!-- CONTACT STRIP -->
-<div class="contact-strip">
-  <div class="contact-brand"><span class="q">QUANT</span><span class="aip">AIP</span></div>
-  <div class="contact-items">
-    <div class="contact-item"><div class="contact-item-label">Location</div><div class="contact-item-val">Lahore, Pakistan</div></div>
-    <div class="contact-item"><div class="contact-item-label">WhatsApp</div><div class="contact-item-val">+92 312 1960002</div></div>
-    <div class="contact-item"><div class="contact-item-label">Email</div><div class="contact-item-val">mammarshahid104@gmail.com</div></div>
-    <div class="contact-item"><div class="contact-item-label">Services</div><div class="contact-item-val">Physics · Web · Design · Marketing · Automation · School</div></div>
-    <div class="contact-item"><div class="contact-item-label">International</div><div class="contact-item-val">UK · Australia · Worldwide</div></div>
-  </div>
-</div>
-
 <!-- REVIEW FORM SECTION -->
-<section id="review-section" style="background:#0d1628;padding:80px 20px;text-align:center;">
+<section id="review-section" class="snap-section" data-section-name="Reviews" style="background:#0d1628;padding:80px 20px;text-align:center;">
   <div style="font-family:&#39;DM Mono&#39;,monospace;font-size:9px;letter-spacing:5px;color:#b8960a;text-transform:uppercase;margin-bottom:16px;">Share Your Experience</div>
   <h2 style="font-family:&#39;Cormorant Garamond&#39;,serif;font-size:clamp(28px,5vw,52px);font-weight:300;color:#f0e8cc;margin-bottom:12px;">Leave a <em style="color:#b8960a;">Review</em></h2>
   <p style="font-size:13px;color:#6b7280;margin-bottom:40px;">Your feedback helps us grow and helps others make the right decision.</p>
@@ -984,7 +1015,7 @@ footer{background:#040810;padding:20px 60px;display:flex;align-items:center;just
 </section>
 
 <!-- CONTACT FORM SECTION -->
-<section style="background:#080f1e;padding:80px 20px;text-align:center;">
+<section class="snap-section" data-section-name="Message" style="background:#080f1e;padding:80px 20px;text-align:center;">
   <div style="font-family:&#39;DM Mono&#39;,monospace;font-size:9px;letter-spacing:5px;color:#b8960a;text-transform:uppercase;margin-bottom:16px;">Get in Touch</div>
   <h2 style="font-family:&#39;Cormorant Garamond&#39;,serif;font-size:clamp(28px,5vw,52px);font-weight:300;color:#f0e8cc;margin-bottom:12px;">Send Us a <em style="color:#b8960a;">Message</em></h2>
   <p style="font-size:13px;color:#6b7280;margin-bottom:40px;">Have a project in mind? We'd love to hear from you.</p>
@@ -1029,10 +1060,25 @@ footer{background:#040810;padding:20px 60px;display:flex;align-items:center;just
 </section>
 
 
-<footer>
-  <span class="footer-copy">© 2026 QUANTAIP — Quantum AI Pakistan. All rights reserved.</span>
-  <span class="footer-powered">AI · PHYSICS · INNOVATION</span>
-</footer>
+<!-- CONTACT INFO + FOOTER SCREEN -->
+<section class="snap-section snap-info" data-section-name="Info">
+  <div class="contact-strip">
+    <div class="contact-brand"><span class="q">QUANT</span><span class="aip">AIP</span></div>
+    <div class="contact-items">
+      <div class="contact-item"><div class="contact-item-label">Location</div><div class="contact-item-val">Lahore, Pakistan</div></div>
+      <div class="contact-item"><div class="contact-item-label">WhatsApp</div><div class="contact-item-val">+92 312 1960002</div></div>
+      <div class="contact-item"><div class="contact-item-label">Email</div><div class="contact-item-val">mammarshahid104@gmail.com</div></div>
+      <div class="contact-item"><div class="contact-item-label">Services</div><div class="contact-item-val">Physics · Web · Design · Marketing · Automation · School</div></div>
+      <div class="contact-item"><div class="contact-item-label">International</div><div class="contact-item-val">UK · Australia · Worldwide</div></div>
+    </div>
+  </div>
+  <footer>
+    <span class="footer-copy">© 2026 QUANTAIP — Quantum AI Pakistan. All rights reserved.</span>
+    <span class="footer-powered">AI · PHYSICS · INNOVATION</span>
+  </footer>
+</section>
+
+</div><!-- /snap-container -->
 
 <!-- WhatsApp Floating Button -->
 <div class="wa-float">
@@ -1236,5 +1282,86 @@ window.addEventListener('load', function() {
     }, 1000);
   }
 });
+</script>
+
+<!-- Full-page snap scroll navigation -->
+<script>
+(function(){
+  const container = document.getElementById('snapContainer');
+  const dotsWrap  = document.getElementById('snapDots');
+  if(!container || !dotsWrap) return;
+
+  const sections = Array.from(container.querySelectorAll('.snap-section'));
+  let current = 0;
+
+  // Build one dot per section
+  sections.forEach(function(sec, i){
+    const name = sec.getAttribute('data-section-name') || ('Section ' + (i+1));
+    const dot = document.createElement('button');
+    dot.className = 'snap-dot';
+    dot.setAttribute('aria-label', name);
+    dot.innerHTML = '<span class="dot-label">' + name + '</span>';
+    dot.addEventListener('click', function(){ goTo(i); });
+    dotsWrap.appendChild(dot);
+  });
+  const dots = Array.from(dotsWrap.querySelectorAll('.snap-dot'));
+
+  function setActive(i){
+    current = i;
+    dots.forEach(function(d, j){ d.classList.toggle('active', j === i); });
+  }
+
+  function goTo(i){
+    if(i < 0 || i >= sections.length) return;
+    container.scrollTo({ top: sections[i].offsetTop, behavior: 'smooth' });
+    setActive(i);
+  }
+
+  // Track active section while scrolling (native wheel / touch / programmatic)
+  const io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        const idx = sections.indexOf(e.target);
+        if(idx > -1) setActive(idx);
+      }
+    });
+  }, { root: container, threshold: 0.55 });
+  sections.forEach(function(s){ io.observe(s); });
+
+  // Arrow buttons
+  document.getElementById('snapUp').addEventListener('click', function(){ goTo(current - 1); });
+  document.getElementById('snapDown').addEventListener('click', function(){ goTo(current + 1); });
+
+  // Keyboard arrows (ignored while typing in a field)
+  window.addEventListener('keydown', function(e){
+    const t = e.target;
+    if(t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT')) return;
+    if(e.key === 'ArrowDown' || e.key === 'PageDown'){ e.preventDefault(); goTo(current + 1); }
+    else if(e.key === 'ArrowUp' || e.key === 'PageUp'){ e.preventDefault(); goTo(current - 1); }
+  });
+
+  // Touch swipe (mobile): native CSS scroll-snap (scroll-snap-stop:always) already
+  // moves one section per swipe. This handler only assists when a swipe is decisive
+  // but the section has no internal overflow to consume it — without forcing a double jump.
+  let touchStartY = null, touchMoved = false;
+  container.addEventListener('touchstart', function(e){
+    touchStartY = e.changedTouches[0].clientY;
+    touchMoved = false;
+  }, { passive: true });
+  container.addEventListener('touchmove', function(){ touchMoved = true; }, { passive: true });
+  container.addEventListener('touchend', function(e){
+    if(touchStartY === null || !touchMoved) { touchStartY = null; return; }
+    const dy = touchStartY - e.changedTouches[0].clientY;
+    const sec = sections[current];
+    const canScrollInside = sec && sec.scrollHeight > sec.clientHeight + 4;
+    // Let native snap do its job for normal swipes; only nudge tiny swipes on
+    // non-scrollable sections so a deliberate flick always advances.
+    if(Math.abs(dy) > 45 && Math.abs(dy) < 120 && !canScrollInside){
+      if(dy > 0) goTo(current + 1);
+      else goTo(current - 1);
+    }
+    touchStartY = null;
+  }, { passive: true });
+})();
 </script>
 </body></html>
