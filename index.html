@@ -20,8 +20,8 @@
   --white: #ffffff;
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
-html{scroll-behavior:smooth;height:100%;overflow:hidden;}
-body{font-family:'Jost',sans-serif;background:var(--navy);color:var(--cream);height:100%;overflow:hidden;}
+html{scroll-behavior:smooth;}
+body{font-family:'Jost',sans-serif;background:var(--navy);color:var(--cream);overflow-x:hidden;}
 
 /* WhatsApp Floating Button */
 .wa-float{position:fixed;bottom:28px;right:28px;z-index:999;display:flex;flex-direction:column;align-items:flex-end;gap:10px;}
@@ -255,128 +255,6 @@ footer{background:#040810;padding:20px 60px;display:flex;align-items:center;just
   .contact-strip{flex-direction:column;}
   footer{flex-direction:column;gap:6px;padding:18px 24px;}
 }
-
-/* ===== PHYSICS WORLD ===== */
-.physics-section{background:var(--navy);}
-.tabs-nav{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-bottom:48px;border-bottom:1px solid rgba(184,150,10,0.12);}
-.tab-btn{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(168,200,232,0.6);background:none;border:none;padding:16px 22px;cursor:pointer;position:relative;transition:color 0.3s;}
-.tab-btn::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold-lt));transform:scaleX(0);transition:transform 0.35s ease;}
-.tab-btn:hover{color:var(--gold);}
-.tab-btn.active{color:var(--gold);}
-.tab-btn.active::after{transform:scaleX(1);}
-.tab-panel{display:none;}
-.tab-panel.active{display:block;animation:fadeUp 0.5s ease;}
-
-/* Tab 1 — Teacher */
-.teacher-photo{position:relative;width:100%;height:480px;background:linear-gradient(135deg,var(--navy-mid),var(--navy-light));border:1px solid rgba(184,150,10,0.2);display:flex;align-items:center;justify-content:center;overflow:hidden;}
-.teacher-photo>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
-.img-hint{position:absolute;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(184,150,10,0.4);}
-.teacher-overlay{position:relative;z-index:2;text-align:center;background:rgba(8,15,30,0.55);backdrop-filter:blur(2px);padding:28px 44px;border:1px solid rgba(184,150,10,0.2);}
-.teacher-overlay h3{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:600;color:var(--cream);margin-bottom:8px;}
-.teacher-overlay h3 em{font-style:italic;color:var(--gold);}
-.teacher-caption{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;}
-
-/* Tab 2 — Whiteboards masonry */
-.wb-gallery{column-count:3;column-gap:18px;}
-.wb-item{break-inside:avoid;margin-bottom:18px;background:var(--navy-mid);border:1px solid rgba(184,150,10,0.15);transition:border-color 0.3s,transform 0.3s;}
-.wb-item:hover{border-color:var(--gold);transform:translateY(-4px);}
-.wb-img{position:relative;width:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--navy-light),var(--navy-mid));overflow:hidden;}
-.wb-img>img{width:100%;display:block;}
-.wb-caption{padding:14px 16px;font-size:12px;font-weight:300;color:var(--grey-light);line-height:1.6;}
-
-/* Tab 3 — YouTube */
-.yt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
-.yt-card{background:var(--navy-mid);border:1px solid rgba(184,150,10,0.12);overflow:hidden;transition:all 0.3s;}
-.yt-card:hover{border-color:rgba(184,150,10,0.4);transform:translateY(-4px);}
-.yt-thumb{position:relative;height:170px;background:linear-gradient(135deg,var(--navy-light),#0a1322);display:flex;align-items:center;justify-content:center;}
-.yt-thumb>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
-.yt-play{position:relative;z-index:2;width:54px;height:54px;border-radius:50%;background:rgba(184,150,10,0.9);display:flex;align-items:center;justify-content:center;}
-.yt-play::after{content:'';border-left:16px solid var(--navy);border-top:10px solid transparent;border-bottom:10px solid transparent;margin-left:4px;}
-.yt-body{padding:20px;}
-.yt-title{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;color:var(--cream);margin-bottom:14px;}
-
-/* Tab 4 — Resources */
-.res-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
-.res-card{position:relative;background:var(--navy-mid);border:1px solid rgba(184,150,10,0.12);padding:44px 32px;text-align:center;transition:all 0.3s;}
-.res-card:hover{border-color:rgba(184,150,10,0.4);transform:translateY(-4px);}
-.res-icon{width:52px;height:52px;margin:0 auto 22px;}
-.res-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:var(--cream);margin-bottom:10px;}
-.res-desc{font-size:12px;font-weight:300;color:var(--grey-light);line-height:1.7;}
-.coming-badge{position:absolute;top:14px;right:14px;font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--gold);background:rgba(184,150,10,0.12);border:1px solid rgba(184,150,10,0.3);padding:4px 9px;text-transform:uppercase;}
-
-/* Tab 5 — MCQ */
-.mcq-wrap{max-width:780px;margin:0 auto;text-align:center;}
-.mcq-intro{font-size:13px;font-weight:300;color:var(--grey-light);line-height:1.85;margin-bottom:40px;}
-.mcq-flow{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin-bottom:44px;}
-.mcq-step{flex:1;min-width:150px;background:var(--navy-mid);border:1px solid rgba(184,150,10,0.15);padding:28px 20px;transition:border-color 0.3s;}
-.mcq-step:hover{border-color:rgba(184,150,10,0.4);}
-.mcq-step-icon{font-size:30px;margin-bottom:12px;}
-.mcq-step-title{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;color:var(--cream);margin-bottom:6px;}
-.mcq-step-desc{font-size:11px;font-weight:300;color:var(--grey-light);line-height:1.6;}
-.mcq-arrow{font-size:22px;color:var(--gold);}
-.mcq-note{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:rgba(168,200,232,0.6);margin-top:26px;}
-
-/* ===== WORK / PORTFOLIO (Web & Apps) ===== */
-.work-section{background:#060c18;}
-.work-section.alt{background:var(--navy-mid);}
-.work-grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;max-width:1040px;margin:0 auto;}
-.work-card{position:relative;background:var(--navy);border:1px solid rgba(184,150,10,0.12);padding:40px;transition:all 0.3s;}
-.work-card:hover{border-color:rgba(184,150,10,0.4);transform:translateY(-4px);}
-.work-card-wide{max-width:680px;margin:0 auto;}
-.work-badge{display:inline-flex;align-items:center;gap:7px;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;padding:5px 12px;border-radius:2px;margin-bottom:18px;}
-.work-badge.live{color:#27ae60;border:1px solid rgba(39,174,96,0.4);background:rgba(39,174,96,0.08);}
-.work-badge.live::before{content:'';width:7px;height:7px;border-radius:50%;background:#27ae60;box-shadow:0 0 8px rgba(39,174,96,0.7);}
-.work-badge.dev{color:var(--gold);border:1px solid rgba(184,150,10,0.4);background:rgba(184,150,10,0.08);}
-.work-badge.dev::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px rgba(184,150,10,0.7);}
-.work-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:var(--cream);margin-bottom:12px;line-height:1.2;}
-.work-desc{font-size:12.5px;font-weight:300;color:var(--grey-light);line-height:1.85;margin-bottom:18px;}
-.work-tech{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:24px;}
-.work-buttons{display:flex;gap:12px;flex-wrap:wrap;}
-.card-btn{display:inline-block;font-family:'Jost',sans-serif;font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;text-decoration:none;padding:13px 28px;transition:all 0.3s;}
-.card-btn.filled{background:var(--gold);color:var(--navy);border:1px solid var(--gold);}
-.card-btn.filled:hover{background:transparent;color:var(--gold);}
-.card-btn.outline{background:transparent;color:var(--cream);border:1px solid rgba(240,232,204,0.25);}
-.card-btn.outline:hover{border-color:var(--gold);color:var(--gold);}
-.work-note{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(168,200,232,0.5);text-transform:uppercase;margin-top:18px;}
-
-/* Tech We Use strip */
-.tech-strip-label{text-align:center;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin:64px 0 22px;}
-.tech-strip{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;}
-.tech-chip{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--cream);border:1px solid rgba(184,150,10,0.25);background:rgba(184,150,10,0.04);padding:11px 18px;transition:all 0.3s;}
-.tech-chip:hover{border-color:var(--gold);color:var(--gold);}
-
-@media(max-width:768px){
-  .tabs-nav{gap:0;}
-  .tab-btn{padding:12px 14px;font-size:9px;letter-spacing:2px;}
-  .wb-gallery{column-count:1;}
-  .yt-grid,.res-grid,.work-grid-2{grid-template-columns:1fr;}
-  .teacher-photo{height:340px;}
-  .teacher-overlay h3{font-size:26px;}
-  .mcq-flow{flex-direction:column;}
-  .mcq-arrow{transform:rotate(90deg);}
-}
-
-/* ===== FULL-PAGE SNAP SCROLL ===== */
-.snap-container{height:100vh;overflow-y:scroll;overflow-x:hidden;scroll-snap-type:y mandatory;scroll-behavior:smooth;position:relative;-ms-overflow-style:none;scrollbar-width:none;}
-.snap-container::-webkit-scrollbar{width:0;height:0;display:none;}
-.snap-section{height:100vh;overflow-y:auto;overflow-x:hidden;scroll-snap-align:start;scroll-snap-stop:always;position:relative;-ms-overflow-style:none;scrollbar-width:none;}
-.snap-section::-webkit-scrollbar{width:0;display:none;}
-/* tall content sections scroll internally, others keep their own centering */
-.snap-section.hero{min-height:100vh;}
-.snap-info{display:flex;flex-direction:column;justify-content:flex-end;}
-
-/* Dot navigation + arrows */
-.snap-nav{position:fixed;right:22px;top:50%;transform:translateY(-50%);z-index:200;display:flex;flex-direction:column;align-items:center;gap:16px;}
-.snap-arrow{width:30px;height:30px;padding:0;border:1px solid var(--gold);background:rgba(8,15,30,0.85);color:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.3s;}
-.snap-arrow:hover{background:var(--gold);color:var(--navy);transform:scale(1.1);}
-.snap-arrow svg{width:13px;height:13px;display:block;}
-.snap-dots{display:flex;flex-direction:column;align-items:center;gap:14px;}
-.snap-dot{position:relative;width:8px;height:8px;padding:0;border-radius:50%;border:1px solid var(--gold);background:var(--navy);cursor:pointer;transition:all 0.3s;}
-.snap-dot:hover{transform:scale(1.35);}
-.snap-dot.active{background:var(--gold);box-shadow:0 0 10px 2px rgba(184,150,10,0.7);}
-.snap-dot .dot-label{position:absolute;right:18px;top:50%;transform:translateY(-50%);white-space:nowrap;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);background:var(--navy-mid);border:1px solid rgba(184,150,10,0.3);padding:5px 11px;border-radius:2px;opacity:0;pointer-events:none;transition:opacity 0.25s;}
-.snap-dot:hover .dot-label{opacity:1;}
-@media(max-width:768px){.snap-nav{display:none;}}
 </style>
 </head>
 <body>
@@ -387,31 +265,14 @@ footer{background:#040810;padding:20px 60px;display:flex;align-items:center;just
   <ul class="nav-links">
     <li><a href="file:///C:/Users/ammar/Downloads/quantaip_landing_8.html#services" onclick="event.preventDefault();document.getElementById(&#39;services&#39;).scrollIntoView({behavior:&#39;smooth&#39;})">Services</a></li>
     <li><a href="file:///C:/Users/ammar/Downloads/quantaip_landing_8.html#portfolio" onclick="event.preventDefault();document.getElementById(&#39;portfolio&#39;).scrollIntoView({behavior:&#39;smooth&#39;})">Portfolio</a></li>
-    <li><a href="#physics-world" onclick="event.preventDefault();document.getElementById(&#39;physics-world&#39;).scrollIntoView({behavior:&#39;smooth&#39;})">Physics</a></li>
-    <li><a href="#web-portfolio" onclick="event.preventDefault();document.getElementById(&#39;web-portfolio&#39;).scrollIntoView({behavior:&#39;smooth&#39;})">Web Work</a></li>
-    <li><a href="#app-portfolio" onclick="event.preventDefault();document.getElementById(&#39;app-portfolio&#39;).scrollIntoView({behavior:&#39;smooth&#39;})">App Work</a></li>
     <li><a href="file:///C:/Users/ammar/Downloads/quantaip_landing_8.html#about" onclick="event.preventDefault();document.getElementById(&#39;about&#39;).scrollIntoView({behavior:&#39;smooth&#39;})">About</a></li>
     <li><a href="file:///C:/Users/ammar/Downloads/quantaip_landing_8.html#international" onclick="event.preventDefault();document.getElementById(&#39;international&#39;).scrollIntoView({behavior:&#39;smooth&#39;})">International</a></li>
     <li><a href="file:///C:/Users/ammar/Downloads/quantaip_landing_8.html#contact" onclick="event.preventDefault();document.getElementById(&#39;contact&#39;).scrollIntoView({behavior:&#39;smooth&#39;})" class="nav-cta">Get In Touch</a></li>
   </ul>
 </nav>
 
-<!-- FULL-PAGE SNAP DOT NAVIGATION -->
-<div class="snap-nav" id="snapNav">
-  <button class="snap-arrow" id="snapUp" aria-label="Previous section">
-    <svg viewBox="0 0 24 24" fill="none"><path d="M6 15l6-6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-  </button>
-  <div class="snap-dots" id="snapDots"></div>
-  <button class="snap-arrow" id="snapDown" aria-label="Next section">
-    <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-  </button>
-</div>
-
-<!-- SNAP CONTAINER -->
-<div class="snap-container" id="snapContainer">
-
 <!-- HERO -->
-<section class="hero snap-section" id="hero" data-section-name="Home">
+<section class="hero">
   <div class="atom-wrap">
     <div class="orbit orbit-1"></div>
     <div class="orbit orbit-2"></div>
@@ -447,159 +308,8 @@ footer{background:#040810;padding:20px 60px;display:flex;align-items:center;just
   </div>
 </section>
 
-<!-- ============ PHYSICS WORLD ============ -->
-<section class="section physics-section reveal snap-section" id="physics-world" data-section-name="Physics">
-  <div class="section-eyebrow">Physics · Education</div>
-  <h2 class="section-title">The World of <em>Physics</em></h2>
-  <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-dot"></div><div class="section-divider-line"></div></div>
-
-  <div class="tabs-nav" id="physicsTabs">
-    <button class="tab-btn active" data-tab="pw-teacher">The Teacher</button>
-    <button class="tab-btn" data-tab="pw-whiteboards">Whiteboards of Physics</button>
-    <button class="tab-btn" data-tab="pw-youtube">YouTube Lectures</button>
-    <button class="tab-btn" data-tab="pw-resources">Physics Resources</button>
-    <button class="tab-btn" data-tab="pw-mcq">MCQ Test</button>
-  </div>
-
-  <!-- TAB 1: The Teacher -->
-  <div class="tab-panel active" id="pw-teacher">
-    <div class="teacher-photo" id="teacher-photo">
-      <img src="images/ammar-whiteboard.jpg" alt="Ammar Shahid — Physics Educator" onerror="this.style.display='none'">
-      <span class="img-hint">📷 images/ammar-whiteboard.jpg</span>
-      <div class="teacher-overlay">
-        <h3><em>Ammar Shahid</em> — Physics Educator</h3>
-        <div class="teacher-caption">M.Phil Physics | Riphah International University</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TAB 2: Whiteboards of Physics -->
-  <div class="tab-panel" id="pw-whiteboards">
-    <div class="wb-gallery">
-      <div class="wb-item"><div class="wb-img" style="min-height:220px;"><img src="images/wb-1.jpg" alt="Whiteboard 1" onerror="this.style.display='none'"><span class="img-hint">📷 images/wb-1.jpg</span></div><div class="wb-caption">Kinematics — equations of motion derived on the board.</div></div>
-      <div class="wb-item"><div class="wb-img" style="min-height:300px;"><img src="images/wb-2.jpg" alt="Whiteboard 2" onerror="this.style.display='none'"><span class="img-hint">📷 images/wb-2.jpg</span></div><div class="wb-caption">Electromagnetism — field lines and flux explained.</div></div>
-      <div class="wb-item"><div class="wb-img" style="min-height:200px;"><img src="images/wb-3.jpg" alt="Whiteboard 3" onerror="this.style.display='none'"><span class="img-hint">📷 images/wb-3.jpg</span></div><div class="wb-caption">Thermodynamics — laws and PV diagrams.</div></div>
-      <div class="wb-item"><div class="wb-img" style="min-height:260px;"><img src="images/wb-4.jpg" alt="Whiteboard 4" onerror="this.style.display='none'"><span class="img-hint">📷 images/wb-4.jpg</span></div><div class="wb-caption">Waves &amp; Oscillations — SHM worked examples.</div></div>
-      <div class="wb-item"><div class="wb-img" style="min-height:220px;"><img src="images/wb-5.jpg" alt="Whiteboard 5" onerror="this.style.display='none'"><span class="img-hint">📷 images/wb-5.jpg</span></div><div class="wb-caption">Modern Physics — photoelectric effect &amp; quanta.</div></div>
-      <div class="wb-item"><div class="wb-img" style="min-height:300px;"><img src="images/wb-6.jpg" alt="Whiteboard 6" onerror="this.style.display='none'"><span class="img-hint">📷 images/wb-6.jpg</span></div><div class="wb-caption">Circuits — Kirchhoff's laws step by step.</div></div>
-    </div>
-  </div>
-
-  <!-- TAB 3: YouTube Lectures -->
-  <div class="tab-panel" id="pw-youtube">
-    <div class="yt-grid">
-      <div class="yt-card"><div class="yt-thumb"><span class="yt-play"></span></div><div class="yt-body"><div class="yt-title">Lecture Title</div><a href="#" class="card-btn filled">Watch on YouTube</a></div></div>
-      <div class="yt-card"><div class="yt-thumb"><span class="yt-play"></span></div><div class="yt-body"><div class="yt-title">Lecture Title</div><a href="#" class="card-btn filled">Watch on YouTube</a></div></div>
-      <div class="yt-card"><div class="yt-thumb"><span class="yt-play"></span></div><div class="yt-body"><div class="yt-title">Lecture Title</div><a href="#" class="card-btn filled">Watch on YouTube</a></div></div>
-      <div class="yt-card"><div class="yt-thumb"><span class="yt-play"></span></div><div class="yt-body"><div class="yt-title">Lecture Title</div><a href="#" class="card-btn filled">Watch on YouTube</a></div></div>
-      <div class="yt-card"><div class="yt-thumb"><span class="yt-play"></span></div><div class="yt-body"><div class="yt-title">Lecture Title</div><a href="#" class="card-btn filled">Watch on YouTube</a></div></div>
-      <div class="yt-card"><div class="yt-thumb"><span class="yt-play"></span></div><div class="yt-body"><div class="yt-title">Lecture Title</div><a href="#" class="card-btn filled">Watch on YouTube</a></div></div>
-    </div>
-  </div>
-
-  <!-- TAB 4: Physics Resources -->
-  <div class="tab-panel" id="pw-resources">
-    <div class="res-grid">
-      <div class="res-card">
-        <span class="coming-badge">Coming Soon</span>
-        <svg class="res-icon" viewBox="0 0 48 48" fill="none"><rect x="8" y="6" width="32" height="36" rx="2" stroke="#b8960a" stroke-width="1.2" opacity="0.7"/><circle cx="18" cy="18" r="4" stroke="#b8960a" stroke-width="1" opacity="0.6"/><path d="M8 36l10-10 7 7 6-6 9 9" stroke="#b8960a" stroke-width="1.2" opacity="0.7"/></svg>
-        <div class="res-title">PNG Diagrams</div>
-        <div class="res-desc">High-resolution transparent physics diagrams ready to drop into your notes and slides.</div>
-      </div>
-      <div class="res-card">
-        <span class="coming-badge">Coming Soon</span>
-        <svg class="res-icon" viewBox="0 0 48 48" fill="none"><polygon points="24,6 42,16 42,32 24,42 6,32 6,16" stroke="#b8960a" stroke-width="1.2" fill="none" opacity="0.7"/><path d="M24 6v36M6 16l36 16M42 16L6 32" stroke="#b8960a" stroke-width="0.6" opacity="0.4"/></svg>
-        <div class="res-title">Vector Files</div>
-        <div class="res-desc">Fully editable SVG / AI vectors of circuits, fields and apparatus — scale without losing quality.</div>
-      </div>
-      <div class="res-card">
-        <span class="coming-badge">Coming Soon</span>
-        <svg class="res-icon" viewBox="0 0 48 48" fill="none"><rect x="6" y="10" width="36" height="28" rx="2" stroke="#b8960a" stroke-width="1.2" opacity="0.7"/><circle cx="16" cy="24" r="3" fill="#b8960a" opacity="0.7"/><path d="M22 28l4-5 5 6 4-4" stroke="#b8960a" stroke-width="1.2" opacity="0.7"/></svg>
-        <div class="res-title">Animated GIFs</div>
-        <div class="res-desc">Looping animations of waves, orbits and oscillations to bring concepts to life in class.</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TAB 5: MCQ Test -->
-  <div class="tab-panel" id="pw-mcq">
-    <div class="mcq-wrap">
-      <p class="mcq-intro">Practice and assess yourself with online MCQ tests. Teachers can upload their own question banks via a simple Excel sheet — and a ready-to-attempt test is generated instantly.</p>
-      <div class="mcq-flow">
-        <div class="mcq-step"><div class="mcq-step-icon">📊</div><div class="mcq-step-title">Upload Excel</div><div class="mcq-step-desc">Drop your MCQ bank in a simple spreadsheet format.</div></div>
-        <div class="mcq-arrow">→</div>
-        <div class="mcq-step"><div class="mcq-step-icon">⚙️</div><div class="mcq-step-title">Generate Test</div><div class="mcq-step-desc">Questions are auto-formatted into an online test.</div></div>
-        <div class="mcq-arrow">→</div>
-        <div class="mcq-step"><div class="mcq-step-icon">✅</div><div class="mcq-step-title">Attempt &amp; Score</div><div class="mcq-step-desc">Students take the test and get instant results.</div></div>
-      </div>
-      <a href="#" class="card-btn filled">Take Test</a>
-      <p class="mcq-note">Teachers: Contact us to upload your MCQ bank</p>
-    </div>
-  </div>
-</section>
-
-<!-- ============ OUR WORK — WEB ============ -->
-<section class="section work-section reveal snap-section" id="web-portfolio" data-section-name="Web Work">
-  <div class="section-eyebrow">Portfolio · Web Development</div>
-  <h2 class="section-title">Sites We've <em>Built</em></h2>
-  <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-dot"></div><div class="section-divider-line"></div></div>
-
-  <div class="work-grid-2">
-    <div class="work-card">
-      <span class="work-badge live">Live</span>
-      <div class="work-title">QUANTAIP Official Website</div>
-      <div class="work-desc">Full-stack website for Quantum AI Pakistan. Features AI chatbot, Physics Academy enrollment, service booking, MongoDB Atlas backend, and GitHub Pages deployment.</div>
-      <div class="work-tech">
-        <span class="tech-tag">HTML/CSS</span><span class="tech-tag">JavaScript</span><span class="tech-tag">Node.js</span><span class="tech-tag">MongoDB Atlas</span><span class="tech-tag">GitHub Pages</span>
-      </div>
-      <div class="work-buttons"><a href="https://quantaip.org" target="_blank" class="card-btn filled">Visit Site</a></div>
-    </div>
-
-    <div class="work-card">
-      <span class="work-badge live">Live</span>
-      <div class="work-title">Elbnam — Online Clothing Store</div>
-      <div class="work-desc">Complete e-commerce website for Akasha Shahid's clothing brand. Features product catalog, cart system, COD checkout, order management, and Cloudinary image hosting.</div>
-      <div class="work-tech">
-        <span class="tech-tag">HTML/CSS</span><span class="tech-tag">JavaScript</span><span class="tech-tag">Node.js</span><span class="tech-tag">MongoDB Atlas</span><span class="tech-tag">Cloudinary</span><span class="tech-tag">GitHub Pages</span>
-      </div>
-      <div class="work-buttons"><a href="https://elbnam.com" target="_blank" class="card-btn filled">Visit Site</a></div>
-    </div>
-  </div>
-
-  <div class="tech-strip-label">Tech We Use</div>
-  <div class="tech-strip">
-    <span class="tech-chip">MongoDB Atlas</span>
-    <span class="tech-chip">JSON</span>
-    <span class="tech-chip">Python</span>
-    <span class="tech-chip">Claude AI · Vibe Coding</span>
-    <span class="tech-chip">Node.js</span>
-    <span class="tech-chip">GitHub</span>
-  </div>
-</section>
-
-<!-- ============ OUR WORK — APPS ============ -->
-<section class="section work-section alt reveal snap-section" id="app-portfolio" data-section-name="App Work">
-  <div class="section-eyebrow">Portfolio · App Development</div>
-  <h2 class="section-title">Apps We've <em>Developed</em></h2>
-  <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-dot"></div><div class="section-divider-line"></div></div>
-
-  <div class="work-card work-card-wide">
-    <span class="work-badge dev">In Development</span>
-    <div class="work-title">EduOS — School Management System</div>
-    <div class="work-desc">A complete 3-platform school management ecosystem. React Native mobile app, React/Vite web dashboard, and Electron desktop app — all on a shared Firebase backend. Features fee management, student records, timetable, and AI-powered tools.</div>
-    <div class="work-tech">
-      <span class="tech-tag">React Native</span><span class="tech-tag">React</span><span class="tech-tag">Vite</span><span class="tech-tag">Electron</span><span class="tech-tag">Firebase</span><span class="tech-tag">Expo</span>
-    </div>
-    <div class="work-buttons">
-      <a href="#" class="card-btn filled">Download APK</a>
-      <a href="#" class="card-btn outline">Web Dashboard</a>
-    </div>
-    <p class="work-note">APK and live link coming soon</p>
-  </div>
-</section>
-
 <!-- SERVICES -->
-<section class="section services-section snap-section" id="services" data-section-name="Services">
+<section class="section services-section" id="services">
   <div class="section-eyebrow">What We Offer</div>
   <h2 class="section-title">Six Services — <em>One Studio</em></h2>
   <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-dot"></div><div class="section-divider-line"></div></div>
@@ -718,52 +428,8 @@ footer{background:#040810;padding:20px 60px;display:flex;align-items:center;just
   </div>
 </section>
 
-<!-- PHYSICS ACADEMY -->
-<section class="section enroll-section snap-section" id="physics-academy" data-section-name="Academy">
-  <div class="section-eyebrow">Physics Academy</div>
-  <h2 class="section-title" style="text-align:center;margin-bottom:14px;">Enroll in the <em>Academy</em></h2>
-  <div class="section-divider" style="margin-bottom:48px;"><div class="section-divider-line"></div><div class="section-divider-dot"></div><div class="section-divider-line"></div></div>
-  <div class="enroll-wrap reveal visible" style="grid-template-columns:1fr;max-width:560px;">
-    <div class="form-card">
-      <div class="form-card-title">Physics <em>Academy</em></div>
-      <div class="form-card-sub">Enroll for FSc · A-Level · MDCAT · ECAT</div>
-      <form id="enrollForm">
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Student Name</label>
-            <input type="text" class="form-input" placeholder="Full name" required="">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Father Name</label>
-            <input type="text" class="form-input" placeholder="Father&#39;s name" required="">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">WhatsApp</label>
-            <input type="tel" class="form-input" placeholder="+92 XXX XXXXXXX" required="">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Class Level</label>
-            <select class="form-select">
-              <option value="">Select</option>
-              <option>FSc Pre-Medical</option>
-              <option>FSc Pre-Engineering</option>
-              <option>A-Level</option>
-              <option>MDCAT Preparation</option>
-              <option>ECAT Preparation</option>
-            </select>
-          </div>
-        </div>
-        <button type="submit" class="btn-submit">◆ Enroll Now</button>
-        <div class="success-msg" id="enrollSuccess"><h3>Enrolled!</h3><p>We'll contact you on WhatsApp within 24 hours. JazakAllah!</p></div>
-      </form>
-    </div>
-  </div>
-</section>
-
 <!-- PORTFOLIO -->
-<section class="section portfolio-section snap-section" id="portfolio" data-section-name="Projects">
+<section class="section portfolio-section" id="portfolio">
   <div class="section-eyebrow">Our Work</div>
   <h2 class="section-title">Recent <em>Projects</em></h2>
   <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-dot"></div><div class="section-divider-line"></div></div>
@@ -795,40 +461,8 @@ footer{background:#040810;padding:20px 60px;display:flex;align-items:center;just
   </div>
 </section>
 
-<!-- ABOUT -->
-<section class="section about-section snap-section" id="about" data-section-name="About">
-  <div class="about-wrap reveal visible">
-    <div class="about-left">
-      <div class="about-eyebrow">About QUANTAIP</div>
-      <h2 class="about-title">Built on Physics,<br>Powered by <em>Innovation</em></h2>
-      <div class="about-line"></div>
-      <p class="about-desc">QUANTAIP — Quantum AI Pakistan — is a Lahore-based digital studio founded by Ammar Shahid, a Physics educator and technology innovator. We believe the same principles that govern the universe — precision, clarity, and elegance — should govern great digital work.</p>
-      <p class="about-desc">From AI-powered physics education to enterprise-grade web applications, we deliver excellence across every domain we touch.</p>
-      <div class="about-values">
-        <div class="about-value"><div class="about-value-dot"></div>Honest, transparent communication on every project.</div>
-        <div class="about-value"><div class="about-value-dot"></div>On-time delivery — no exceptions, no excuses.</div>
-        <div class="about-value"><div class="about-value-dot"></div>Quality that makes your recommendation proud.</div>
-      </div>
-    </div>
-    <div class="about-right">
-      <div class="about-stat-card">
-        <div class="about-stat-num">Ammar Shahid</div>
-        <div class="about-stat-label">Founder &amp; Director — Physics Educator, Web Developer, Tech Innovator</div>
-      </div>
-      <div class="about-stat-card">
-        <div class="about-stat-num">Lahore, Pakistan</div>
-        <div class="about-stat-label">Serving Pakistan · UK · Australia · Worldwide</div>
-      </div>
-      <div class="about-stat-card">
-        <div class="about-stat-num">quantaip.org</div>
-        <div class="about-stat-label">+92 312 1960002 · mammarshahid104@gmail.com</div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- INTERNATIONAL -->
-<section class="section intl-section snap-section" id="international" data-section-name="International">
+<section class="section intl-section" id="international">
   <div class="section-eyebrow">Global Reach</div>
   <h2 class="section-title">Serving Clients <em>Worldwide</em></h2>
   <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-dot"></div><div class="section-divider-line"></div></div>
@@ -865,8 +499,40 @@ footer{background:#040810;padding:20px 60px;display:flex;align-items:center;just
   </div>
 </section>
 
+<!-- ABOUT -->
+<section class="section about-section" id="about">
+  <div class="about-wrap reveal visible">
+    <div class="about-left">
+      <div class="about-eyebrow">About QUANTAIP</div>
+      <h2 class="about-title">Built on Physics,<br>Powered by <em>Innovation</em></h2>
+      <div class="about-line"></div>
+      <p class="about-desc">QUANTAIP — Quantum AI Pakistan — is a Lahore-based digital studio founded by Ammar Shahid, a Physics educator and technology innovator. We believe the same principles that govern the universe — precision, clarity, and elegance — should govern great digital work.</p>
+      <p class="about-desc">From AI-powered physics education to enterprise-grade web applications, we deliver excellence across every domain we touch.</p>
+      <div class="about-values">
+        <div class="about-value"><div class="about-value-dot"></div>Honest, transparent communication on every project.</div>
+        <div class="about-value"><div class="about-value-dot"></div>On-time delivery — no exceptions, no excuses.</div>
+        <div class="about-value"><div class="about-value-dot"></div>Quality that makes your recommendation proud.</div>
+      </div>
+    </div>
+    <div class="about-right">
+      <div class="about-stat-card">
+        <div class="about-stat-num">Ammar Shahid</div>
+        <div class="about-stat-label">Founder &amp; Director — Physics Educator, Web Developer, Tech Innovator</div>
+      </div>
+      <div class="about-stat-card">
+        <div class="about-stat-num">Lahore, Pakistan</div>
+        <div class="about-stat-label">Serving Pakistan · UK · Australia · Worldwide</div>
+      </div>
+      <div class="about-stat-card">
+        <div class="about-stat-num">quantaip.org</div>
+        <div class="about-stat-label">+92 312 1960002 · mammarshahid104@gmail.com</div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- PHILOSOPHY -->
-<section class="section phil-section snap-section" data-section-name="Philosophy">
+<section class="section phil-section">
   <div class="section-eyebrow">Our Philosophy</div>
   <h2 class="section-title">The <em>QUANTAIP</em> Way</h2>
   <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-dot"></div><div class="section-divider-line"></div></div>
@@ -891,7 +557,7 @@ footer{background:#040810;padding:20px 60px;display:flex;align-items:center;just
 </section>
 
 <!-- TESTIMONIALS -->
-<section class="section testimonials-section snap-section" data-section-name="Testimonials">
+<section class="section testimonials-section">
   <div class="section-eyebrow">Client Words</div>
   <h2 class="section-title">What Clients <em>Say</em></h2>
   <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-dot"></div><div class="section-divider-line"></div></div>
@@ -912,13 +578,50 @@ footer{background:#040810;padding:20px 60px;display:flex;align-items:center;just
   </div>
 </section>
 
-<!-- CONTACT / SERVICE REQUEST -->
-<section class="section enroll-section snap-section" id="contact" data-section-name="Contact">
+<!-- CONTACT / ENROLL -->
+<section class="enroll-section" id="contact">
   <div class="section-eyebrow">Get In Touch</div>
   <h2 class="section-title" style="text-align:center;margin-bottom:14px;">Start Your <em>Project</em></h2>
   <div class="section-divider" style="margin-bottom:48px;"><div class="section-divider-line"></div><div class="section-divider-dot"></div><div class="section-divider-line"></div></div>
 
-  <div class="enroll-wrap reveal visible" style="grid-template-columns:1fr;max-width:600px;">
+  <div class="enroll-wrap reveal visible">
+    <!-- Physics Enrollment -->
+    <div class="form-card">
+      <div class="form-card-title">Physics <em>Academy</em></div>
+      <div class="form-card-sub">Enroll for FSc · A-Level · MDCAT · ECAT</div>
+      <form id="enrollForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Student Name</label>
+            <input type="text" class="form-input" placeholder="Full name" required="">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Father Name</label>
+            <input type="text" class="form-input" placeholder="Father&#39;s name" required="">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">WhatsApp</label>
+            <input type="tel" class="form-input" placeholder="+92 XXX XXXXXXX" required="">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Class Level</label>
+            <select class="form-select">
+              <option value="">Select</option>
+              <option>FSc Pre-Medical</option>
+              <option>FSc Pre-Engineering</option>
+              <option>A-Level</option>
+              <option>MDCAT Preparation</option>
+              <option>ECAT Preparation</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="btn-submit">◆ Enroll Now</button>
+        <div class="success-msg" id="enrollSuccess"><h3>Enrolled!</h3><p>We'll contact you on WhatsApp within 24 hours. JazakAllah!</p></div>
+      </form>
+    </div>
+
     <!-- Digital Services -->
     <div class="form-card">
       <div class="form-card-title">Digital <em>Services</em></div>
@@ -963,8 +666,20 @@ footer{background:#040810;padding:20px 60px;display:flex;align-items:center;just
   </div>
 </section>
 
+<!-- CONTACT STRIP -->
+<div class="contact-strip">
+  <div class="contact-brand"><span class="q">QUANT</span><span class="aip">AIP</span></div>
+  <div class="contact-items">
+    <div class="contact-item"><div class="contact-item-label">Location</div><div class="contact-item-val">Lahore, Pakistan</div></div>
+    <div class="contact-item"><div class="contact-item-label">WhatsApp</div><div class="contact-item-val">+92 312 1960002</div></div>
+    <div class="contact-item"><div class="contact-item-label">Email</div><div class="contact-item-val">mammarshahid104@gmail.com</div></div>
+    <div class="contact-item"><div class="contact-item-label">Services</div><div class="contact-item-val">Physics · Web · Design · Marketing · Automation · School</div></div>
+    <div class="contact-item"><div class="contact-item-label">International</div><div class="contact-item-val">UK · Australia · Worldwide</div></div>
+  </div>
+</div>
+
 <!-- REVIEW FORM SECTION -->
-<section id="review-section" class="snap-section" data-section-name="Reviews" style="background:#0d1628;padding:80px 20px;text-align:center;">
+<section id="review-section" style="background:#0d1628;padding:80px 20px;text-align:center;">
   <div style="font-family:&#39;DM Mono&#39;,monospace;font-size:9px;letter-spacing:5px;color:#b8960a;text-transform:uppercase;margin-bottom:16px;">Share Your Experience</div>
   <h2 style="font-family:&#39;Cormorant Garamond&#39;,serif;font-size:clamp(28px,5vw,52px);font-weight:300;color:#f0e8cc;margin-bottom:12px;">Leave a <em style="color:#b8960a;">Review</em></h2>
   <p style="font-size:13px;color:#6b7280;margin-bottom:40px;">Your feedback helps us grow and helps others make the right decision.</p>
@@ -1015,7 +730,7 @@ footer{background:#040810;padding:20px 60px;display:flex;align-items:center;just
 </section>
 
 <!-- CONTACT FORM SECTION -->
-<section class="snap-section" data-section-name="Message" style="background:#080f1e;padding:80px 20px;text-align:center;">
+<section style="background:#080f1e;padding:80px 20px;text-align:center;">
   <div style="font-family:&#39;DM Mono&#39;,monospace;font-size:9px;letter-spacing:5px;color:#b8960a;text-transform:uppercase;margin-bottom:16px;">Get in Touch</div>
   <h2 style="font-family:&#39;Cormorant Garamond&#39;,serif;font-size:clamp(28px,5vw,52px);font-weight:300;color:#f0e8cc;margin-bottom:12px;">Send Us a <em style="color:#b8960a;">Message</em></h2>
   <p style="font-size:13px;color:#6b7280;margin-bottom:40px;">Have a project in mind? We'd love to hear from you.</p>
@@ -1060,25 +775,10 @@ footer{background:#040810;padding:20px 60px;display:flex;align-items:center;just
 </section>
 
 
-<!-- CONTACT INFO + FOOTER SCREEN -->
-<section class="snap-section snap-info" data-section-name="Info">
-  <div class="contact-strip">
-    <div class="contact-brand"><span class="q">QUANT</span><span class="aip">AIP</span></div>
-    <div class="contact-items">
-      <div class="contact-item"><div class="contact-item-label">Location</div><div class="contact-item-val">Lahore, Pakistan</div></div>
-      <div class="contact-item"><div class="contact-item-label">WhatsApp</div><div class="contact-item-val">+92 312 1960002</div></div>
-      <div class="contact-item"><div class="contact-item-label">Email</div><div class="contact-item-val">mammarshahid104@gmail.com</div></div>
-      <div class="contact-item"><div class="contact-item-label">Services</div><div class="contact-item-val">Physics · Web · Design · Marketing · Automation · School</div></div>
-      <div class="contact-item"><div class="contact-item-label">International</div><div class="contact-item-val">UK · Australia · Worldwide</div></div>
-    </div>
-  </div>
-  <footer>
-    <span class="footer-copy">© 2026 QUANTAIP — Quantum AI Pakistan. All rights reserved.</span>
-    <span class="footer-powered">AI · PHYSICS · INNOVATION</span>
-  </footer>
-</section>
-
-</div><!-- /snap-container -->
+<footer>
+  <span class="footer-copy">© 2026 QUANTAIP — Quantum AI Pakistan. All rights reserved.</span>
+  <span class="footer-powered">AI · PHYSICS · INNOVATION</span>
+</footer>
 
 <!-- WhatsApp Floating Button -->
 <div class="wa-float">
@@ -1165,16 +865,6 @@ async function submitContact() {
 
 const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{threshold:0.1});
 document.querySelectorAll('.reveal').forEach(r=>obs.observe(r));
-
-// Physics World — tab switching
-document.querySelectorAll('#physicsTabs .tab-btn').forEach(btn=>{
-  btn.addEventListener('click',function(){
-    document.querySelectorAll('#physicsTabs .tab-btn').forEach(b=>b.classList.remove('active'));
-    document.querySelectorAll('#physics-world .tab-panel').forEach(p=>p.classList.remove('active'));
-    this.classList.add('active');
-    document.getElementById(this.dataset.tab).classList.add('active');
-  });
-});
 
 // Enroll form
 document.getElementById('enrollForm').addEventListener('submit',function(e){
@@ -1282,86 +972,5 @@ window.addEventListener('load', function() {
     }, 1000);
   }
 });
-</script>
-
-<!-- Full-page snap scroll navigation -->
-<script>
-(function(){
-  const container = document.getElementById('snapContainer');
-  const dotsWrap  = document.getElementById('snapDots');
-  if(!container || !dotsWrap) return;
-
-  const sections = Array.from(container.querySelectorAll('.snap-section'));
-  let current = 0;
-
-  // Build one dot per section
-  sections.forEach(function(sec, i){
-    const name = sec.getAttribute('data-section-name') || ('Section ' + (i+1));
-    const dot = document.createElement('button');
-    dot.className = 'snap-dot';
-    dot.setAttribute('aria-label', name);
-    dot.innerHTML = '<span class="dot-label">' + name + '</span>';
-    dot.addEventListener('click', function(){ goTo(i); });
-    dotsWrap.appendChild(dot);
-  });
-  const dots = Array.from(dotsWrap.querySelectorAll('.snap-dot'));
-
-  function setActive(i){
-    current = i;
-    dots.forEach(function(d, j){ d.classList.toggle('active', j === i); });
-  }
-
-  function goTo(i){
-    if(i < 0 || i >= sections.length) return;
-    container.scrollTo({ top: sections[i].offsetTop, behavior: 'smooth' });
-    setActive(i);
-  }
-
-  // Track active section while scrolling (native wheel / touch / programmatic)
-  const io = new IntersectionObserver(function(entries){
-    entries.forEach(function(e){
-      if(e.isIntersecting){
-        const idx = sections.indexOf(e.target);
-        if(idx > -1) setActive(idx);
-      }
-    });
-  }, { root: container, threshold: 0.55 });
-  sections.forEach(function(s){ io.observe(s); });
-
-  // Arrow buttons
-  document.getElementById('snapUp').addEventListener('click', function(){ goTo(current - 1); });
-  document.getElementById('snapDown').addEventListener('click', function(){ goTo(current + 1); });
-
-  // Keyboard arrows (ignored while typing in a field)
-  window.addEventListener('keydown', function(e){
-    const t = e.target;
-    if(t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT')) return;
-    if(e.key === 'ArrowDown' || e.key === 'PageDown'){ e.preventDefault(); goTo(current + 1); }
-    else if(e.key === 'ArrowUp' || e.key === 'PageUp'){ e.preventDefault(); goTo(current - 1); }
-  });
-
-  // Touch swipe (mobile): native CSS scroll-snap (scroll-snap-stop:always) already
-  // moves one section per swipe. This handler only assists when a swipe is decisive
-  // but the section has no internal overflow to consume it — without forcing a double jump.
-  let touchStartY = null, touchMoved = false;
-  container.addEventListener('touchstart', function(e){
-    touchStartY = e.changedTouches[0].clientY;
-    touchMoved = false;
-  }, { passive: true });
-  container.addEventListener('touchmove', function(){ touchMoved = true; }, { passive: true });
-  container.addEventListener('touchend', function(e){
-    if(touchStartY === null || !touchMoved) { touchStartY = null; return; }
-    const dy = touchStartY - e.changedTouches[0].clientY;
-    const sec = sections[current];
-    const canScrollInside = sec && sec.scrollHeight > sec.clientHeight + 4;
-    // Let native snap do its job for normal swipes; only nudge tiny swipes on
-    // non-scrollable sections so a deliberate flick always advances.
-    if(Math.abs(dy) > 45 && Math.abs(dy) < 120 && !canScrollInside){
-      if(dy > 0) goTo(current + 1);
-      else goTo(current - 1);
-    }
-    touchStartY = null;
-  }, { passive: true });
-})();
 </script>
 </body></html>
