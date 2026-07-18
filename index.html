@@ -153,6 +153,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:20px 60px;display:fl
 .portfolio-icon{position:absolute;top:24px;right:24px;width:36px;height:36px;opacity:0.2;}
 .portfolio-tech{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px;}
 .tech-tag{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;color:var(--blue);border:1px solid rgba(74,122,204,0.3);padding:3px 8px;}
+.portfolio-launch-btn{display:inline-block;margin-top:16px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold);padding:10px 18px;text-decoration:none;border-radius:2px;transition:all 0.3s;}
+.portfolio-launch-btn:hover{background:var(--gold);color:var(--navy);}
 
 /* INTERNATIONAL */
 .intl-section{background:var(--navy-mid);position:relative;overflow:hidden;}
@@ -265,6 +267,7 @@ footer{background:#040810;padding:20px 60px;display:flex;align-items:center;just
   <a href="#" class="nav-brand"><span class="q">QUANT</span><span class="aip">AIP</span></a>
   <ul class="nav-links">
     <li><a href="#services" onclick="event.preventDefault();document.getElementById(&#39;services&#39;).scrollIntoView({behavior:&#39;smooth&#39;})">Services</a></li>
+    <li><a href="simulator/index.html" target="_blank" rel="noopener">Virtual Lab</a></li>
     <li><a href="#portfolio" onclick="event.preventDefault();document.getElementById(&#39;portfolio&#39;).scrollIntoView({behavior:&#39;smooth&#39;})">Portfolio</a></li>
     <li><a href="#about" onclick="event.preventDefault();document.getElementById(&#39;about&#39;).scrollIntoView({behavior:&#39;smooth&#39;})">About</a></li>
     <li><a href="#international" onclick="event.preventDefault();document.getElementById(&#39;international&#39;).scrollIntoView({behavior:&#39;smooth&#39;})">International</a></li>
@@ -436,6 +439,13 @@ footer{background:#040810;padding:20px 60px;display:flex;align-items:center;just
   <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-dot"></div><div class="section-divider-line"></div></div>
 
   <div class="portfolio-grid reveal visible">
+    <div class="portfolio-card">
+      <div class="portfolio-tag">Live Demo · EdTech</div>
+      <div class="portfolio-title">QUANTAIP Virtual Lab</div>
+      <div class="portfolio-desc">An interactive physics &amp; mathematics simulator — pendulum motion, projectile motion, circuits, collisions, sound waves and function graphing, all running live in the browser. Built for EduOS classrooms with zero installation.</div>
+      <div class="portfolio-tech"><span class="tech-tag">JavaScript</span><span class="tech-tag">Canvas</span><span class="tech-tag">Web Audio API</span></div>
+      <a href="simulator/index.html" target="_blank" rel="noopener" class="portfolio-launch-btn">Launch Simulator →</a>
+    </div>
     <div class="portfolio-card">
       <div class="portfolio-tag">E-Commerce · Web Development</div>
       <div class="portfolio-title">Libas &amp; Co.</div>

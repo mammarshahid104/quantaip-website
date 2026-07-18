@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>QUANTAIP Simulator — Rocket Propulsion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-deep:#060c1c; --navy:#0b1530; --navy-panel:#101c3d; --navy-line:#1e2c54;
+    --gold:#d4af37; --gold-soft:#e8cf7a; --text:#eef1fb; --text-dim:#8a93b8;
+    --good:#5fd0a3; --red:#e0715f; --flame:#ff8c42;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: radial-gradient(1200px 600px at 15% -10%, #12234f 0%, transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, #14183a 0%, transparent 55%), var(--navy-deep);
+    color:var(--text); font-family:'Poppins',sans-serif; min-height:100vh;
+    display:flex; flex-direction:column; align-items:center; padding:28px 16px 60px;
+  }
+  .header{ width:100%; max-width:1060px; display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom:26px; flex-wrap:wrap; gap:8px; border-bottom:1px solid var(--navy-line); padding-bottom:18px; }
+  .brand{ display:flex; align-items:baseline; gap:10px; }
+  .brand .mark{ font-weight:700; letter-spacing:0.14em; font-size:13px; color:var(--gold); text-transform:uppercase; }
+  .brand .name{ font-weight:300; font-size:22px; letter-spacing:0.01em; }
+  .brand .name b{ font-weight:600; color:var(--gold-soft); }
+  .exp-label{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); letter-spacing:0.08em; }
+  .layout{ width:100%; max-width:1060px; display:grid; grid-template-columns:1.3fr 1fr; gap:22px; }
+  @media (max-width:820px){ .layout{ grid-template-columns:1fr; } }
+  .panel{ background:linear-gradient(180deg, var(--navy-panel), var(--navy)); border:1px solid var(--navy-line); border-radius:14px; padding:20px; }
+  .panel h2{ margin:0 0 14px; font-size:12px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-dim); }
+  #stage{ width:100%; aspect-ratio:4/3; border-radius:10px; background:linear-gradient(180deg, #0a1330 0%, #060c1c 100%); display:block; border:1px solid var(--navy-line); }
+  .readouts{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:16px; }
+  .readout{ background:var(--navy-deep); border:1px solid var(--navy-line); border-radius:8px; padding:10px 12px; }
+  .readout .lbl{ font-size:10px; color:var(--text-dim); letter-spacing:0.08em; text-transform:uppercase; }
+  .readout .val{ font-family:'JetBrains Mono',monospace; font-size:15px; color:var(--gold-soft); margin-top:4px; }
+  .readout .val.good{ color:var(--good); }
+  .readout .val.red{ color:var(--red); }
+  .controls{ display:flex; flex-direction:column; gap:16px; }
+  .field{ display:flex; flex-direction:column; gap:6px; }
+  .field label{ display:flex; justify-content:space-between; font-size:12.5px; color:var(--text-dim); }
+  .field label span.v{ font-family:'JetBrains Mono',monospace; color:var(--gold-soft); }
+  input[type=range]{ -webkit-appearance:none; width:100%; height:4px; border-radius:2px; background:var(--navy-line); outline:none; }
+  input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:15px; height:15px; border-radius:50%; background:var(--gold); cursor:pointer; border:2px solid var(--navy-deep); }
+  .btn-row{ display:flex; gap:10px; margin-top:4px; }
+  button{ flex:1; font-family:'Poppins',sans-serif; font-weight:500; font-size:13px; padding:11px 14px; border-radius:8px; border:1px solid var(--navy-line); background:var(--navy-deep); color:var(--text); cursor:pointer; transition:all .15s ease; }
+  button:hover{ border-color:var(--gold); color:var(--gold-soft); }
+  button.primary{ background:linear-gradient(180deg, var(--gold-soft), var(--gold)); color:#191204; border:none; font-weight:600; }
+  button.primary:hover{ filter:brightness(1.08); color:#191204; }
+  .toggle-row{ display:flex; align-items:center; justify-content:space-between; font-size:12.5px; color:var(--text-dim); }
+  .switch{ position:relative; width:38px; height:20px; background:var(--navy-line); border-radius:999px; cursor:pointer; transition:background .15s; }
+  .switch.on{ background:var(--gold); }
+  .switch::after{ content:''; position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%; background:var(--navy-deep); transition:left .15s; }
+  .switch.on::after{ left:20px; background:#191204; }
+  .note{ font-size:11.5px; color:var(--text-dim); line-height:1.6; margin-top:6px; border-top:1px solid var(--navy-line); padding-top:14px; }
+  .note b{ color:var(--gold-soft); font-weight:600; }
+  footer{ margin-top:26px; font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--text-dim); letter-spacing:0.06em; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">
+    <span class="mark">QUANTAIP</span>
+    <span class="name">Simulator — <b>Virtual Physics Lab</b></span>
+  </div>
+  <div class="exp-label">EXPERIMENT / ROCKET PROPULSION</div>
+</div>
+
+<div class="layout">
+  <div class="panel">
+    <h2>Live Launch</h2>
+    <canvas id="stage" width="640" height="480"></canvas>
+    <div class="readouts">
+      <div class="readout"><div class="lbl">Altitude</div><div class="val" id="rAlt">0 m</div></div>
+      <div class="readout"><div class="lbl">Velocity</div><div class="val" id="rVel">0.0 m/s</div></div>
+      <div class="readout"><div class="lbl">Acceleration</div><div class="val" id="rAcc">0.00 m/s²</div></div>
+      <div class="readout"><div class="lbl">Remaining Fuel</div><div class="val good" id="rFuel">100%</div></div>
+      <div class="readout"><div class="lbl">Current Mass</div><div class="val" id="rMass">0 kg</div></div>
+      <div class="readout"><div class="lbl">Thrust / Weight</div><div class="val" id="rTWR">0.00</div></div>
+    </div>
+  </div>
+
+  <div class="panel controls">
+    <h2>Parameters</h2>
+
+    <div class="field">
+      <label>Dry Mass (structure, m₀) <span class="v" id="vDry">500 kg</span></label>
+      <input type="range" id="dry" min="100" max="2000" step="50" value="500">
+    </div>
+    <div class="field">
+      <label>Fuel Mass (mf) <span class="v" id="vFuelM">1500 kg</span></label>
+      <input type="range" id="fuelm" min="100" max="5000" step="50" value="1500">
+    </div>
+    <div class="field">
+      <label>Thrust (F) <span class="v" id="vThrust">30 kN</span></label>
+      <input type="range" id="thrust" min="5" max="100" step="1" value="30">
+    </div>
+    <div class="field">
+      <label>Exhaust Velocity (vₑ) <span class="v" id="vExh">2500 m/s</span></label>
+      <input type="range" id="exh" min="1000" max="4500" step="50" value="2500">
+    </div>
+    <div class="field">
+      <label>Burn Time (t_burn) <span class="v" id="vBurn">40 s</span></label>
+      <input type="range" id="burn" min="5" max="120" step="1" value="40">
+    </div>
+
+    <div class="toggle-row">
+      <span>Air resistance (drag)</span>
+      <div class="switch" id="dragSwitch"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="primary" id="launchBtn">Launch</button>
+      <button id="resetBtn">Reset</button>
+    </div>
+
+    <div class="note">
+      Tsiolkovsky rocket equation: <b>Δv = vₑ·ln(m₀/m_f)</b>. Fuel burns linearly over the burn time; thrust stays constant while mass drops, so acceleration rises through the burn — a real rocket effect. If Thrust/Weight starts below 1.0, the rocket won't lift off at all — try it and see.
+    </div>
+  </div>
+</div>
+
+<footer>QUANTAIP EDUOS · VIRTUAL LAB MODULE · PROTOTYPE BUILD</footer>
+
+<script>
+(function(){
+  const canvas = document.getElementById('stage');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const g = 9.8;
+
+  const drySlider=document.getElementById('dry'), fuelmSlider=document.getElementById('fuelm');
+  const thrustSlider=document.getElementById('thrust'), exhSlider=document.getElementById('exh');
+  const burnSlider=document.getElementById('burn'), dragSwitch=document.getElementById('dragSwitch');
+
+  const vDry=document.getElementById('vDry'), vFuelM=document.getElementById('vFuelM');
+  const vThrust=document.getElementById('vThrust'), vExh=document.getElementById('vExh'), vBurn=document.getElementById('vBurn');
+
+  const rAlt=document.getElementById('rAlt'), rVel=document.getElementById('rVel'), rAcc=document.getElementById('rAcc');
+  const rFuel=document.getElementById('rFuel'), rMass=document.getElementById('rMass'), rTWR=document.getElementById('rTWR');
+
+  const launchBtn=document.getElementById('launchBtn'), resetBtn=document.getElementById('resetBtn');
+
+  let dryMass=500, fuelMass=1500, thrustN=30000, exhaustV=2500, burnTime=40, drag=false;
+  let m0, mf_used, alt, vel, acc, t, flying=false, burned=false;
+  let maxAltReached = 2000; // for scale, adjust dynamically
+  let flameFlicker=0;
+
+  function setup(){
+    dryMass = parseFloat(drySlider.value);
+    fuelMass = parseFloat(fuelmSlider.value);
+    thrustN = parseFloat(thrustSlider.value)*1000;
+    exhaustV = parseFloat(exhSlider.value);
+    burnTime = parseFloat(burnSlider.value);
+
+    m0 = dryMass + fuelMass;
+    alt = 0; vel = 0; acc = 0; t = 0;
+    burned = false;
+    maxAltReached = 500;
+  }
+
+  function launch(){ setup(); flying = true; }
+  function reset(){ setup(); flying = false; draw(); }
+
+  [drySlider,fuelmSlider,thrustSlider,exhSlider,burnSlider].forEach(s=>s.addEventListener('input', ()=>{
+    vDry.textContent = drySlider.value+' kg';
+    vFuelM.textContent = fuelmSlider.value+' kg';
+    vThrust.textContent = thrustSlider.value+' kN';
+    vExh.textContent = exhSlider.value+' m/s';
+    vBurn.textContent = burnSlider.value+' s';
+    if(!flying) reset();
+  }));
+  dragSwitch.addEventListener('click', ()=>{ drag=!drag; dragSwitch.classList.toggle('on', drag); });
+  launchBtn.addEventListener('click', launch);
+  resetBtn.addEventListener('click', reset);
+
+  function currentMass(){
+    if (t >= burnTime) return dryMass;
+    const fuelBurned = fuelMass * (t/burnTime);
+    return m0 - fuelBurned;
+  }
+
+  function massFlowRate(){
+    return fuelMass/burnTime; // kg/s
+  }
+
+  function step(dt){
+    t += dt;
+    const m = currentMass();
+    const burning = t < burnTime;
+    const thrustForce = burning ? thrustN : 0;
+
+    let dragForce = 0;
+    if (drag && vel > 0){
+      const rho = 1.225 * Math.exp(-alt/8500); // air density falls with altitude
+      const Cd_A = 0.5; // simplified drag coefficient * area
+      dragForce = 0.5*rho*vel*vel*Cd_A;
+    }
+
+    const netForce = thrustForce - m*g - dragForce*Math.sign(vel||1);
+    acc = netForce/m;
+    vel += acc*dt;
+    if (vel < 0 && alt <= 0){ vel = 0; acc=0; }
+    alt += vel*dt;
+    if (alt < 0) alt = 0;
+
+    if (alt > maxAltReached) maxAltReached = alt*1.15;
+
+    if (!burning && !burned){ burned = true; }
+
+    if (alt<=0 && t>burnTime && vel<=0){ flying=false; }
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+
+    // sky gradient already via canvas bg; add stars at high altitude feel
+    const groundY = H-40;
+    ctx.strokeStyle='rgba(138,147,184,0.35)';
+    ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(0,groundY); ctx.lineTo(W,groundY); ctx.stroke();
+
+    // altitude scale mapping
+    const usableH = groundY - 40;
+    const scale = usableH / Math.max(maxAltReached, 100);
+    const rocketY = groundY - alt*scale;
+    const rocketX = W/2;
+
+    // altitude gridlines
+    ctx.strokeStyle = 'rgba(138,147,184,0.1)';
+    ctx.fillStyle = 'rgba(138,147,184,0.4)';
+    ctx.font = '9px JetBrains Mono, monospace';
+    for(let i=1;i<=4;i++){
+      const gy = groundY - (usableH*i/4);
+      ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(W,gy); ctx.stroke();
+      const altLabel = (maxAltReached*i/4);
+      ctx.fillText(altLabel.toFixed(0)+'m', 8, gy-4);
+    }
+
+    // flame (if burning)
+    const burning = t < burnTime && flying;
+    if (burning){
+      flameFlicker = (flameFlicker+1)%6;
+      const flen = 18 + (flameFlicker>3?6:0);
+      const grad = ctx.createLinearGradient(rocketX, rocketY+22, rocketX, rocketY+22+flen);
+      grad.addColorStop(0, '#ffe6a8');
+      grad.addColorStop(0.5, '#ff8c42');
+      grad.addColorStop(1, 'rgba(255,140,66,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(rocketX-7, rocketY+22);
+      ctx.lineTo(rocketX+7, rocketY+22);
+      ctx.lineTo(rocketX, rocketY+22+flen);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // rocket body
+    ctx.fillStyle = '#c9cee0';
+    ctx.beginPath();
+    ctx.moveTo(rocketX, rocketY-24);
+    ctx.lineTo(rocketX-9, rocketY-6);
+    ctx.lineTo(rocketX-9, rocketY+22);
+    ctx.lineTo(rocketX+9, rocketY+22);
+    ctx.lineTo(rocketX+9, rocketY-6);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle='#191204'; ctx.lineWidth=1; ctx.stroke();
+
+    // nose cone highlight
+    ctx.fillStyle = '#e8cf7a';
+    ctx.beginPath();
+    ctx.moveTo(rocketX, rocketY-24);
+    ctx.lineTo(rocketX-9, rocketY-6);
+    ctx.lineTo(rocketX+9, rocketY-6);
+    ctx.closePath();
+    ctx.fill();
+
+    // fins
+    ctx.fillStyle = '#8a93b8';
+    ctx.beginPath();
+    ctx.moveTo(rocketX-9, rocketY+10); ctx.lineTo(rocketX-18, rocketY+22); ctx.lineTo(rocketX-9, rocketY+22);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(rocketX+9, rocketY+10); ctx.lineTo(rocketX+18, rocketY+22); ctx.lineTo(rocketX+9, rocketY+22);
+    ctx.closePath(); ctx.fill();
+
+    // readouts
+    const m = flying||t>0 ? currentMass() : m0;
+    const fuelPct = Math.max(0, Math.min(100, ((m - dryMass)/fuelMass)*100));
+    const weight = m*g;
+    const twr = (t<burnTime && flying) ? (thrustN/weight) : ((t===0)? (thrustN/(m0*g)) : 0);
+
+    rAlt.textContent = alt.toFixed(0)+' m';
+    rVel.textContent = vel.toFixed(1)+' m/s';
+    rAcc.textContent = acc.toFixed(2)+' m/s²';
+    rFuel.textContent = fuelPct.toFixed(0)+'%';
+    rMass.textContent = m.toFixed(0)+' kg';
+    rTWR.textContent = twr.toFixed(2) + (twr<1 && t===0 ? ' ⚠ won\\'t lift off' : '');
+  }
+
+  function loop(){
+    if (flying) step(0.016);
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  vDry.textContent=drySlider.value+' kg'; vFuelM.textContent=fuelmSlider.value+' kg';
+  vThrust.textContent=thrustSlider.value+' kN'; vExh.textContent=exhSlider.value+' m/s'; vBurn.textContent=burnSlider.value+' s';
+  reset();
+  loop();
+})();
+</script>
+</body>
+</html>

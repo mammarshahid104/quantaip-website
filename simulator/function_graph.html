@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>QUANTAIP Simulator — Graphical Representation of Functions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-deep:#060c1c; --navy:#0b1530; --navy-panel:#101c3d; --navy-line:#1e2c54;
+    --gold:#d4af37; --gold-soft:#e8cf7a; --text:#eef1fb; --text-dim:#8a93b8;
+    --good:#5fd0a3; --red:#e0715f; --blue:#6fa8dc;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: radial-gradient(1200px 600px at 15% -10%, #12234f 0%, transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, #14183a 0%, transparent 55%), var(--navy-deep);
+    color:var(--text); font-family:'Poppins',sans-serif; min-height:100vh;
+    display:flex; flex-direction:column; align-items:center; padding:28px 16px 60px;
+  }
+  .header{ width:100%; max-width:1040px; display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom:26px; flex-wrap:wrap; gap:8px; border-bottom:1px solid var(--navy-line); padding-bottom:18px; }
+  .brand{ display:flex; align-items:baseline; gap:10px; }
+  .brand .mark{ font-weight:700; letter-spacing:0.14em; font-size:13px; color:var(--gold); text-transform:uppercase; }
+  .brand .name{ font-weight:300; font-size:22px; letter-spacing:0.01em; }
+  .brand .name b{ font-weight:600; color:var(--gold-soft); }
+  .exp-label{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); letter-spacing:0.08em; }
+
+  .container{ width:100%; max-width:1040px; }
+
+  .panel{
+    background:linear-gradient(180deg, var(--navy-panel), var(--navy));
+    border:1px solid var(--navy-line); border-radius:14px; padding:20px; margin-bottom:20px;
+  }
+  .panel h2{ margin:0 0 14px; font-size:12px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-dim); }
+
+  .func-row{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  .func-field{ flex:1; min-width:220px; }
+  .func-field label{ display:block; font-size:12.5px; color:var(--text-dim); margin-bottom:6px; }
+  .func-input-wrap{ display:flex; align-items:center; background:var(--navy-deep); border:1px solid var(--navy-line); border-radius:8px; padding:0 12px; }
+  .func-input-wrap .prefix{ font-family:'JetBrains Mono',monospace; color:var(--gold-soft); margin-right:6px; }
+  .func-input-wrap input{
+    flex:1; background:transparent; border:none; outline:none; color:var(--text);
+    font-family:'JetBrains Mono',monospace; font-size:15px; padding:12px 4px;
+  }
+
+  .preview-box{
+    margin-top:12px; padding:14px 18px; background:var(--navy-deep); border:1px solid var(--navy-line);
+    border-radius:8px; font-size:22px; color:var(--gold-soft); text-align:center; min-height:56px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .preview-box sup{ font-size:0.62em; }
+
+  .keypad{ margin-top:14px; display:flex; flex-direction:column; gap:8px; }
+  .keypad-row{ display:flex; gap:8px; flex-wrap:wrap; }
+  .key-btn{
+    flex:1; min-width:44px; font-family:'JetBrains Mono',monospace; font-size:14px;
+    padding:10px 6px; border-radius:8px; border:1px solid var(--navy-line);
+    background:var(--navy-deep); color:var(--text); cursor:pointer; transition:all .12s ease;
+  }
+  .key-btn:hover{ border-color:var(--gold); color:var(--gold-soft); background:rgba(212,175,55,0.08); }
+  .key-btn.wide{ flex:2; font-family:'Poppins',sans-serif; font-size:12px; }
+  .key-btn sup{ font-size:0.7em; }
+
+  .power-prompt{
+    display:none; margin-top:10px; align-items:center; gap:10px;
+    background:var(--navy-deep); border:1px solid var(--gold); border-radius:8px; padding:10px 14px;
+    font-size:12.5px; color:var(--text-dim);
+  }
+  .power-prompt.show{ display:flex; }
+  .power-prompt input{
+    flex:1; background:var(--navy); border:1px solid var(--navy-line); border-radius:6px;
+    color:var(--gold-soft); font-family:'JetBrains Mono',monospace; font-size:14px; padding:8px 10px; outline:none;
+  }
+
+  .btn-row{ display:flex; gap:10px; margin-top:14px; }
+  button.action-btn{
+    flex:1; font-family:'Poppins',sans-serif; font-weight:600; font-size:13px;
+    padding:13px 14px; border-radius:8px; border:none; cursor:pointer;
+    background:linear-gradient(180deg, var(--gold-soft), var(--gold)); color:#191204;
+    transition:filter .15s ease;
+  }
+  button.action-btn:hover{ filter:brightness(1.08); }
+  button.action-btn.secondary{
+    background:var(--navy-deep); color:var(--text); border:1px solid var(--navy-line);
+  }
+  button.action-btn.secondary:hover{ border-color:var(--gold); color:var(--gold-soft); }
+  button.action-btn.graph-btn{
+    background:linear-gradient(180deg, #9cc2ea, var(--blue)); color:#0a1128;
+  }
+
+  .cat-tabs{ display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+  .cat-tab{
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.04em;
+    padding:8px 14px; border-radius:999px; border:1px solid var(--navy-line);
+    background:var(--navy-deep); color:var(--text-dim); cursor:pointer;
+  }
+  .cat-tab.active{ background:var(--gold); color:#191204; border-color:var(--gold); font-weight:600; }
+
+  .presets{ display:flex; gap:8px; flex-wrap:wrap; }
+  .preset-chip{
+    font-family:'JetBrains Mono',monospace; font-size:12px;
+    padding:7px 13px; border-radius:999px; border:1px solid var(--navy-line);
+    background:var(--navy-deep); color:var(--text-dim); cursor:pointer;
+  }
+  .preset-chip sup{ font-size:0.7em; }
+  .preset-chip:hover{ color:var(--gold-soft); border-color:var(--gold); }
+  .cat-desc{ font-size:11px; color:var(--text-dim); margin-bottom:10px; font-style:italic; }
+
+  .error-box{
+    display:none; margin-top:12px; padding:10px 14px; border-radius:8px;
+    background:rgba(224,113,95,0.1); border:1px solid var(--red); color:var(--red); font-size:12.5px;
+  }
+  .error-box.show{ display:block; }
+
+  .help-note{ font-size:11.5px; color:var(--text-dim); line-height:1.6; margin-top:14px; border-top:1px solid var(--navy-line); padding-top:14px; }
+  .help-note b{ color:var(--gold-soft); font-weight:600; }
+  .help-note code{ background:var(--navy-deep); padding:1px 6px; border-radius:4px; color:var(--gold-soft); }
+
+  table{ width:100%; border-collapse:collapse; font-family:'JetBrains Mono',monospace; }
+  thead th{
+    background:var(--navy-deep); color:var(--gold-soft); font-size:14px; font-weight:600;
+    padding:12px 10px; text-align:center; border:1px solid var(--navy-line);
+  }
+  tbody td{
+    padding:9px 10px; text-align:center; border:1px solid var(--navy-line); font-size:13px; color:var(--text);
+  }
+  tbody td sup{ font-size:0.75em; }
+  tbody tr:nth-child(even) td{ background:rgba(255,255,255,0.02); }
+  tbody tr:hover td{ background:rgba(212,175,55,0.08); }
+  td.x-col{ color:var(--gold-soft); font-weight:500; }
+  td.undefined{ color:var(--red); font-style:italic; }
+  td.zero-row{ background:rgba(95,208,163,0.08) !important; }
+
+  .table-scroll{ overflow-x:auto; }
+
+  #graphSection{ display:none; }
+  #graphCanvas{ width:100%; aspect-ratio:4/3; border-radius:10px; background:linear-gradient(180deg, #0a1330 0%, #060c1c 100%); display:block; border:1px solid var(--navy-line); }
+
+  footer{ margin-top:6px; font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--text-dim); letter-spacing:0.06em; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">
+    <span class="mark">QUANTAIP</span>
+    <span class="name">Simulator — <b>Mathematics Lab</b></span>
+  </div>
+  <div class="exp-label">EXPERIMENT / GRAPHICAL REPRESENTATION OF FUNCTIONS</div>
+</div>
+
+<div class="container">
+
+  <div class="panel">
+    <h2>Define the Function</h2>
+
+    <div class="func-row">
+      <div class="func-field">
+        <label>Build your function using the buttons below, or type directly</label>
+        <div class="func-input-wrap">
+          <span class="prefix">f(x) =</span>
+          <input type="text" id="funcInput" value="e^x" spellcheck="false">
+        </div>
+      </div>
+    </div>
+
+    <div class="keypad" id="keypad">
+      <div class="keypad-row">
+        <button type="button" class="key-btn" data-ins="x">x</button>
+        <button type="button" class="key-btn" data-power="2">x²</button>
+        <button type="button" class="key-btn" data-power="3">x³</button>
+        <button type="button" class="key-btn" data-power="n">xⁿ</button>
+        <button type="button" class="key-btn" data-ins="sqrt()" data-cursor="-1">√</button>
+        <button type="button" class="key-btn" data-ins="e^()" data-cursor="-1">eˣ</button>
+        <button type="button" class="key-btn" data-ins="pi">π</button>
+      </div>
+      <div class="keypad-row">
+        <button type="button" class="key-btn" data-ins="sin()" data-cursor="-1">sin</button>
+        <button type="button" class="key-btn" data-ins="cos()" data-cursor="-1">cos</button>
+        <button type="button" class="key-btn" data-ins="tan()" data-cursor="-1">tan</button>
+        <button type="button" class="key-btn" data-ins="ln()" data-cursor="-1">ln</button>
+        <button type="button" class="key-btn" data-ins="log()" data-cursor="-1">log</button>
+        <button type="button" class="key-btn" data-ins="abs()" data-cursor="-1">|x|</button>
+      </div>
+      <div class="keypad-row">
+        <button type="button" class="key-btn" data-ins="(">(</button>
+        <button type="button" class="key-btn" data-ins=")">)</button>
+        <button type="button" class="key-btn" data-ins="+">+</button>
+        <button type="button" class="key-btn" data-ins="-">−</button>
+        <button type="button" class="key-btn" data-ins="*">×</button>
+        <button type="button" class="key-btn" data-ins="/">÷</button>
+        <button type="button" class="key-btn wide" id="clearBtn">Clear</button>
+        <button type="button" class="key-btn wide" id="backspaceBtn">⌫ Delete</button>
+      </div>
+    </div>
+
+    <div class="preview-box" id="previewBox">y = eˣ</div>
+
+    <div class="power-prompt" id="powerPrompt">
+      <span>Type the power (exponent), then press Enter:</span>
+      <input type="text" id="powerInput" placeholder="e.g. 4 or -1 or 0.5">
+      <button type="button" class="action-btn" id="powerOkBtn" style="flex:none; padding:8px 16px;">OK</button>
+    </div>
+
+    <div class="btn-row">
+      <button class="action-btn" id="genBtn">Generate Table</button>
+      <button class="action-btn graph-btn" id="graphBtn">Generate Graph</button>
+    </div>
+
+    <div class="error-box" id="errorBox"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Choose a Function Type</h2>
+    <div class="cat-tabs" id="catTabs">
+      <div class="cat-tab active" data-cat="algebraic">Algebraic</div>
+      <div class="cat-tab" data-cat="fundamental">Transcendental — Fundamental</div>
+      <div class="cat-tab" data-cat="nonfundamental">Transcendental — Non-fundamental</div>
+    </div>
+
+    <div class="cat-desc" id="catDesc">Polynomial, rational and radical (root) functions — built from x using +, −, ×, ÷ and roots only.</div>
+
+    <div class="presets" id="presetGroup"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Table of Values (x = −10 to 10)</h2>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>x</th><th>y = f(x)</th></tr></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="help-note">
+      Supported syntax: <code>+ - * /</code>, <code>^</code> for power, <code>sqrt()</code>, <code>sin() cos() tan()</code>, <code>asin() acos() atan()</code> (inverse trig), <code>sinh() cosh() tanh()</code> (hyperbolic), <code>ln()</code> (natural log), <code>log()</code> (log base 10), <code>abs()</code>, constants <code>e</code>, <code>pi</code>.
+    </div>
+  </div>
+
+  <div class="panel" id="graphSection">
+    <h2>Graph</h2>
+    <canvas id="graphCanvas" width="640" height="480"></canvas>
+  </div>
+
+</div>
+
+<footer>QUANTAIP EDUOS · VIRTUAL LAB MODULE · PROTOTYPE BUILD</footer>
+
+<script>
+(function(){
+  const funcInput = document.getElementById('funcInput');
+  const genBtn = document.getElementById('genBtn');
+  const graphBtn = document.getElementById('graphBtn');
+  const errorBox = document.getElementById('errorBox');
+  const tableBody = document.getElementById('tableBody');
+  const previewBox = document.getElementById('previewBox');
+  const graphSection = document.getElementById('graphSection');
+  const graphCanvas = document.getElementById('graphCanvas');
+  const gctx = graphCanvas.getContext('2d');
+
+  const catTabs = document.querySelectorAll('.cat-tab');
+  const presetGroup = document.getElementById('presetGroup');
+  const catDesc = document.getElementById('catDesc');
+
+  // ---------- Function categories ----------
+  const categories = {
+    algebraic: {
+      desc: 'Polynomial, rational and radical (root) functions — built from x using +, −, ×, ÷ and roots only.',
+      items: [
+        {expr:'x', label:'x'},
+        {expr:'x^2', label:'x^2'},
+        {expr:'x^3', label:'x^3'},
+        {expr:'2*x+3', label:'2x+3'},
+        {expr:'x^2-4*x+3', label:'x^2-4x+3'},
+        {expr:'1/x', label:'1/x'},
+        {expr:'sqrt(x)', label:'sqrt(x)'},
+        {expr:'1/x^2', label:'1/x^2'}
+      ]
+    },
+    fundamental: {
+      desc: 'Exponential, logarithmic and trigonometric functions — the core transcendental functions taught first.',
+      items: [
+        {expr:'e^x', label:'e^x'},
+        {expr:'2^x', label:'2^x'},
+        {expr:'ln(x)', label:'ln(x)'},
+        {expr:'log(x)', label:'log(x)'},
+        {expr:'sin(x)', label:'sin(x)'},
+        {expr:'cos(x)', label:'cos(x)'},
+        {expr:'tan(x)', label:'tan(x)'}
+      ]
+    },
+    nonfundamental: {
+      desc: 'Inverse trigonometric and hyperbolic functions — built from the fundamental ones.',
+      items: [
+        {expr:'asin(x)', label:'asin(x)'},
+        {expr:'acos(x)', label:'acos(x)'},
+        {expr:'atan(x)', label:'atan(x)'},
+        {expr:'sinh(x)', label:'sinh(x)'},
+        {expr:'cosh(x)', label:'cosh(x)'},
+        {expr:'tanh(x)', label:'tanh(x)'}
+      ]
+    }
+  };
+
+  function renderPresets(catKey){
+    const cat = categories[catKey];
+    catDesc.textContent = cat.desc;
+    presetGroup.innerHTML = '';
+    cat.items.forEach(item=>{
+      const chip = document.createElement('div');
+      chip.className = 'preset-chip';
+      chip.innerHTML = prettyPrintString(item.expr);
+      chip.addEventListener('click', ()=>{
+        funcInput.value = item.expr;
+        updatePreview();
+        generateTable();
+        if (graphSection.style.display==='block') generateGraph();
+      });
+      presetGroup.appendChild(chip);
+    });
+  }
+
+  catTabs.forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      catTabs.forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      renderPresets(tab.dataset.cat);
+    });
+  });
+
+  // ---------- Safe expression parser (recursive descent) ----------
+  function tokenize(str){
+    const tokens = [];
+    let i = 0;
+    str = str.replace(/\s+/g,'');
+    while(i < str.length){
+      const c = str[i];
+      if (/[0-9.]/.test(c)){
+        let num = '';
+        while(i<str.length && /[0-9.]/.test(str[i])){ num+=str[i]; i++; }
+        tokens.push({type:'num', value:parseFloat(num)});
+        continue;
+      }
+      if (/[a-zA-Z]/.test(c)){
+        let name = '';
+        while(i<str.length && /[a-zA-Z0-9]/.test(str[i])){ name+=str[i]; i++; }
+        tokens.push({type:'name', value:name});
+        continue;
+      }
+      if ('+-*/^()'.includes(c)){
+        tokens.push({type:'op', value:c});
+        i++;
+        continue;
+      }
+      throw new Error('Unexpected character: '+c);
+    }
+    return tokens;
+  }
+
+  const FUNC_NAMES = ['sin','cos','tan','asin','acos','atan','sinh','cosh','tanh','sqrt','ln','log','abs','exp'];
+
+  function parse(tokens){
+    let pos = 0;
+    function peek(){ return tokens[pos]; }
+    function next(){ return tokens[pos++]; }
+
+    function parseExpr(){
+      let node = parseTerm();
+      while(peek() && peek().type==='op' && (peek().value==='+'||peek().value==='-')){
+        const op = next().value;
+        const right = parseTerm();
+        node = {type:'binop', op, left:node, right};
+      }
+      return node;
+    }
+    function parseTerm(){
+      let node = parseUnary();
+      while(peek() && peek().type==='op' && (peek().value==='*'||peek().value==='/')){
+        const op = next().value;
+        const right = parseUnary();
+        node = {type:'binop', op, left:node, right};
+      }
+      return node;
+    }
+    function parseUnary(){
+      if (peek() && peek().type==='op' && (peek().value==='-'||peek().value==='+')){
+        const op = next().value;
+        const node = parseUnary();
+        return {type:'unary', op, node};
+      }
+      return parsePower();
+    }
+    function parsePower(){
+      let node = parsePrimary();
+      if (peek() && peek().type==='op' && peek().value==='^'){
+        next();
+        const right = parseUnary();
+        node = {type:'binop', op:'^', left:node, right};
+      }
+      return node;
+    }
+    function parsePrimary(){
+      const tok = peek();
+      if (!tok) throw new Error('Unexpected end of expression');
+
+      if (tok.type==='num'){ next(); return {type:'num', value:tok.value}; }
+
+      if (tok.type==='op' && tok.value==='('){
+        next();
+        const node = parseExpr();
+        if (!peek() || peek().value!==')') throw new Error('Missing closing parenthesis');
+        next();
+        return node;
+      }
+
+      if (tok.type==='name'){
+        next();
+        if (FUNC_NAMES.includes(tok.value)){
+          if (!peek() || peek().value!=='(') throw new Error('Expected ( after '+tok.value);
+          next();
+          const arg = parseExpr();
+          if (!peek() || peek().value!==')') throw new Error('Missing closing parenthesis');
+          next();
+          return {type:'func', name:tok.value, arg};
+        }
+        if (tok.value==='x') return {type:'var'};
+        if (tok.value==='e') return {type:'const', name:'e', value:Math.E};
+        if (tok.value==='pi') return {type:'const', name:'pi', value:Math.PI};
+        throw new Error('Unknown identifier: '+tok.value);
+      }
+
+      throw new Error('Unexpected token: '+JSON.stringify(tok));
+    }
+
+    const result = parseExpr();
+    if (pos < tokens.length) throw new Error('Unexpected trailing input');
+    return result;
+  }
+
+  function evaluate(node, xVal){
+    switch(node.type){
+      case 'num': return node.value;
+      case 'const': return node.value;
+      case 'var': return xVal;
+      case 'unary': {
+        const v = evaluate(node.node, xVal);
+        return node.op==='-' ? -v : v;
+      }
+      case 'binop': {
+        const l = evaluate(node.left, xVal);
+        const r = evaluate(node.right, xVal);
+        switch(node.op){
+          case '+': return l+r;
+          case '-': return l-r;
+          case '*': return l*r;
+          case '/': return l/r;
+          case '^': return Math.pow(l,r);
+        }
+        break;
+      }
+      case 'func': {
+        const a = evaluate(node.arg, xVal);
+        switch(node.name){
+          case 'sin': return Math.sin(a);
+          case 'cos': return Math.cos(a);
+          case 'tan': return Math.tan(a);
+          case 'asin': return Math.asin(a);
+          case 'acos': return Math.acos(a);
+          case 'atan': return Math.atan(a);
+          case 'sinh': return Math.sinh(a);
+          case 'cosh': return Math.cosh(a);
+          case 'tanh': return Math.tanh(a);
+          case 'sqrt': return Math.sqrt(a);
+          case 'ln': return Math.log(a);
+          case 'log': return Math.log10(a);
+          case 'abs': return Math.abs(a);
+          case 'exp': return Math.exp(a);
+        }
+        break;
+      }
+    }
+    throw new Error('Evaluation error');
+  }
+
+  function compileFunction(str){
+    const tokens = tokenize(str);
+    const ast = parse(tokens);
+    return (xVal) => evaluate(ast, xVal);
+  }
+
+  // ---------- Pretty-print AST to HTML with superscripts ----------
+  function needsParens(node){
+    return node.type==='binop' && (node.op==='+' || node.op==='-');
+  }
+
+  function prettyPrint(node){
+    switch(node.type){
+      case 'num': {
+        let v = node.value;
+        return (Number.isInteger(v) ? v.toString() : v.toString());
+      }
+      case 'const': return node.name==='pi' ? 'π' : node.name;
+      case 'var': return 'x';
+      case 'unary': {
+        const inner = prettyPrint(node.node);
+        const wrapped = needsParens(node.node) ? '('+inner+')' : inner;
+        return node.op==='-' ? '−'+wrapped : wrapped;
+      }
+      case 'func': {
+        const nameMap = {sin:'sin',cos:'cos',tan:'tan',asin:'sin<sup>−1</sup>',acos:'cos<sup>−1</sup>',atan:'tan<sup>−1</sup>',
+          sinh:'sinh',cosh:'cosh',tanh:'tanh',sqrt:'√',ln:'ln',log:'log',abs:'abs',exp:'exp'};
+        const inner = prettyPrint(node.arg);
+        if (node.name==='sqrt') return '√('+inner+')';
+        return nameMap[node.name]+'('+inner+')';
+      }
+      case 'binop': {
+        if (node.op==='^'){
+          const base = prettyPrint(node.left);
+          const baseWrapped = (node.left.type==='binop'||node.left.type==='unary') ? '('+base+')' : base;
+          const exp = prettyPrint(node.right);
+          return baseWrapped+'<sup>'+exp+'</sup>';
+        }
+        if (node.op==='*'){
+          const l = node.left, r = node.right;
+          const lStr = prettyPrint(l);
+          const rStr = prettyPrint(r);
+          const lWrapped = needsParens(l) ? '('+lStr+')' : lStr;
+          const rWrapped = needsParens(r) ? '('+rStr+')' : rStr;
+          // implicit multiplication: number*var or number*func → no dot
+          if (l.type==='num') return lWrapped+rWrapped;
+          return lWrapped+'·'+rWrapped;
+        }
+        if (node.op==='/'){
+          const lStr = prettyPrint(node.left);
+          const rStr = prettyPrint(node.right);
+          const lWrapped = needsParens(node.left) ? '('+lStr+')' : lStr;
+          const rWrapped = needsParens(node.right) ? '('+rStr+')' : rStr;
+          return lWrapped+'/'+rWrapped;
+        }
+        // + or -
+        const lStr = prettyPrint(node.left);
+        const rStr = prettyPrint(node.right);
+        const opSym = node.op==='-' ? ' − ' : ' + ';
+        return lStr+opSym+rStr;
+      }
+    }
+    return '?';
+  }
+
+  function prettyPrintString(exprStr){
+    try{
+      const ast = parse(tokenize(exprStr));
+      return 'y = '+prettyPrint(ast);
+    } catch(e){
+      return exprStr;
+    }
+  }
+
+  function updatePreview(){
+    const exprStr = funcInput.value.trim();
+    try{
+      const ast = parse(tokenize(exprStr));
+      previewBox.innerHTML = 'y = '+prettyPrint(ast);
+      errorBox.classList.remove('show');
+    } catch(e){
+      previewBox.textContent = 'y = ?';
+    }
+  }
+
+  // ---------- Scientific notation formatting (proper math style) ----------
+  function toSuperscript(numStr){
+    const map = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻','+':''};
+    return numStr.split('').map(ch=>map[ch]!==undefined?map[ch]:ch).join('');
+  }
+
+  function formatY(v){
+    if (v===null || v===undefined || Number.isNaN(v) || !Number.isFinite(v)){
+      return null;
+    }
+    const absV = Math.abs(v);
+    if (absV !== 0 && (absV >= 100000 || absV < 0.0001)){
+      // scientific notation: mantissa × 10^exp
+      const exp = Math.floor(Math.log10(absV));
+      const mantissa = v / Math.pow(10, exp);
+      const mantissaStr = mantissa.toFixed(3);
+      return mantissaStr+' × 10<sup>'+toSuperscript(exp.toString())+'</sup>';
+    }
+    const rounded = Math.round(v*10000)/10000;
+    return rounded.toString();
+  }
+
+  // ---------- Table generation ----------
+  function generateTable(){
+    const exprStr = funcInput.value.trim();
+    errorBox.classList.remove('show');
+    errorBox.textContent = '';
+
+    let fn;
+    try{
+      fn = compileFunction(exprStr);
+    } catch(e){
+      errorBox.textContent = '⚠ Could not parse function: '+e.message;
+      errorBox.classList.add('show');
+      tableBody.innerHTML = '';
+      return null;
+    }
+
+    let rows = '';
+    for(let x=-10; x<=10; x++){
+      let y;
+      try{ y = fn(x); } catch(e){ y = null; }
+      const displayY = formatY(y);
+      const isZeroRow = x===0;
+      rows += `<tr>
+        <td class="x-col ${isZeroRow?'zero-row':''}">${x}</td>
+        <td class="${displayY===null?'undefined':''} ${isZeroRow?'zero-row':''}">${displayY===null?'undefined':displayY}</td>
+      </tr>`;
+    }
+    tableBody.innerHTML = rows;
+    return fn;
+  }
+
+  // ---------- Graph generation ----------
+  function generateGraph(){
+    const fn = generateTable();
+    if (!fn) return;
+
+    graphSection.style.display = 'block';
+    graphSection.scrollIntoView({behavior:'smooth', block:'nearest'});
+
+    const W = graphCanvas.width, H = graphCanvas.height;
+    gctx.clearRect(0,0,W,H);
+
+    const xMin=-10, xMax=10;
+    // sample to find reasonable y range
+    const samples = [];
+    const N = 600;
+    for(let i=0;i<=N;i++){
+      const x = xMin + (xMax-xMin)*i/N;
+      let y;
+      try{ y = fn(x); } catch(e){ y = NaN; }
+      samples.push({x, y: (Number.isFinite(y) ? y : NaN)});
+    }
+    let finiteYs = samples.map(s=>s.y).filter(y=>!Number.isNaN(y));
+    // clip extreme outliers for sane y-axis (percentile-based)
+    finiteYs.sort((a,b)=>a-b);
+    let yMin, yMax;
+    if (finiteYs.length===0){ yMin=-10; yMax=10; }
+    else {
+      const p05 = finiteYs[Math.floor(finiteYs.length*0.02)];
+      const p95 = finiteYs[Math.ceil(finiteYs.length*0.98)-1];
+      yMin = Math.min(p05, 0); yMax = Math.max(p95, 0);
+      if (yMin===yMax){ yMin-=5; yMax+=5; }
+      const pad = (yMax-yMin)*0.1;
+      yMin -= pad; yMax += pad;
+    }
+
+    const marginL=50, marginR=20, marginT=20, marginB=40;
+    const plotW = W-marginL-marginR, plotH = H-marginT-marginB;
+
+    function toPx(x,y){
+      const px = marginL + ((x-xMin)/(xMax-xMin))*plotW;
+      const py = marginT + (1-((y-yMin)/(yMax-yMin)))*plotH;
+      return {px, py};
+    }
+
+    // gridlines
+    gctx.strokeStyle = 'rgba(138,147,184,0.12)';
+    gctx.lineWidth = 1;
+    for(let gx=xMin; gx<=xMax; gx+=2){
+      const {px} = toPx(gx,0);
+      gctx.beginPath(); gctx.moveTo(px, marginT); gctx.lineTo(px, H-marginB); gctx.stroke();
+    }
+    const yStep = (yMax-yMin)/8;
+    for(let i=0;i<=8;i++){
+      const gy = yMin + yStep*i;
+      const {py} = toPx(0,gy);
+      gctx.beginPath(); gctx.moveTo(marginL, py); gctx.lineTo(W-marginR, py); gctx.stroke();
+    }
+
+    // axes
+    gctx.strokeStyle = 'rgba(232,207,122,0.6)';
+    gctx.lineWidth = 1.5;
+    if (yMin<=0 && yMax>=0){
+      const {py} = toPx(0,0);
+      gctx.beginPath(); gctx.moveTo(marginL,py); gctx.lineTo(W-marginR,py); gctx.stroke();
+    }
+    if (xMin<=0 && xMax>=0){
+      const {px} = toPx(0,0);
+      gctx.beginPath(); gctx.moveTo(px,marginT); gctx.lineTo(px,H-marginB); gctx.stroke();
+    }
+
+    // axis labels
+    gctx.fillStyle = 'rgba(138,147,184,0.7)';
+    gctx.font = '10px JetBrains Mono, monospace';
+    gctx.textAlign = 'center';
+    for(let gx=xMin; gx<=xMax; gx+=2){
+      const {px} = toPx(gx,0);
+      gctx.fillText(gx.toString(), px, H-marginB+16);
+    }
+    gctx.textAlign = 'right';
+    for(let i=0;i<=8;i+=2){
+      const gy = yMin + yStep*i;
+      const {py} = toPx(0,gy);
+      gctx.fillText(gy.toFixed(1), marginL-8, py+3);
+    }
+    gctx.textAlign = 'left';
+
+    // curve — break line on discontinuities (large jumps = asymptote)
+    gctx.strokeStyle = '#5fd0a3';
+    gctx.lineWidth = 2.2;
+    gctx.beginPath();
+    let prevPx=null, prevPy=null, drawing=false;
+    for(let i=0;i<samples.length;i++){
+      const s = samples[i];
+      if (Number.isNaN(s.y) || s.y<yMin-Math.abs(yMax-yMin) || s.y>yMax+Math.abs(yMax-yMin)){
+        drawing = false;
+        continue;
+      }
+      const {px,py} = toPx(s.x, s.y);
+      if (!drawing){
+        gctx.moveTo(px,py);
+        drawing = true;
+      } else {
+        // detect asymptote jump
+        if (prevPy!==null && Math.abs(py-prevPy) > plotH*0.6){
+          gctx.moveTo(px,py);
+        } else {
+          gctx.lineTo(px,py);
+        }
+      }
+      prevPx=px; prevPy=py;
+    }
+    gctx.stroke();
+
+    // function label
+    gctx.fillStyle = '#e8cf7a';
+    gctx.font = '12px Poppins';
+    gctx.fillText(previewBox.textContent || '', marginL, marginT+2);
+  }
+
+  // ---------- On-screen math keypad ----------
+  const powerPrompt = document.getElementById('powerPrompt');
+  const powerInput = document.getElementById('powerInput');
+  const powerOkBtn = document.getElementById('powerOkBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const backspaceBtn = document.getElementById('backspaceBtn');
+  let lastCursorPos = funcInput.value.length;
+  let pendingPowerInsert = false;
+
+  funcInput.addEventListener('click', ()=>{ lastCursorPos = funcInput.selectionStart; });
+  funcInput.addEventListener('keyup', ()=>{ lastCursorPos = funcInput.selectionStart; });
+
+  function insertAtCursor(text, cursorOffsetFromEnd){
+    const val = funcInput.value;
+    const pos = lastCursorPos!=null ? lastCursorPos : val.length;
+    const newVal = val.slice(0,pos) + text + val.slice(pos);
+    funcInput.value = newVal;
+    let newCursor = pos + text.length;
+    if (cursorOffsetFromEnd) newCursor = pos + text.length + cursorOffsetFromEnd;
+    funcInput.focus();
+    funcInput.setSelectionRange(newCursor, newCursor);
+    lastCursorPos = newCursor;
+    updatePreview();
+    generateTable();
+  }
+
+  document.querySelectorAll('.key-btn[data-ins]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const text = btn.dataset.ins;
+      const cursorAttr = btn.dataset.cursor;
+      insertAtCursor(text, cursorAttr ? parseInt(cursorAttr) : 0);
+    });
+  });
+
+  document.querySelectorAll('.key-btn[data-power]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const p = btn.dataset.power;
+      if (p==='n'){
+        powerPrompt.classList.add('show');
+        powerInput.value = '';
+        powerInput.focus();
+        pendingPowerInsert = true;
+      } else {
+        insertAtCursor('x^'+p, 0);
+      }
+    });
+  });
+
+  function confirmPowerInsert(){
+    const p = powerInput.value.trim();
+    if (p==='') { powerPrompt.classList.remove('show'); return; }
+    const needsParens = /[^0-9.]/.test(p) || p.includes('-');
+    const expr = needsParens ? 'x^('+p+')' : 'x^'+p;
+    insertAtCursor(expr, 0);
+    powerPrompt.classList.remove('show');
+    pendingPowerInsert = false;
+  }
+  powerOkBtn.addEventListener('click', confirmPowerInsert);
+  powerInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') confirmPowerInsert(); });
+
+  clearBtn.addEventListener('click', ()=>{
+    funcInput.value = '';
+    lastCursorPos = 0;
+    funcInput.focus();
+    updatePreview();
+    generateTable();
+  });
+
+  backspaceBtn.addEventListener('click', ()=>{
+    const val = funcInput.value;
+    const pos = lastCursorPos!=null ? lastCursorPos : val.length;
+    if (pos<=0) return;
+    funcInput.value = val.slice(0,pos-1) + val.slice(pos);
+    lastCursorPos = pos-1;
+    funcInput.focus();
+    funcInput.setSelectionRange(lastCursorPos, lastCursorPos);
+    updatePreview();
+    generateTable();
+  });
+
+  genBtn.addEventListener('click', ()=>{ updatePreview(); generateTable(); });
+  graphBtn.addEventListener('click', ()=>{ updatePreview(); generateGraph(); });
+  funcInput.addEventListener('input', updatePreview);
+  funcInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ updatePreview(); generateTable(); } });
+
+  renderPresets('algebraic');
+  updatePreview();
+  generateTable();
+})();
+</script>
+</body>
+</html>
