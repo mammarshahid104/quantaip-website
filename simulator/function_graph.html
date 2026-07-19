@@ -38,21 +38,45 @@
   .func-row{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
   .func-field{ flex:1; min-width:220px; }
   .func-field label{ display:block; font-size:12.5px; color:var(--text-dim); margin-bottom:6px; }
-  .func-input-wrap{ display:flex; align-items:center; background:var(--navy-deep); border:1px solid var(--navy-line); border-radius:8px; padding:0 12px; }
-  .func-input-wrap .prefix{ font-family:'JetBrains Mono',monospace; color:var(--gold-soft); margin-right:6px; }
-  .func-input-wrap input{
-    flex:1; background:transparent; border:none; outline:none; color:var(--text);
-    font-family:'JetBrains Mono',monospace; font-size:15px; padding:12px 4px;
+  .func-input-wrap{ display:flex; align-items:center; background:var(--navy-deep); border:1px solid var(--navy-line); border-radius:8px; padding:0 12px; position:relative; }
+  .func-input-wrap .prefix{ font-family:'JetBrains Mono',monospace; color:var(--gold-soft); margin-right:8px; flex:none; }
+
+  .math-field{
+    flex:1; min-height:52px; outline:none; caret-color:var(--gold-soft);
+    font-family:'JetBrains Mono',monospace; font-size:17px; color:var(--text);
+    padding:12px 4px; display:flex; align-items:center; flex-wrap:wrap; line-height:1.4;
   }
+  .math-field:focus{ }
+  .math-field .tok-func{ color:#7dd3fc; font-weight:600; }
+  .math-field .tok-var{ color:#facc15; font-weight:600; font-style:italic; }
+  .math-field .tok-const{ color:#c084fc; font-weight:600; }
+  .math-field sup{ font-size:0.66em; vertical-align:super; line-height:0; }
+  .math-field sub{ font-size:0.62em; vertical-align:sub; line-height:0; }
+  .math-field .pow-exp, .math-field .sqrt-arg, .math-field .func-arg, .math-field .log-base{
+    outline:none; border-bottom:1px dashed rgba(212,175,55,0.5); padding:0 2px; min-width:8px; display:inline-block;
+  }
+  .math-field .pow-exp:focus, .math-field .sqrt-arg:focus, .math-field .func-arg:focus, .math-field .log-base:focus{
+    border-bottom:1px solid var(--gold);
+  }
+  .math-field .sqrt-arg{ border-bottom:1px solid rgba(212,175,55,0.6); }
 
   .preview-box{
     margin-top:12px; padding:14px 18px; background:var(--navy-deep); border:1px solid var(--navy-line);
-    border-radius:8px; font-size:22px; color:var(--gold-soft); text-align:center; min-height:56px;
+    border-radius:8px; font-size:22px; color:var(--text); text-align:center; min-height:56px;
     display:flex; align-items:center; justify-content:center;
   }
   .preview-box sup{ font-size:0.62em; }
+  .preview-box sub{ font-size:0.6em; }
+  .tok-func{ color:#7dd3fc; font-weight:600; }
+  .tok-var{ color:#facc15; font-weight:600; font-style:italic; }
+  .tok-const{ color:#c084fc; font-weight:600; }
 
   .keypad{ margin-top:14px; display:flex; flex-direction:column; gap:8px; }
+  .keypad-label{
+    font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--gold-soft);
+    background:rgba(212,175,55,0.08); border:1px solid rgba(212,175,55,0.25);
+    border-radius:6px; padding:6px 10px; margin-bottom:2px; letter-spacing:0.03em;
+  }
   .keypad-row{ display:flex; gap:8px; flex-wrap:wrap; }
   .key-btn{
     flex:1; min-width:44px; font-family:'JetBrains Mono',monospace; font-size:14px;
@@ -62,6 +86,7 @@
   .key-btn:hover{ border-color:var(--gold); color:var(--gold-soft); background:rgba(212,175,55,0.08); }
   .key-btn.wide{ flex:2; font-family:'Poppins',sans-serif; font-size:12px; }
   .key-btn sup{ font-size:0.7em; }
+  .key-btn sub{ font-size:0.65em; }
 
   .power-prompt{
     display:none; margin-top:10px; align-items:center; gap:10px;
@@ -105,6 +130,7 @@
     background:var(--navy-deep); color:var(--text-dim); cursor:pointer;
   }
   .preset-chip sup{ font-size:0.7em; }
+  .preset-chip sub{ font-size:0.65em; }
   .preset-chip:hover{ color:var(--gold-soft); border-color:var(--gold); }
   .cat-desc{ font-size:11px; color:var(--text-dim); margin-bottom:10px; font-style:italic; }
 
@@ -127,6 +153,7 @@
     padding:9px 10px; text-align:center; border:1px solid var(--navy-line); font-size:13px; color:var(--text);
   }
   tbody td sup{ font-size:0.75em; }
+  tbody td sub{ font-size:0.7em; }
   tbody tr:nth-child(even) td{ background:rgba(255,255,255,0.02); }
   tbody tr:hover td{ background:rgba(212,175,55,0.08); }
   td.x-col{ color:var(--gold-soft); font-weight:500; }
@@ -136,7 +163,48 @@
   .table-scroll{ overflow-x:auto; }
 
   #graphSection{ display:none; }
-  #graphCanvas{ width:100%; aspect-ratio:4/3; border-radius:10px; background:linear-gradient(180deg, #0a1330 0%, #060c1c 100%); display:block; border:1px solid var(--navy-line); }
+  #graphCanvas{ width:100%; aspect-ratio:16/10; border-radius:10px; background:#ffffff; display:block; border:1px solid var(--navy-line); cursor:grab; }
+  #graphCanvas.dragging{ cursor:grabbing; }
+  .canvas-wrap{ position:relative; }
+
+  .graph-func-row{
+    display:flex; align-items:center; gap:10px; margin-bottom:8px;
+    background:var(--navy-deep); border:1px solid var(--navy-line); border-radius:8px; padding:8px 10px;
+  }
+  .graph-func-row .swatch{ width:16px; height:16px; border-radius:4px; flex:none; }
+  .mini-math-field{
+    flex:1; outline:none; caret-color:var(--gold-soft); min-height:26px;
+    font-family:'JetBrains Mono',monospace; font-size:14px; color:var(--text);
+    padding:6px 4px; display:flex; align-items:center; flex-wrap:wrap;
+  }
+  .mini-math-field .tok-func{ color:#7dd3fc; font-weight:600; }
+  .mini-math-field .tok-var{ color:#facc15; font-weight:600; font-style:italic; }
+  .mini-math-field .tok-const{ color:#c084fc; font-weight:600; }
+  .mini-math-field sup{ font-size:0.68em; vertical-align:super; line-height:0; }
+  .mini-math-field sub{ font-size:0.64em; vertical-align:sub; line-height:0; }
+  .mini-math-field .pow-exp, .mini-math-field .sqrt-arg, .mini-math-field .func-arg, .mini-math-field .log-base{
+    outline:none; border-bottom:1px dashed rgba(212,175,55,0.5); padding:0 2px; min-width:6px; display:inline-block;
+  }
+  .mini-math-field .pow-exp:focus, .mini-math-field .sqrt-arg:focus, .mini-math-field .func-arg:focus, .mini-math-field .log-base:focus{
+    border-bottom:1px solid var(--gold);
+  }
+  .graph-func-row .prefix{ font-family:'JetBrains Mono',monospace; color:var(--text-dim); font-size:13px; flex:none; }
+  .graph-func-row .remove-btn{
+    flex:none; background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:16px;
+    padding:2px 8px; border-radius:6px;
+  }
+  .graph-func-row .remove-btn:hover{ color:var(--red); background:rgba(224,113,95,0.1); }
+  .graph-func-row .row-error{ font-size:10.5px; color:var(--red); flex:none; }
+
+  .graph-toolbar{ display:flex; align-items:center; gap:8px; margin:14px 0 12px; flex-wrap:wrap; }
+  .graph-tool-btn{
+    font-family:'JetBrains Mono',monospace; font-size:11.5px; padding:8px 14px; border-radius:8px;
+    border:1px solid var(--navy-line); background:var(--navy-deep); color:var(--text); cursor:pointer;
+  }
+  .graph-tool-btn:hover{ border-color:var(--gold); color:var(--gold-soft); }
+  .viewport-info{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); margin-left:auto; }
+
+  .graph-hint{ font-size:11px; color:var(--text-dim); margin-top:10px; font-style:italic; }
 
   footer{ margin-top:6px; font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--text-dim); letter-spacing:0.06em; }
 </style>
@@ -158,31 +226,34 @@
 
     <div class="func-row">
       <div class="func-field">
-        <label>Build your function using the buttons below, or type directly</label>
+        <label>Build your function using the buttons below, or type directly (press ^ for a real power box)</label>
         <div class="func-input-wrap">
           <span class="prefix">f(x) =</span>
-          <input type="text" id="funcInput" value="e^x" spellcheck="false">
+          <div id="mathField" class="math-field" data-mathfield="true" contenteditable="true" spellcheck="false" tabindex="0"></div>
         </div>
       </div>
     </div>
 
+    <div id="keypadHome"></div>
     <div class="keypad" id="keypad">
+      <div class="keypad-label" id="keypadLabel">Editing: f(x)</div>
       <div class="keypad-row">
         <button type="button" class="key-btn" data-ins="x">x</button>
         <button type="button" class="key-btn" data-power="2">x²</button>
         <button type="button" class="key-btn" data-power="3">x³</button>
         <button type="button" class="key-btn" data-power="n">xⁿ</button>
-        <button type="button" class="key-btn" data-ins="sqrt()" data-cursor="-1">√</button>
-        <button type="button" class="key-btn" data-ins="e^()" data-cursor="-1">eˣ</button>
+        <button type="button" class="key-btn" data-template="sqrt(x)">√</button>
+        <button type="button" class="key-btn" data-template="e^(x)">eˣ</button>
         <button type="button" class="key-btn" data-ins="pi">π</button>
       </div>
       <div class="keypad-row">
-        <button type="button" class="key-btn" data-ins="sin()" data-cursor="-1">sin</button>
-        <button type="button" class="key-btn" data-ins="cos()" data-cursor="-1">cos</button>
-        <button type="button" class="key-btn" data-ins="tan()" data-cursor="-1">tan</button>
-        <button type="button" class="key-btn" data-ins="ln()" data-cursor="-1">ln</button>
-        <button type="button" class="key-btn" data-ins="log()" data-cursor="-1">log</button>
-        <button type="button" class="key-btn" data-ins="abs()" data-cursor="-1">|x|</button>
+        <button type="button" class="key-btn" data-template="sin(x)">sin</button>
+        <button type="button" class="key-btn" data-template="cos(x)">cos</button>
+        <button type="button" class="key-btn" data-template="tan(x)">tan</button>
+        <button type="button" class="key-btn" data-template="ln(x)">ln</button>
+        <button type="button" class="key-btn" data-template="log(x)">log</button>
+        <button type="button" class="key-btn" data-logbase="1">log<sub>b</sub></button>
+        <button type="button" class="key-btn" data-template="abs(x)">|x|</button>
       </div>
       <div class="keypad-row">
         <button type="button" class="key-btn" data-ins="(">(</button>
@@ -198,10 +269,10 @@
 
     <div class="preview-box" id="previewBox">y = eˣ</div>
 
-    <div class="power-prompt" id="powerPrompt">
-      <span>Type the power (exponent), then press Enter:</span>
-      <input type="text" id="powerInput" placeholder="e.g. 4 or -1 or 0.5">
-      <button type="button" class="action-btn" id="powerOkBtn" style="flex:none; padding:8px 16px;">OK</button>
+    <div class="power-prompt" id="logBasePrompt">
+      <span>Type the log base (subscript), then press Enter:</span>
+      <input type="text" id="logBaseInput" placeholder="e.g. 2 or 10">
+      <button type="button" class="action-btn" id="logBaseOkBtn" style="flex:none; padding:8px 16px;">OK</button>
     </div>
 
     <div class="btn-row">
@@ -240,8 +311,22 @@
   </div>
 
   <div class="panel" id="graphSection">
-    <h2>Graph</h2>
-    <canvas id="graphCanvas" width="640" height="480"></canvas>
+    <h2>Graph — Multiple Functions Supported</h2>
+
+    <div id="graphFuncList"></div>
+    <button type="button" class="action-btn secondary" id="addFuncBtn" style="margin-top:10px; max-width:220px;">+ Add Another Function</button>
+
+    <div class="graph-toolbar">
+      <button type="button" class="graph-tool-btn" id="zoomInBtn">＋ Zoom In</button>
+      <button type="button" class="graph-tool-btn" id="zoomOutBtn">－ Zoom Out</button>
+      <button type="button" class="graph-tool-btn" id="resetViewBtn">⟲ Reset View</button>
+      <span class="viewport-info" id="viewportInfo">x: [-10, 10]</span>
+    </div>
+
+    <div class="canvas-wrap">
+      <canvas id="graphCanvas"></canvas>
+    </div>
+    <div class="graph-hint">Scroll to zoom · Click and drag to pan · Domain extends to ±∞, limited only by each function's natural domain (e.g. √x, ln x).</div>
   </div>
 
 </div>
@@ -250,7 +335,7 @@
 
 <script>
 (function(){
-  const funcInput = document.getElementById('funcInput');
+  const mathField = document.getElementById('mathField');
   const genBtn = document.getElementById('genBtn');
   const graphBtn = document.getElementById('graphBtn');
   const errorBox = document.getElementById('errorBox');
@@ -259,6 +344,12 @@
   const graphSection = document.getElementById('graphSection');
   const graphCanvas = document.getElementById('graphCanvas');
   const gctx = graphCanvas.getContext('2d');
+  const graphFuncList = document.getElementById('graphFuncList');
+  const addFuncBtn = document.getElementById('addFuncBtn');
+  const zoomInBtn = document.getElementById('zoomInBtn');
+  const zoomOutBtn = document.getElementById('zoomOutBtn');
+  const resetViewBtn = document.getElementById('resetViewBtn');
+  const viewportInfo = document.getElementById('viewportInfo');
 
   const catTabs = document.querySelectorAll('.cat-tab');
   const presetGroup = document.getElementById('presetGroup');
@@ -313,7 +404,7 @@
       chip.className = 'preset-chip';
       chip.innerHTML = prettyPrintString(item.expr);
       chip.addEventListener('click', ()=>{
-        funcInput.value = item.expr;
+        setMathField(item.expr);
         updatePreview();
         generateTable();
         if (graphSection.style.display==='block') generateGraph();
@@ -349,7 +440,7 @@
         tokens.push({type:'name', value:name});
         continue;
       }
-      if ('+-*/^()'.includes(c)){
+      if ('+-*/^()_'.includes(c)){
         tokens.push({type:'op', value:c});
         i++;
         continue;
@@ -418,12 +509,17 @@
       if (tok.type==='name'){
         next();
         if (FUNC_NAMES.includes(tok.value)){
+          let base = null;
+          if (tok.value==='log' && peek() && peek().type==='op' && peek().value==='_'){
+            next(); // consume '_'
+            base = parsePrimary(); // subscript operand: number, const, or (expr)
+          }
           if (!peek() || peek().value!=='(') throw new Error('Expected ( after '+tok.value);
           next();
           const arg = parseExpr();
           if (!peek() || peek().value!==')') throw new Error('Missing closing parenthesis');
           next();
-          return {type:'func', name:tok.value, arg};
+          return {type:'func', name:tok.value, arg, base};
         }
         if (tok.value==='x') return {type:'var'};
         if (tok.value==='e') return {type:'const', name:'e', value:Math.E};
@@ -474,7 +570,7 @@
           case 'tanh': return Math.tanh(a);
           case 'sqrt': return Math.sqrt(a);
           case 'ln': return Math.log(a);
-          case 'log': return Math.log10(a);
+          case 'log': return node.base ? (Math.log(a)/Math.log(evaluate(node.base, xVal))) : Math.log10(a);
           case 'abs': return Math.abs(a);
           case 'exp': return Math.exp(a);
         }
@@ -490,7 +586,7 @@
     return (xVal) => evaluate(ast, xVal);
   }
 
-  // ---------- Pretty-print AST to HTML with superscripts ----------
+  // ---------- Pretty-print AST to HTML with superscripts, subscripts, and color-coded tokens ----------
   function needsParens(node){
     return node.type==='binop' && (node.op==='+' || node.op==='-');
   }
@@ -501,19 +597,25 @@
         let v = node.value;
         return (Number.isInteger(v) ? v.toString() : v.toString());
       }
-      case 'const': return node.name==='pi' ? 'π' : node.name;
-      case 'var': return 'x';
+      case 'const': return '<span class="tok-const">'+(node.name==='pi' ? 'π' : node.name)+'</span>';
+      case 'var': return '<span class="tok-var">x</span>';
       case 'unary': {
         const inner = prettyPrint(node.node);
         const wrapped = needsParens(node.node) ? '('+inner+')' : inner;
         return node.op==='-' ? '−'+wrapped : wrapped;
       }
       case 'func': {
-        const nameMap = {sin:'sin',cos:'cos',tan:'tan',asin:'sin<sup>−1</sup>',acos:'cos<sup>−1</sup>',atan:'tan<sup>−1</sup>',
+        const nameMap = {sin:'sin',cos:'cos',tan:'tan',
+          asin:'sin<sup>−1</sup>',acos:'cos<sup>−1</sup>',atan:'tan<sup>−1</sup>',
           sinh:'sinh',cosh:'cosh',tanh:'tanh',sqrt:'√',ln:'ln',log:'log',abs:'abs',exp:'exp'};
         const inner = prettyPrint(node.arg);
-        if (node.name==='sqrt') return '√('+inner+')';
-        return nameMap[node.name]+'('+inner+')';
+        const opSpan = (label)=>'<span class="tok-func">'+label+'</span>';
+        if (node.name==='sqrt') return opSpan('√')+'('+inner+')';
+        if (node.name==='log' && node.base){
+          const baseStr = prettyPrint(node.base);
+          return opSpan('log')+'<sub>'+baseStr+'</sub>'+'('+inner+')';
+        }
+        return opSpan(nameMap[node.name])+'('+inner+')';
       }
       case 'binop': {
         if (node.op==='^'){
@@ -549,6 +651,270 @@
     return '?';
   }
 
+  // ---------- Structural math field: DOM builder (expr -> real editable DOM) ----------
+  function el(tag, className, attrs){
+    const e = document.createElement(tag);
+    if (className) e.className = className;
+    if (attrs) for (const k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+
+  function buildDom(node){
+    const frag = document.createDocumentFragment();
+    switch(node.type){
+      case 'num': {
+        frag.appendChild(document.createTextNode(node.value.toString()));
+        break;
+      }
+      case 'const': {
+        const s = el('span','tok-const',{'data-atom':'const','data-name':node.name});
+        s.textContent = node.name==='pi' ? 'π' : 'e';
+        frag.appendChild(s);
+        break;
+      }
+      case 'var': {
+        const s = el('span','tok-var',{'data-atom':'var'});
+        s.textContent = 'x';
+        frag.appendChild(s);
+        break;
+      }
+      case 'unary': {
+        if (node.op==='-') frag.appendChild(document.createTextNode('−'));
+        const needsP = node.node.type==='binop' && (node.node.op==='+'||node.node.op==='-');
+        if (needsP) frag.appendChild(document.createTextNode('('));
+        frag.appendChild(buildDom(node.node));
+        if (needsP) frag.appendChild(document.createTextNode(')'));
+        break;
+      }
+      case 'func': {
+        const wrap = el('span', null, {'data-atom':'func','data-fname':node.name});
+        const labelMap = {sin:'sin',cos:'cos',tan:'tan',sinh:'sinh',cosh:'cosh',tanh:'tanh',
+          ln:'ln',log:'log',abs:'abs',exp:'exp',
+          asin:null, acos:null, atan:null};
+        if (node.name==='sqrt'){
+          const symbol = el('span','tok-func'); symbol.textContent='√';
+          wrap.appendChild(symbol);
+          wrap.appendChild(document.createTextNode('('));
+          const arg = el('span','sqrt-arg',{'data-slot':'arg','contenteditable':'true'});
+          arg.appendChild(buildDom(node.arg));
+          wrap.appendChild(arg);
+          wrap.appendChild(document.createTextNode(')'));
+        } else if (node.name==='asin'||node.name==='acos'||node.name==='atan'){
+          const baseLabel = {asin:'sin',acos:'cos',atan:'tan'}[node.name];
+          const label = el('span','tok-func'); label.textContent = baseLabel;
+          const sup = el('sup'); sup.textContent = '−1'; sup.setAttribute('contenteditable','false');
+          wrap.appendChild(label); wrap.appendChild(sup);
+          wrap.appendChild(document.createTextNode('('));
+          const arg = el('span','func-arg',{'data-slot':'arg','contenteditable':'true'});
+          arg.appendChild(buildDom(node.arg));
+          wrap.appendChild(arg);
+          wrap.appendChild(document.createTextNode(')'));
+        } else if (node.name==='log'){
+          const label = el('span','tok-func'); label.textContent='log';
+          wrap.appendChild(label);
+          if (node.base){
+            const baseEl = el('sub','log-base',{'data-slot':'base','contenteditable':'true'});
+            baseEl.appendChild(buildDom(node.base));
+            wrap.appendChild(baseEl);
+          }
+          wrap.appendChild(document.createTextNode('('));
+          const arg = el('span','func-arg',{'data-slot':'arg','contenteditable':'true'});
+          arg.appendChild(buildDom(node.arg));
+          wrap.appendChild(arg);
+          wrap.appendChild(document.createTextNode(')'));
+        } else {
+          const label = el('span','tok-func'); label.textContent = labelMap[node.name] || node.name;
+          wrap.appendChild(label);
+          wrap.appendChild(document.createTextNode('('));
+          const arg = el('span','func-arg',{'data-slot':'arg','contenteditable':'true'});
+          arg.appendChild(buildDom(node.arg));
+          wrap.appendChild(arg);
+          wrap.appendChild(document.createTextNode(')'));
+        }
+        frag.appendChild(wrap);
+        break;
+      }
+      case 'binop': {
+        if (node.op==='^'){
+          const wrap = el('span', null, {'data-atom':'pow'});
+          const needsBP = (node.left.type==='binop'||node.left.type==='unary');
+          const baseWrap = el('span','pow-base',{'data-slot':'base','contenteditable':'true'});
+          if (needsBP){ baseWrap.appendChild(document.createTextNode('(')); baseWrap.appendChild(buildDom(node.left)); baseWrap.appendChild(document.createTextNode(')')); }
+          else baseWrap.appendChild(buildDom(node.left));
+          const supEl = el('sup','pow-exp',{'data-slot':'exp','contenteditable':'true'});
+          supEl.appendChild(buildDom(node.right));
+          wrap.appendChild(baseWrap);
+          wrap.appendChild(supEl);
+          frag.appendChild(wrap);
+          break;
+        }
+        if (node.op==='*'){
+          const l=node.left, r=node.right;
+          const needsLP = l.type==='binop' && (l.op==='+'||l.op==='-');
+          const needsRP = r.type==='binop' && (r.op==='+'||r.op==='-');
+          if (needsLP) frag.appendChild(document.createTextNode('('));
+          frag.appendChild(buildDom(l));
+          if (needsLP) frag.appendChild(document.createTextNode(')'));
+          if (l.type!=='num') frag.appendChild(document.createTextNode('·'));
+          if (needsRP) frag.appendChild(document.createTextNode('('));
+          frag.appendChild(buildDom(r));
+          if (needsRP) frag.appendChild(document.createTextNode(')'));
+          break;
+        }
+        if (node.op==='/'){
+          const needsLP = node.left.type==='binop' && (node.left.op==='+'||node.left.op==='-');
+          const needsRP = node.right.type==='binop' && (node.right.op==='+'||node.right.op==='-');
+          if (needsLP) frag.appendChild(document.createTextNode('('));
+          frag.appendChild(buildDom(node.left));
+          if (needsLP) frag.appendChild(document.createTextNode(')'));
+          frag.appendChild(document.createTextNode('/'));
+          if (needsRP) frag.appendChild(document.createTextNode('('));
+          frag.appendChild(buildDom(node.right));
+          if (needsRP) frag.appendChild(document.createTextNode(')'));
+          break;
+        }
+        // + or -
+        frag.appendChild(buildDom(node.left));
+        frag.appendChild(document.createTextNode(node.op==='-' ? ' − ' : ' + '));
+        frag.appendChild(buildDom(node.right));
+        break;
+      }
+    }
+    return frag;
+  }
+
+  // ---------- Structural math field: DOM -> expr string (reverse serialization) ----------
+  function domToExpr(container){
+    let out = '';
+    container.childNodes.forEach(child=>{
+      if (child.nodeType === Node.TEXT_NODE){
+        out += child.textContent
+          .split('×').join('*')
+          .split('÷').join('/')
+          .split('−').join('-')
+          .split('·').join('*');
+        return;
+      }
+      if (child.nodeType !== Node.ELEMENT_NODE) return;
+      const atom = child.dataset ? child.dataset.atom : null;
+
+      if (atom === 'pow'){
+        const baseEl = child.querySelector(':scope > [data-slot="base"]');
+        const expEl = child.querySelector(':scope > [data-slot="exp"]');
+        const baseExpr = baseEl ? domToExpr(baseEl) : 'x';
+        const expExpr = expEl ? domToExpr(expEl) : '1';
+        out += '('+(baseExpr||'x')+')^('+(expExpr||'1')+')';
+        return;
+      }
+      if (atom === 'func'){
+        const fname = child.dataset.fname;
+        const argEl = child.querySelector(':scope > [data-slot="arg"]');
+        const argExpr = argEl ? domToExpr(argEl) : 'x';
+        if (fname==='log'){
+          const baseEl = child.querySelector(':scope > [data-slot="base"]');
+          const baseExpr = baseEl ? domToExpr(baseEl).trim() : '';
+          if (baseExpr){ out += 'log_('+baseExpr+')('+(argExpr||'x')+')'; }
+          else { out += 'log('+(argExpr||'x')+')'; }
+        } else {
+          out += fname+'('+(argExpr||'x')+')';
+        }
+        return;
+      }
+      if (atom === 'var'){ out += 'x'; return; }
+      if (atom === 'const'){ out += (child.dataset.name==='pi' ? 'pi' : 'e'); return; }
+      // plain wrapper / unknown element: recurse into children generically
+      out += domToExpr(child);
+    });
+    return out;
+  }
+
+  function getMathExpr(){
+    const s = domToExpr(mathField).trim();
+    return s === '' ? '0' : s;
+  }
+
+  function setMathField(exprStr){
+    try{
+      const ast = parse(tokenize(exprStr));
+      mathField.innerHTML = '';
+      mathField.appendChild(buildDom(ast));
+    } catch(e){
+      mathField.textContent = exprStr;
+    }
+  }
+
+  // ---------- Active field tracking (so ONE shared keypad works for the main field AND every graph-row field) ----------
+  let activeField = mathField;
+  const fieldRefreshCallbacks = new Map(); // field element -> callback to run after any edit
+  const keypad = document.getElementById('keypad');
+  const keypadHome = document.getElementById('keypadHome');
+  const keypadLabel = document.getElementById('keypadLabel');
+
+  function relocateKeypad(field){
+    if (field === mathField){
+      keypadHome.insertAdjacentElement('afterend', keypad);
+      keypadLabel.textContent = 'Editing: f(x)';
+    } else {
+      const row = field.closest('.graph-func-row');
+      if (row){
+        row.insertAdjacentElement('afterend', keypad);
+        const prefixEl = row.querySelector('.prefix');
+        keypadLabel.textContent = 'Editing: ' + (prefixEl ? prefixEl.textContent : 'f(x)');
+      }
+    }
+  }
+
+  document.addEventListener('focusin', (e)=>{
+    const field = e.target.closest ? e.target.closest('[data-mathfield]') : null;
+    if (field){
+      activeField = field;
+      relocateKeypad(field);
+    }
+  });
+
+  function registerMathField(fieldEl, onChange){
+    fieldRefreshCallbacks.set(fieldEl, onChange);
+  }
+
+  function refreshActiveField(){
+    const cb = fieldRefreshCallbacks.get(activeField);
+    if (cb) cb();
+  }
+
+  function selectSlot(slotEl){
+    if (!slotEl) return;
+    const owningField = slotEl.closest('[data-mathfield]');
+    if (owningField) activeField = owningField;
+    slotEl.focus();
+    const range = document.createRange();
+    range.selectNodeContents(slotEl);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  function getCurrentRange(){
+    const sel = window.getSelection();
+    if (sel.rangeCount===0) return null;
+    const range = sel.getRangeAt(0);
+    if (!activeField || !activeField.contains(range.commonAncestorContainer)) return null;
+    return range;
+  }
+
+  function insertNodeAtCursor(node){
+    const field = activeField || mathField;
+    field.focus();
+    let range = getCurrentRange();
+    if (!range){
+      range = document.createRange();
+      range.selectNodeContents(field);
+      range.collapse(false);
+    }
+    range.deleteContents();
+    range.insertNode(node);
+    return range;
+  }
+
   function prettyPrintString(exprStr){
     try{
       const ast = parse(tokenize(exprStr));
@@ -559,7 +925,7 @@
   }
 
   function updatePreview(){
-    const exprStr = funcInput.value.trim();
+    const exprStr = getMathExpr();
     try{
       const ast = parse(tokenize(exprStr));
       previewBox.innerHTML = 'y = '+prettyPrint(ast);
@@ -593,7 +959,7 @@
 
   // ---------- Table generation ----------
   function generateTable(){
-    const exprStr = funcInput.value.trim();
+    const exprStr = getMathExpr();
     errorBox.classList.remove('show');
     errorBox.textContent = '';
 
@@ -622,7 +988,297 @@
     return fn;
   }
 
-  // ---------- Graph generation ----------
+  // ---------- Multi-function graph engine (zoomable, pannable, HD, white background) ----------
+  const GRAPH_COLORS = ['#e63946','#1d4ed8','#16a34a','#9333ea','#ea580c','#0891b2'];
+  let graphFuncs = []; // {id, expr, color}
+  let graphFuncCounter = 0;
+
+  function addGraphFunc(expr){
+    const id = graphFuncCounter++;
+    const color = GRAPH_COLORS[graphFuncs.length % GRAPH_COLORS.length];
+    graphFuncs.push({id, expr, color});
+    renderGraphFuncList();
+  }
+
+  function renderGraphFuncList(){
+    graphFuncList.innerHTML = '';
+    graphFuncs.forEach((gf, idx)=>{
+      const row = document.createElement('div');
+      row.className = 'graph-func-row';
+
+      const swatch = document.createElement('div');
+      swatch.className = 'swatch';
+      swatch.style.background = gf.color;
+
+      const prefix = document.createElement('span');
+      prefix.className = 'prefix';
+      prefix.textContent = 'f'+(idx+1)+'(x) =';
+
+      const fieldEl = document.createElement('div');
+      fieldEl.className = 'mini-math-field';
+      fieldEl.setAttribute('data-mathfield','true');
+      fieldEl.setAttribute('contenteditable','true');
+      fieldEl.setAttribute('spellcheck','false');
+      fieldEl.setAttribute('tabindex','0');
+      fieldEl.dataset.rowId = gf.id;
+
+      const errSpan = document.createElement('span');
+      errSpan.className = 'row-error';
+      errSpan.dataset.err = gf.id;
+
+      row.appendChild(swatch);
+      row.appendChild(prefix);
+      row.appendChild(fieldEl);
+      row.appendChild(errSpan);
+
+      if (graphFuncs.length>1){
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'remove-btn';
+        removeBtn.textContent = '✕';
+        removeBtn.dataset.remove = gf.id;
+        row.appendChild(removeBtn);
+      }
+
+      graphFuncList.appendChild(row);
+
+      // seed the field with the current expr as real structural math
+      try{
+        const ast = parse(tokenize(gf.expr));
+        fieldEl.appendChild(buildDom(ast));
+      } catch(e){
+        fieldEl.textContent = gf.expr;
+      }
+
+      registerMathField(fieldEl, ()=>{
+        gf.expr = domToExpr(fieldEl).trim() || 'x';
+        drawGraph();
+      });
+    });
+
+    graphFuncList.querySelectorAll('[data-remove]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const id = parseInt(btn.dataset.remove);
+        graphFuncs = graphFuncs.filter(f=>f.id!==id);
+        renderGraphFuncList();
+        drawGraph();
+      });
+    });
+  }
+
+  addFuncBtn.addEventListener('click', ()=>{
+    if (graphFuncs.length>=6) return;
+    addGraphFunc('x');
+    drawGraph();
+    // select the new row's placeholder "x" so the next keypad action replaces it, not appends after it
+    const allFields = graphFuncList.querySelectorAll('.mini-math-field');
+    const lastField = allFields[allFields.length-1];
+    if (lastField) selectSlot(lastField);
+  });
+
+  // ---------- Viewport state (supports infinite pan/zoom) ----------
+  const viewport = { cx: 0, cy: 0, unitsPerPxBase: 0.03 }; // scale = units per pixel
+  let scaleFactor = 1; // multiplier applied to base scale (zoom level)
+
+  function resetViewport(){
+    viewport.cx = 0; viewport.cy = 0; scaleFactor = 1;
+  }
+
+  function setupHiDPICanvas(){
+    const dpr = window.devicePixelRatio || 1;
+    const rect = graphCanvas.getBoundingClientRect();
+    const cssW = rect.width || 640;
+    const cssH = cssW * (10/16);
+    graphCanvas.style.height = cssH + 'px';
+    graphCanvas.width = Math.round(cssW * dpr);
+    graphCanvas.height = Math.round(cssH * dpr);
+    gctx.setTransform(dpr,0,0,dpr,0,0);
+    return { cssW, cssH };
+  }
+
+  function niceStep(rough){
+    const pow10 = Math.pow(10, Math.floor(Math.log10(rough)));
+    const n = rough/pow10;
+    let step;
+    if (n<1.5) step=1; else if (n<3) step=2; else if (n<7) step=5; else step=10;
+    return step*pow10;
+  }
+
+  function drawGraph(){
+    const {cssW, cssH} = setupHiDPICanvas();
+    const unitsPerPx = viewport.unitsPerPxBase * scaleFactor;
+
+    const xMin = viewport.cx - (cssW/2)*unitsPerPx;
+    const xMax = viewport.cx + (cssW/2)*unitsPerPx;
+    const yMin = viewport.cy - (cssH/2)*unitsPerPx;
+    const yMax = viewport.cy + (cssH/2)*unitsPerPx;
+
+    viewportInfo.textContent = `x: [${xMin.toFixed(2)}, ${xMax.toFixed(2)}]  y: [${yMin.toFixed(2)}, ${yMax.toFixed(2)}]`;
+
+    // white background
+    gctx.fillStyle = '#ffffff';
+    gctx.fillRect(0,0,cssW,cssH);
+
+    function toPx(x,y){
+      return {
+        px: (x - xMin)/unitsPerPx,
+        py: cssH - (y - yMin)/unitsPerPx
+      };
+    }
+    function toGraph(px,py){
+      return {
+        x: xMin + px*unitsPerPx,
+        y: yMin + (cssH-py)*unitsPerPx
+      };
+    }
+
+    // gridlines — nice step based on visible range
+    const stepX = niceStep((xMax-xMin)/10);
+    const stepY = niceStep((yMax-yMin)/8);
+
+    gctx.strokeStyle = '#e5e7eb';
+    gctx.lineWidth = 1;
+    gctx.beginPath();
+    let gx0 = Math.ceil(xMin/stepX)*stepX;
+    for(let gx=gx0; gx<=xMax; gx+=stepX){
+      const {px} = toPx(gx,0);
+      gctx.moveTo(px,0); gctx.lineTo(px,cssH);
+    }
+    let gy0 = Math.ceil(yMin/stepY)*stepY;
+    for(let gy=gy0; gy<=yMax; gy+=stepY){
+      const {py} = toPx(0,gy);
+      gctx.moveTo(0,py); gctx.lineTo(cssW,py);
+    }
+    gctx.stroke();
+
+    // axes
+    gctx.strokeStyle = '#1f2937';
+    gctx.lineWidth = 1.5;
+    if (yMin<=0 && yMax>=0){
+      const {py} = toPx(0,0);
+      gctx.beginPath(); gctx.moveTo(0,py); gctx.lineTo(cssW,py); gctx.stroke();
+    }
+    if (xMin<=0 && xMax>=0){
+      const {px} = toPx(0,0);
+      gctx.beginPath(); gctx.moveTo(px,0); gctx.lineTo(px,cssH); gctx.stroke();
+    }
+
+    // tick labels
+    gctx.fillStyle = '#374151';
+    gctx.font = '11px JetBrains Mono, monospace';
+    gctx.textAlign = 'center';
+    const {py: axisPy} = toPx(0, (yMin<=0&&yMax>=0)?0:yMin);
+    for(let gx=gx0; gx<=xMax; gx+=stepX){
+      if (Math.abs(gx)<stepX*0.01) continue;
+      const {px} = toPx(gx,0);
+      gctx.fillText(formatTick(gx), px, Math.min(axisPy+16, cssH-4));
+    }
+    gctx.textAlign = 'right';
+    const {px: axisPx} = toPx((xMin<=0&&xMax>=0)?0:xMin, 0);
+    for(let gy=gy0; gy<=yMax; gy+=stepY){
+      if (Math.abs(gy)<stepY*0.01) continue;
+      const {py} = toPx(0,gy);
+      gctx.fillText(formatTick(gy), Math.max(axisPx-8,36), py+4);
+    }
+    gctx.textAlign = 'left';
+
+    // plot each function
+    graphFuncs.forEach((gf, idx)=>{
+      const errSpan = document.querySelector(`[data-err="${gf.id}"]`);
+      let fn;
+      try{
+        fn = compileFunction(gf.expr);
+        if (errSpan) errSpan.textContent = '';
+      } catch(e){
+        if (errSpan) errSpan.textContent = '⚠ '+e.message;
+        return;
+      }
+
+      gctx.strokeStyle = gf.color;
+      gctx.lineWidth = 2;
+      gctx.beginPath();
+      let drawing = false, prevPy = null;
+      const pxStep = 1; // one sample per device-independent pixel for HD smoothness
+      for(let pxI=0; pxI<=cssW; pxI+=pxStep){
+        const gx = toGraph(pxI,0).x;
+        let y;
+        try{ y = fn(gx); } catch(e){ y = NaN; }
+        if (!Number.isFinite(y)){ drawing=false; continue; }
+        const {py} = toPx(gx,y);
+        if (py < -cssH*3 || py > cssH*4){ drawing=false; continue; }
+        if (!drawing){
+          gctx.moveTo(pxI,py); drawing=true;
+        } else {
+          if (prevPy!==null && Math.abs(py-prevPy) > cssH*0.5){
+            gctx.moveTo(pxI,py);
+          } else {
+            gctx.lineTo(pxI,py);
+          }
+        }
+        prevPy = py;
+      }
+      gctx.stroke();
+
+      // label near right edge of visible curve
+      gctx.fillStyle = gf.color;
+      gctx.font = '600 12px Poppins';
+      gctx.fillText('f'+(idx+1)+'(x) = '+gf.expr, 10, 18+idx*16);
+    });
+  }
+
+  function formatTick(v){
+    if (Math.abs(v) < 0.0001) return '0';
+    if (Number.isInteger(v)) return v.toString();
+    return v.toFixed(2);
+  }
+
+  // ---------- Zoom & Pan interaction ----------
+  let isDragging = false, dragStartX=0, dragStartY=0, dragStartCx=0, dragStartCy=0;
+
+  graphCanvas.addEventListener('wheel', (e)=>{
+    e.preventDefault();
+    const rect = graphCanvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+    const unitsPerPx = viewport.unitsPerPxBase * scaleFactor;
+    const beforeX = viewport.cx + (mx - rect.width/2)*unitsPerPx;
+    const beforeY = viewport.cy - (my - rect.height/2)*unitsPerPx;
+
+    const zoomFactor = e.deltaY > 0 ? 1.12 : 1/1.12;
+    scaleFactor *= zoomFactor;
+    scaleFactor = Math.max(0.0005, Math.min(scaleFactor, 5000));
+
+    const newUnitsPerPx = viewport.unitsPerPxBase * scaleFactor;
+    viewport.cx = beforeX - (mx - rect.width/2)*newUnitsPerPx;
+    viewport.cy = beforeY + (my - rect.height/2)*newUnitsPerPx;
+
+    drawGraph();
+  }, {passive:false});
+
+  graphCanvas.addEventListener('mousedown', (e)=>{
+    isDragging = true;
+    graphCanvas.classList.add('dragging');
+    dragStartX = e.clientX; dragStartY = e.clientY;
+    dragStartCx = viewport.cx; dragStartCy = viewport.cy;
+  });
+  window.addEventListener('mousemove', (e)=>{
+    if (!isDragging) return;
+    const unitsPerPx = viewport.unitsPerPxBase * scaleFactor;
+    const dx = e.clientX - dragStartX, dy = e.clientY - dragStartY;
+    viewport.cx = dragStartCx - dx*unitsPerPx;
+    viewport.cy = dragStartCy + dy*unitsPerPx;
+    drawGraph();
+  });
+  window.addEventListener('mouseup', ()=>{
+    isDragging = false;
+    graphCanvas.classList.remove('dragging');
+  });
+
+  zoomInBtn.addEventListener('click', ()=>{ scaleFactor = Math.max(0.0005, scaleFactor/1.5); drawGraph(); });
+  zoomOutBtn.addEventListener('click', ()=>{ scaleFactor = Math.min(5000, scaleFactor*1.5); drawGraph(); });
+  resetViewBtn.addEventListener('click', ()=>{ resetViewport(); drawGraph(); });
+
+  window.addEventListener('resize', ()=>{ if (graphSection.style.display==='block') drawGraph(); });
+
   function generateGraph(){
     const fn = generateTable();
     if (!fn) return;
@@ -630,203 +1286,247 @@
     graphSection.style.display = 'block';
     graphSection.scrollIntoView({behavior:'smooth', block:'nearest'});
 
-    const W = graphCanvas.width, H = graphCanvas.height;
-    gctx.clearRect(0,0,W,H);
-
-    const xMin=-10, xMax=10;
-    // sample to find reasonable y range
-    const samples = [];
-    const N = 600;
-    for(let i=0;i<=N;i++){
-      const x = xMin + (xMax-xMin)*i/N;
-      let y;
-      try{ y = fn(x); } catch(e){ y = NaN; }
-      samples.push({x, y: (Number.isFinite(y) ? y : NaN)});
+    if (graphFuncs.length===0){
+      addGraphFunc(getMathExpr());
+    } else {
+      graphFuncs[0].expr = getMathExpr();
+      renderGraphFuncList();
     }
-    let finiteYs = samples.map(s=>s.y).filter(y=>!Number.isNaN(y));
-    // clip extreme outliers for sane y-axis (percentile-based)
-    finiteYs.sort((a,b)=>a-b);
-    let yMin, yMax;
-    if (finiteYs.length===0){ yMin=-10; yMax=10; }
-    else {
-      const p05 = finiteYs[Math.floor(finiteYs.length*0.02)];
-      const p95 = finiteYs[Math.ceil(finiteYs.length*0.98)-1];
-      yMin = Math.min(p05, 0); yMax = Math.max(p95, 0);
-      if (yMin===yMax){ yMin-=5; yMax+=5; }
-      const pad = (yMax-yMin)*0.1;
-      yMin -= pad; yMax += pad;
-    }
-
-    const marginL=50, marginR=20, marginT=20, marginB=40;
-    const plotW = W-marginL-marginR, plotH = H-marginT-marginB;
-
-    function toPx(x,y){
-      const px = marginL + ((x-xMin)/(xMax-xMin))*plotW;
-      const py = marginT + (1-((y-yMin)/(yMax-yMin)))*plotH;
-      return {px, py};
-    }
-
-    // gridlines
-    gctx.strokeStyle = 'rgba(138,147,184,0.12)';
-    gctx.lineWidth = 1;
-    for(let gx=xMin; gx<=xMax; gx+=2){
-      const {px} = toPx(gx,0);
-      gctx.beginPath(); gctx.moveTo(px, marginT); gctx.lineTo(px, H-marginB); gctx.stroke();
-    }
-    const yStep = (yMax-yMin)/8;
-    for(let i=0;i<=8;i++){
-      const gy = yMin + yStep*i;
-      const {py} = toPx(0,gy);
-      gctx.beginPath(); gctx.moveTo(marginL, py); gctx.lineTo(W-marginR, py); gctx.stroke();
-    }
-
-    // axes
-    gctx.strokeStyle = 'rgba(232,207,122,0.6)';
-    gctx.lineWidth = 1.5;
-    if (yMin<=0 && yMax>=0){
-      const {py} = toPx(0,0);
-      gctx.beginPath(); gctx.moveTo(marginL,py); gctx.lineTo(W-marginR,py); gctx.stroke();
-    }
-    if (xMin<=0 && xMax>=0){
-      const {px} = toPx(0,0);
-      gctx.beginPath(); gctx.moveTo(px,marginT); gctx.lineTo(px,H-marginB); gctx.stroke();
-    }
-
-    // axis labels
-    gctx.fillStyle = 'rgba(138,147,184,0.7)';
-    gctx.font = '10px JetBrains Mono, monospace';
-    gctx.textAlign = 'center';
-    for(let gx=xMin; gx<=xMax; gx+=2){
-      const {px} = toPx(gx,0);
-      gctx.fillText(gx.toString(), px, H-marginB+16);
-    }
-    gctx.textAlign = 'right';
-    for(let i=0;i<=8;i+=2){
-      const gy = yMin + yStep*i;
-      const {py} = toPx(0,gy);
-      gctx.fillText(gy.toFixed(1), marginL-8, py+3);
-    }
-    gctx.textAlign = 'left';
-
-    // curve — break line on discontinuities (large jumps = asymptote)
-    gctx.strokeStyle = '#5fd0a3';
-    gctx.lineWidth = 2.2;
-    gctx.beginPath();
-    let prevPx=null, prevPy=null, drawing=false;
-    for(let i=0;i<samples.length;i++){
-      const s = samples[i];
-      if (Number.isNaN(s.y) || s.y<yMin-Math.abs(yMax-yMin) || s.y>yMax+Math.abs(yMax-yMin)){
-        drawing = false;
-        continue;
-      }
-      const {px,py} = toPx(s.x, s.y);
-      if (!drawing){
-        gctx.moveTo(px,py);
-        drawing = true;
-      } else {
-        // detect asymptote jump
-        if (prevPy!==null && Math.abs(py-prevPy) > plotH*0.6){
-          gctx.moveTo(px,py);
-        } else {
-          gctx.lineTo(px,py);
-        }
-      }
-      prevPx=px; prevPy=py;
-    }
-    gctx.stroke();
-
-    // function label
-    gctx.fillStyle = '#e8cf7a';
-    gctx.font = '12px Poppins';
-    gctx.fillText(previewBox.textContent || '', marginL, marginT+2);
+    resetViewport();
+    drawGraph();
   }
 
-  // ---------- On-screen math keypad ----------
-  const powerPrompt = document.getElementById('powerPrompt');
-  const powerInput = document.getElementById('powerInput');
-  const powerOkBtn = document.getElementById('powerOkBtn');
+  // ---------- On-screen math keypad (builds real structural DOM, like Desmos) ----------
   const clearBtn = document.getElementById('clearBtn');
   const backspaceBtn = document.getElementById('backspaceBtn');
-  let lastCursorPos = funcInput.value.length;
-  let pendingPowerInsert = false;
+  const logBasePrompt = document.getElementById('logBasePrompt');
+  const logBaseInput = document.getElementById('logBaseInput');
+  const logBaseOkBtn = document.getElementById('logBaseOkBtn');
 
-  funcInput.addEventListener('click', ()=>{ lastCursorPos = funcInput.selectionStart; });
-  funcInput.addEventListener('keyup', ()=>{ lastCursorPos = funcInput.selectionStart; });
-
-  function insertAtCursor(text, cursorOffsetFromEnd){
-    const val = funcInput.value;
-    const pos = lastCursorPos!=null ? lastCursorPos : val.length;
-    const newVal = val.slice(0,pos) + text + val.slice(pos);
-    funcInput.value = newVal;
-    let newCursor = pos + text.length;
-    if (cursorOffsetFromEnd) newCursor = pos + text.length + cursorOffsetFromEnd;
-    funcInput.focus();
-    funcInput.setSelectionRange(newCursor, newCursor);
-    lastCursorPos = newCursor;
-    updatePreview();
-    generateTable();
+  function refreshAfterEdit(){
+    refreshActiveField();
   }
 
+  // Simple text/symbol insert (digits, operators, parens, pi, x)
   document.querySelectorAll('.key-btn[data-ins]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const text = btn.dataset.ins;
-      const cursorAttr = btn.dataset.cursor;
-      insertAtCursor(text, cursorAttr ? parseInt(cursorAttr) : 0);
+      let node;
+      if (text==='x'){ node = el('span','tok-var',{'data-atom':'var'}); node.textContent='x'; }
+      else if (text==='pi'){ node = el('span','tok-const',{'data-atom':'const','data-name':'pi'}); node.textContent='π'; }
+      else {
+        const symMap = {'*':'×','/':'÷','-':'−'};
+        node = document.createTextNode(symMap[text] || text);
+      }
+      insertNodeAtCursor(node);
+      // move caret right after inserted node
+      const r = document.createRange();
+      r.setStartAfter(node); r.collapse(true);
+      const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      refreshAfterEdit();
     });
   });
+
+  // Real superscript power box: base = x by default (selected/editable), exponent focused and empty
+  function insertPowerBox(defaultExpValue){
+    const wrap = el('span', null, {'data-atom':'pow'});
+    const baseWrap = el('span','pow-base',{'data-slot':'base','contenteditable':'true'});
+    const baseVar = el('span','tok-var',{'data-atom':'var'}); baseVar.textContent='x';
+    baseWrap.appendChild(baseVar);
+    const supEl = el('sup','pow-exp',{'data-slot':'exp','contenteditable':'true'});
+    if (defaultExpValue!==undefined) supEl.textContent = defaultExpValue.toString();
+    wrap.appendChild(baseWrap);
+    wrap.appendChild(supEl);
+    insertNodeAtCursor(wrap);
+    if (defaultExpValue===undefined){
+      selectSlot(supEl); // empty — focus it, ready to type
+    } else {
+      // put caret after the box, ready to continue the expression
+      const r = document.createRange();
+      r.setStartAfter(wrap); r.collapse(true);
+      const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    }
+    refreshAfterEdit();
+  }
 
   document.querySelectorAll('.key-btn[data-power]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const p = btn.dataset.power;
       if (p==='n'){
-        powerPrompt.classList.add('show');
-        powerInput.value = '';
-        powerInput.focus();
-        pendingPowerInsert = true;
+        insertPowerBox(undefined); // empty exponent slot, focused, ready to type
       } else {
-        insertAtCursor('x^'+p, 0);
+        insertPowerBox(p); // x² / x³ pre-filled
       }
     });
   });
 
-  function confirmPowerInsert(){
-    const p = powerInput.value.trim();
-    if (p==='') { powerPrompt.classList.remove('show'); return; }
-    const needsParens = /[^0-9.]/.test(p) || p.includes('-');
-    const expr = needsParens ? 'x^('+p+')' : 'x^'+p;
-    insertAtCursor(expr, 0);
-    powerPrompt.classList.remove('show');
-    pendingPowerInsert = false;
+  // Function templates: sin(x), cos(x), sqrt(x) etc. — argument "x" is a real editable slot, pre-selected
+  function insertFunctionNode(fname, label, isSqrt, isInverse){
+    const wrap = el('span', null, {'data-atom':'func','data-fname':fname});
+    if (isSqrt){
+      const symbol = el('span','tok-func'); symbol.textContent='√';
+      wrap.appendChild(symbol);
+    } else {
+      const lbl = el('span','tok-func'); lbl.textContent = label;
+      wrap.appendChild(lbl);
+      if (isInverse){
+        const sup = el('sup'); sup.textContent='−1'; sup.setAttribute('contenteditable','false');
+        wrap.appendChild(sup);
+      }
+    }
+    wrap.appendChild(document.createTextNode('('));
+    const arg = el('span','func-arg',{'data-slot':'arg','contenteditable':'true'});
+    const argVar = el('span','tok-var',{'data-atom':'var'}); argVar.textContent='x';
+    arg.appendChild(argVar);
+    wrap.appendChild(arg);
+    wrap.appendChild(document.createTextNode(')'));
+    insertNodeAtCursor(wrap);
+    selectSlot(arg); // "x" is pre-selected — type to replace, or just move on
+    refreshAfterEdit();
   }
-  powerOkBtn.addEventListener('click', confirmPowerInsert);
-  powerInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') confirmPowerInsert(); });
 
+  document.querySelectorAll('.key-btn[data-template]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const t = btn.dataset.template;
+      if (t==='sqrt(x)') insertFunctionNode('sqrt', '√', true, false);
+      else if (t==='e^(x)') insertPowerBoxForE();
+      else {
+        const name = t.slice(0, t.indexOf('('));
+        insertFunctionNode(name, name, false, false);
+      }
+    });
+  });
+
+  // eˣ button: e as base (constant), exponent focused and empty
+  function insertPowerBoxForE(){
+    const wrap = el('span', null, {'data-atom':'pow'});
+    const baseWrap = el('span','pow-base',{'data-slot':'base','contenteditable':'true'});
+    const baseConst = el('span','tok-const',{'data-atom':'const','data-name':'e'}); baseConst.textContent='e';
+    baseWrap.appendChild(baseConst);
+    const supEl = el('sup','pow-exp',{'data-slot':'exp','contenteditable':'true'});
+    const supVar = el('span','tok-var',{'data-atom':'var'}); supVar.textContent='x';
+    supEl.appendChild(supVar);
+    wrap.appendChild(baseWrap);
+    wrap.appendChild(supEl);
+    insertNodeAtCursor(wrap);
+    selectSlot(supEl);
+    refreshAfterEdit();
+  }
+
+  // log base (subscript) prompt
+  document.querySelectorAll('.key-btn[data-logbase]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      logBasePrompt.classList.add('show');
+      logBaseInput.value = '';
+      logBaseInput.focus();
+    });
+  });
+
+  function confirmLogBaseInsert(){
+    const b = logBaseInput.value.trim();
+    logBasePrompt.classList.remove('show');
+    if (b==='') return;
+    const wrap = el('span', null, {'data-atom':'func','data-fname':'log'});
+    const lbl = el('span','tok-func'); lbl.textContent='log';
+    wrap.appendChild(lbl);
+    const baseEl = el('sub','log-base',{'data-slot':'base','contenteditable':'true'});
+    baseEl.textContent = b;
+    wrap.appendChild(baseEl);
+    wrap.appendChild(document.createTextNode('('));
+    const arg = el('span','func-arg',{'data-slot':'arg','contenteditable':'true'});
+    const argVar = el('span','tok-var',{'data-atom':'var'}); argVar.textContent='x';
+    arg.appendChild(argVar);
+    wrap.appendChild(arg);
+    wrap.appendChild(document.createTextNode(')'));
+    insertNodeAtCursor(wrap);
+    selectSlot(arg);
+    refreshAfterEdit();
+  }
+  logBaseOkBtn.addEventListener('click', confirmLogBaseInsert);
+  logBaseInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') confirmLogBaseInsert(); });
+
+  
   clearBtn.addEventListener('click', ()=>{
-    funcInput.value = '';
-    lastCursorPos = 0;
-    funcInput.focus();
-    updatePreview();
-    generateTable();
+    const field = activeField || mathField;
+    field.innerHTML = '';
+    field.focus();
+    refreshAfterEdit();
   });
 
   backspaceBtn.addEventListener('click', ()=>{
-    const val = funcInput.value;
-    const pos = lastCursorPos!=null ? lastCursorPos : val.length;
-    if (pos<=0) return;
-    funcInput.value = val.slice(0,pos-1) + val.slice(pos);
-    lastCursorPos = pos-1;
-    funcInput.focus();
-    funcInput.setSelectionRange(lastCursorPos, lastCursorPos);
-    updatePreview();
-    generateTable();
+    const field = activeField || mathField;
+    field.focus();
+    document.execCommand('delete', false);
+    refreshAfterEdit();
   });
+
+  // ---------- Auto-superscript on '^' keypress: never show a literal caret symbol ----------
+  // Delegated to document so it works on the main field AND every graph-row field.
+  document.addEventListener('keydown', (e)=>{
+    const field = e.target.closest ? e.target.closest('[data-mathfield]') : null;
+    if (!field) return;
+
+    if (e.key==='^'){
+      e.preventDefault();
+      activeField = field;
+      // try to absorb the single preceding character/element as the base
+      const range = getCurrentRange();
+      let baseNode = null;
+      if (range && range.collapsed){
+        const container = range.startContainer;
+        const offset = range.startOffset;
+        if (container.nodeType===Node.TEXT_NODE && offset>0){
+          const fullText = container.textContent;
+          const lastChar = fullText[offset-1];
+          if (/[0-9a-zA-Z)]/.test(lastChar)){
+            container.textContent = fullText.slice(0,offset-1)+fullText.slice(offset);
+            baseNode = document.createTextNode(lastChar);
+          }
+        } else if (container.nodeType===Node.ELEMENT_NODE && offset>0){
+          const prevSibling = container.childNodes[offset-1];
+          if (prevSibling && prevSibling.dataset && (prevSibling.dataset.atom==='var'||prevSibling.dataset.atom==='const')){
+            baseNode = prevSibling.cloneNode(true);
+            prevSibling.remove();
+          }
+        }
+      }
+      const wrap = el('span', null, {'data-atom':'pow'});
+      const baseWrap = el('span','pow-base',{'data-slot':'base','contenteditable':'true'});
+      if (baseNode) baseWrap.appendChild(baseNode);
+      else { const bv = el('span','tok-var',{'data-atom':'var'}); bv.textContent='x'; baseWrap.appendChild(bv); }
+      const supEl = el('sup','pow-exp',{'data-slot':'exp','contenteditable':'true'});
+      wrap.appendChild(baseWrap);
+      wrap.appendChild(supEl);
+      insertNodeAtCursor(wrap);
+      selectSlot(supEl);
+      refreshAfterEdit();
+      return;
+    }
+    if (e.key==='Enter'){
+      e.preventDefault();
+      if (field===mathField){
+        updatePreview();
+        generateTable();
+      } else {
+        refreshAfterEdit();
+      }
+    }
+  });
+
+  document.addEventListener('input', (e)=>{
+    const field = e.target.closest ? e.target.closest('[data-mathfield]') : null;
+    if (!field) return;
+    const cb = fieldRefreshCallbacks.get(field);
+    if (cb) cb();
+  });
+
+  registerMathField(mathField, ()=>{ updatePreview(); generateTable(); });
 
   genBtn.addEventListener('click', ()=>{ updatePreview(); generateTable(); });
   graphBtn.addEventListener('click', ()=>{ updatePreview(); generateGraph(); });
-  funcInput.addEventListener('input', updatePreview);
-  funcInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ updatePreview(); generateTable(); } });
 
   renderPresets('algebraic');
+  setMathField('e^x');
   updatePreview();
   generateTable();
 })();
