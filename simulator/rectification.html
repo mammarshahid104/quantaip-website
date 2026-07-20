@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>QUANTAIP Simulator — Rectification of AC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-deep:#060c1c; --navy:#0b1530; --navy-panel:#101c3d; --navy-line:#1e2c54;
+    --gold:#d4af37; --gold-soft:#e8cf7a; --text:#eef1fb; --text-dim:#8a93b8;
+    --good:#5fd0a3; --red:#e0715f; --blue:#6fa8dc;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: radial-gradient(1200px 600px at 15% -10%, #12234f 0%, transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, #14183a 0%, transparent 55%), var(--navy-deep);
+    color:var(--text); font-family:'Poppins',sans-serif; min-height:100vh;
+    display:flex; flex-direction:column; align-items:center; padding:28px 16px 60px;
+  }
+  .header{ width:100%; max-width:1100px; display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom:22px; flex-wrap:wrap; gap:8px; border-bottom:1px solid var(--navy-line); padding-bottom:18px; }
+  .brand{ display:flex; align-items:baseline; gap:10px; }
+  .brand .mark{ font-weight:700; letter-spacing:0.14em; font-size:13px; color:var(--gold); text-transform:uppercase; }
+  .brand .name{ font-weight:300; font-size:22px; letter-spacing:0.01em; }
+  .brand .name b{ font-weight:600; color:var(--gold-soft); }
+  .exp-label{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); letter-spacing:0.08em; }
+
+  .container{ width:100%; max-width:1100px; }
+
+  .mode-tabs{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px; }
+  .mode-tab{
+    font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.02em;
+    padding:10px 18px; border-radius:999px; border:1px solid var(--navy-line);
+    background:var(--navy-deep); color:var(--text-dim); cursor:pointer;
+  }
+  .mode-tab:hover{ color:var(--text); border-color:#33407a; }
+  .mode-tab.active{ background:var(--gold); color:#191204; border-color:var(--gold); font-weight:600; }
+
+  .layout{ display:grid; grid-template-columns:1.4fr 1fr; gap:20px; }
+  @media (max-width:900px){ .layout{ grid-template-columns:1fr; } }
+
+  .panel{
+    background:linear-gradient(180deg, var(--navy-panel), var(--navy));
+    border:1px solid var(--navy-line); border-radius:14px; padding:20px; margin-bottom:20px;
+  }
+  .panel h2{ margin:0 0 14px; font-size:12px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-dim); }
+
+  #circuitCanvas{ width:100%; aspect-ratio:16/10; border-radius:10px; background:linear-gradient(180deg, #0a1330 0%, #060c1c 100%); border:1px solid var(--navy-line); display:block; margin-bottom:16px; }
+  #waveCanvas{ width:100%; aspect-ratio:16/8; border-radius:10px; background:linear-gradient(180deg, #0a1330 0%, #060c1c 100%); border:1px solid var(--navy-line); display:block; }
+
+  .field{ display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
+  .field label{ display:flex; justify-content:space-between; font-size:12.5px; color:var(--text-dim); }
+  .field label span.v{ font-family:'JetBrains Mono',monospace; color:var(--gold-soft); }
+  input[type=range]{ -webkit-appearance:none; width:100%; height:4px; border-radius:2px; background:var(--navy-line); outline:none; }
+  input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:15px; height:15px; border-radius:50%; background:var(--gold); cursor:pointer; border:2px solid var(--navy-deep); }
+
+  .toggle-row{ display:flex; gap:8px; margin-bottom:14px; }
+  .toggle-btn{
+    flex:1; font-family:'JetBrains Mono',monospace; font-size:11.5px; text-align:center;
+    padding:9px 6px; border-radius:8px; border:1px solid var(--navy-line);
+    background:var(--navy-deep); color:var(--text-dim); cursor:pointer;
+  }
+  .toggle-btn.active{ background:var(--gold); color:#191204; border-color:var(--gold); font-weight:600; }
+
+  .legend{ display:flex; gap:16px; justify-content:center; margin-top:10px; font-size:11px; color:var(--text-dim); font-family:'JetBrains Mono',monospace; }
+  .legend span{ display:inline-flex; align-items:center; gap:5px; }
+  .legend .dot{ width:10px; height:3px; border-radius:2px; display:inline-block; }
+
+  .readouts{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+  .readout{ background:var(--navy-deep); border:1px solid var(--navy-line); border-radius:8px; padding:10px 12px; }
+  .readout .lbl{ font-size:10px; color:var(--text-dim); letter-spacing:0.06em; text-transform:uppercase; }
+  .readout .val{ font-family:'JetBrains Mono',monospace; font-size:14px; color:var(--gold-soft); margin-top:4px; }
+  .readout.wide{ grid-column:1/-1; }
+
+  .note{ font-size:11.5px; color:var(--text-dim); line-height:1.6; margin-top:14px; border-top:1px solid var(--navy-line); padding-top:14px; }
+  .note b{ color:var(--gold-soft); font-weight:600; }
+
+  footer{ margin-top:6px; font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--text-dim); letter-spacing:0.06em; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">
+    <span class="mark">QUANTAIP</span>
+    <span class="name">Simulator — <b>Rectification of AC</b></span>
+  </div>
+  <div class="exp-label">EXPERIMENT / HALF-WAVE &amp; FULL-WAVE RECTIFIERS</div>
+</div>
+
+<div class="container">
+
+  <div class="mode-tabs" id="modeTabs">
+    <div class="mode-tab active" data-mode="half">Half-Wave Rectifier (1 Diode)</div>
+    <div class="mode-tab" data-mode="full">Full-Wave Bridge Rectifier (4 Diodes)</div>
+    <div class="mode-tab" data-mode="filter">Filter Circuit (Smoothing)</div>
+  </div>
+
+  <div class="layout">
+
+    <div class="panel">
+      <h2 id="vizTitle">Circuit Diagram</h2>
+      <canvas id="circuitCanvas" width="720" height="450"></canvas>
+      <h2 style="margin-top:18px;">Input &amp; Output Waveforms</h2>
+      <canvas id="waveCanvas" width="720" height="360"></canvas>
+      <div class="legend">
+        <span><span class="dot" style="background:#e8cf7a"></span> AC Input</span>
+        <span><span class="dot" style="background:#5fd0a3"></span> Rectified Output</span>
+      </div>
+      <div class="note" id="vizNote"></div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h2>Parameters</h2>
+        <div id="controlsBox"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Readouts</h2>
+        <div class="readouts" id="readoutsBox"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>QUANTAIP EDUOS · VIRTUAL LAB MODULE · PROTOTYPE BUILD</footer>
+
+<script>
+(function(){
+  const circuitCanvas = document.getElementById('circuitCanvas');
+  const cctx = circuitCanvas.getContext('2d');
+  const waveCanvas = document.getElementById('waveCanvas');
+  const wctx = waveCanvas.getContext('2d');
+  const controlsBox = document.getElementById('controlsBox');
+  const readoutsBox = document.getElementById('readoutsBox');
+  const vizTitle = document.getElementById('vizTitle');
+  const vizNote = document.getElementById('vizNote');
+  const modeTabs = document.querySelectorAll('.mode-tab');
+
+  let mode = 'half';
+  let animT = 0;
+
+  const state = { Vm: 100, freqVisual: 4, R: 1000, C: 100, freqReal: 50, filterType:'full' };
+
+  function renderControls(){
+    if (mode==='filter'){
+      controlsBox.innerHTML = `
+        <div class="toggle-row">
+          <div class="toggle-btn ${state.filterType==='half'?'active':''}" data-ft="half">After Half-Wave</div>
+          <div class="toggle-btn ${state.filterType==='full'?'active':''}" data-ft="full">After Full-Wave</div>
+        </div>
+        <div class="field"><label>Peak AC Voltage (V_m) <span class="v" id="v_Vm">${state.Vm} V</span></label>
+          <input type="range" id="s_Vm" min="10" max="300" step="5" value="${state.Vm}"></div>
+        <div class="field"><label>Supply Frequency (f) <span class="v" id="v_fr">${state.freqReal} Hz</span></label>
+          <input type="range" id="s_fr" min="50" max="400" step="10" value="${state.freqReal}"></div>
+        <div class="field"><label>Load Resistance (R) <span class="v" id="v_R">${state.R} Ω</span></label>
+          <input type="range" id="s_R" min="50" max="2000" step="50" value="${state.R}"></div>
+        <div class="field"><label>Filter Capacitance (C) <span class="v" id="v_C">${state.C} µF</span></label>
+          <input type="range" id="s_C" min="1" max="1000" step="1" value="${state.C}"></div>`;
+      document.querySelectorAll('[data-ft]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{ state.filterType = btn.dataset.ft; renderControls(); render(); });
+      });
+      document.getElementById('s_Vm').addEventListener('input', e=>{
+        state.Vm = parseFloat(e.target.value); document.getElementById('v_Vm').textContent = state.Vm+' V';
+      });
+      document.getElementById('s_fr').addEventListener('input', e=>{
+        state.freqReal = parseFloat(e.target.value); document.getElementById('v_fr').textContent = state.freqReal+' Hz';
+      });
+      document.getElementById('s_R').addEventListener('input', e=>{
+        state.R = parseFloat(e.target.value); document.getElementById('v_R').textContent = state.R+' Ω';
+      });
+      document.getElementById('s_C').addEventListener('input', e=>{
+        state.C = parseFloat(e.target.value); document.getElementById('v_C').textContent = state.C+' µF';
+      });
+      return;
+    }
+
+    controlsBox.innerHTML = `
+      <div class="field"><label>Peak AC Voltage (V_m) <span class="v" id="v_Vm">${state.Vm} V</span></label>
+        <input type="range" id="s_Vm" min="10" max="300" step="5" value="${state.Vm}"></div>
+      <div class="field"><label>Frequency (visual speed) <span class="v" id="v_f">${state.freqVisual}</span></label>
+        <input type="range" id="s_f" min="1" max="10" step="1" value="${state.freqVisual}"></div>
+      <div class="field"><label>Load Resistance (R) <span class="v" id="v_R">${state.R} Ω</span></label>
+        <input type="range" id="s_R" min="10" max="1000" step="10" value="${state.R}"></div>`;
+    document.getElementById('s_Vm').addEventListener('input', e=>{
+      state.Vm = parseFloat(e.target.value); document.getElementById('v_Vm').textContent = state.Vm+' V';
+    });
+    document.getElementById('s_f').addEventListener('input', e=>{
+      state.freqVisual = parseFloat(e.target.value); document.getElementById('v_f').textContent = state.freqVisual;
+    });
+    document.getElementById('s_R').addEventListener('input', e=>{
+      state.R = parseFloat(e.target.value); document.getElementById('v_R').textContent = state.R+' Ω';
+    });
+  }
+
+  // ---------- Physics ----------
+  function calc(){
+    const Vm = state.Vm, R = state.R;
+    if (mode==='half'){
+      const Vdc = Vm/Math.PI;
+      const Vrms = Vm/2;
+      const ripple = Math.sqrt(Math.pow(Vrms/Vdc,2)-1);
+      const efficiency = Math.pow(Vdc/Vrms,2)*100;
+      const Idc = Vdc/R;
+      const PIV = Vm;
+      return { Vdc, Vrms, ripple, efficiency, Idc, PIV, Vpeak:Vm };
+    } else {
+      const Vdc = 2*Vm/Math.PI;
+      const Vrms = Vm/Math.sqrt(2);
+      const ripple = Math.sqrt(Math.pow(Vrms/Vdc,2)-1);
+      const efficiency = Math.pow(Vdc/Vrms,2)*100;
+      const Idc = Vdc/R;
+      const PIV = Vm;
+      return { Vdc, Vrms, ripple, efficiency, Idc, PIV, Vpeak:Vm };
+    }
+  }
+
+  // Standard capacitor-filter ripple approximation: Vr(pp) = Idc / (k*f*C), k=1 half-wave, k=2 full-wave
+  function calcFilter(){
+    const Vm=state.Vm, R=state.R, C=state.C*1e-6, f=state.freqReal;
+    const k = state.filterType==='full' ? 2 : 1;
+    const rippleFreq = k*f;
+    const Idc = Vm/R; // approx, since filtered Vdc stays close to Vm
+    let VrPP = Idc/(rippleFreq*C);
+    VrPP = Math.min(VrPP, Vm*0.95); // clamp — the linear approximation only holds for small ripple
+    const Vdc = Vm - VrPP/2;
+    const rippleFactor = (VrPP/Math.sqrt(12)) / Vdc; // approx RMS of triangular ripple / Vdc
+    const RC = R*C;
+    const period = 1/rippleFreq;
+    return { VrPP, Vdc, rippleFactor, RC, period, rippleFreq };
+  }
+
+  function renderReadouts(){
+    if (mode==='filter'){
+      const r = calcFilter();
+      readoutsBox.innerHTML = `
+        <div class="readout"><div class="lbl">Ripple Voltage (peak-to-peak)</div><div class="val">${r.VrPP.toFixed(2)} V</div></div>
+        <div class="readout"><div class="lbl">Smoothed DC Output</div><div class="val">${r.Vdc.toFixed(2)} V</div></div>
+        <div class="readout"><div class="lbl">Ripple Factor</div><div class="val">${r.rippleFactor.toFixed(4)}</div></div>
+        <div class="readout"><div class="lbl">Time Constant (RC)</div><div class="val">${(r.RC*1000).toFixed(2)} ms</div></div>
+        <div class="readout wide"><div class="lbl">Formula</div><div class="val" style="font-size:11.5px;">Vr(pp) ≈ Idc / (k·f·C) — k=2 for full-wave (ripple frequency doubles)</div></div>
+        <div class="readout wide"><div class="lbl">Tip</div><div class="val" style="font-size:11.5px;">Bigger C (or bigger R) → smaller ripple → smoother DC. This is why full-wave + filter is the standard power-supply combination.</div></div>
+      `;
+      return;
+    }
+    const r = calc();
+    readoutsBox.innerHTML = `
+      <div class="readout"><div class="lbl">DC (Average) Output</div><div class="val">${r.Vdc.toFixed(2)} V</div></div>
+      <div class="readout"><div class="lbl">RMS Output</div><div class="val">${r.Vrms.toFixed(2)} V</div></div>
+      <div class="readout"><div class="lbl">Ripple Factor</div><div class="val">${r.ripple.toFixed(3)}</div></div>
+      <div class="readout"><div class="lbl">Rectification Efficiency</div><div class="val">${r.efficiency.toFixed(1)}%</div></div>
+      <div class="readout"><div class="lbl">DC Load Current</div><div class="val">${(r.Idc*1000).toFixed(1)} mA</div></div>
+      <div class="readout"><div class="lbl">Peak Inverse Voltage (PIV)</div><div class="val">${r.PIV.toFixed(1)} V</div></div>
+      <div class="readout wide"><div class="lbl">Formula</div><div class="val" style="font-size:11.5px;">${mode==='half' ? 'Vdc = Vm/π   ·   Vrms = Vm/2' : 'Vdc = 2Vm/π   ·   Vrms = Vm/√2'}</div></div>
+    `;
+  }
+
+
+  // ---------- Circuit drawing helpers ----------
+  // Exact-match diode symbol for the reference diagram — always solid black, no glow/colour-state
+  function drawDiodeExact(x, y, angle, label){
+    cctx.save();
+    cctx.translate(x,y);
+    cctx.rotate(angle);
+    const size = 15;
+    cctx.strokeStyle = '#111111';
+    cctx.fillStyle = '#111111';
+    cctx.lineWidth = 2.4;
+    cctx.beginPath();
+    cctx.moveTo(-size,-size*0.7);
+    cctx.lineTo(-size, size*0.7);
+    cctx.lineTo(size, 0);
+    cctx.closePath();
+    cctx.fill();
+    cctx.beginPath();
+    cctx.moveTo(size,-size*0.7);
+    cctx.lineTo(size, size*0.7);
+    cctx.stroke();
+    cctx.restore();
+    if (label){
+      cctx.font='600 11px JetBrains Mono, monospace';
+      cctx.fillStyle = 'rgba(30,30,30,0.9)';
+      cctx.textAlign='center';
+      cctx.fillText(label, x, y + (angle===0? -26 : (angle===Math.PI? 26: -26)));
+    }
+  }
+
+  function drawDiode(x, y, angle, forwardBiased, label){
+    cctx.save();
+    cctx.translate(x,y);
+    cctx.rotate(angle);
+    const size = 15;
+    if (forwardBiased){ cctx.shadowColor='#5fd0a3'; cctx.shadowBlur=14; }
+    cctx.strokeStyle = forwardBiased ? '#5fd0a3' : 'rgba(138,147,184,0.5)';
+    cctx.fillStyle = forwardBiased ? '#5fd0a3' : 'rgba(138,147,184,0.5)';
+    cctx.lineWidth = 2.2;
+    // triangle
+    cctx.beginPath();
+    cctx.moveTo(-size,-size*0.7);
+    cctx.lineTo(-size, size*0.7);
+    cctx.lineTo(size, 0);
+    cctx.closePath();
+    cctx.fill();
+    // bar
+    cctx.beginPath();
+    cctx.moveTo(size,-size*0.7);
+    cctx.lineTo(size, size*0.7);
+    cctx.stroke();
+    cctx.shadowBlur=0;
+    cctx.restore();
+    if (label){
+      cctx.font='600 11px JetBrains Mono, monospace';
+      cctx.fillStyle = forwardBiased ? '#5fd0a3' : 'rgba(138,147,184,0.6)';
+      cctx.textAlign='center';
+      cctx.save();
+      cctx.translate(x,y);
+      cctx.rotate(0);
+      cctx.fillText(label, 0, angle===0? -26 : (angle===Math.PI? 26: -26));
+      cctx.restore();
+    }
+  }
+
+  function drawWire(x1,y1,x2,y2,active){
+    if (active){ cctx.shadowColor='rgba(232,207,122,0.6)'; cctx.shadowBlur=6; }
+    cctx.strokeStyle = active ? 'rgba(232,207,122,0.9)' : 'rgba(138,147,184,0.35)';
+    cctx.lineWidth = active?2.6:1.5;
+    cctx.beginPath(); cctx.moveTo(x1,y1); cctx.lineTo(x2,y2); cctx.stroke();
+    cctx.shadowBlur=0;
+
+    // explicit direction arrowhead at the midpoint, showing current flow direction (like the whiteboard's → ←)
+    if (active){
+      const mx=(x1+x2)/2, my=(y1+y2)/2;
+      const ang = Math.atan2(y2-y1, x2-x1);
+      const ah=7;
+      cctx.fillStyle='#ffe6a8';
+      cctx.beginPath();
+      cctx.moveTo(mx+ah*Math.cos(ang), my+ah*Math.sin(ang));
+      cctx.lineTo(mx-ah*Math.cos(ang-0.5), my-ah*Math.sin(ang-0.5));
+      cctx.lineTo(mx-ah*Math.cos(ang+0.5), my-ah*Math.sin(ang+0.5));
+      cctx.closePath(); cctx.fill();
+    }
+  }
+
+  function drawACSource(x,y,phase){
+    cctx.save();
+    cctx.shadowColor='rgba(232,207,122,0.6)'; cctx.shadowBlur=16;
+    cctx.strokeStyle='#e8cf7a'; cctx.lineWidth=2.5;
+    cctx.beginPath(); cctx.arc(x,y,26,0,Math.PI*2); cctx.stroke();
+    cctx.shadowBlur=8;
+    cctx.beginPath();
+    for(let i=-19;i<=19;i++){
+      const yy = y + Math.sin((i/19)*Math.PI*2+phase)*11;
+      if (i===-19) cctx.moveTo(x+i,yy); else cctx.lineTo(x+i,yy);
+    }
+    cctx.stroke();
+    cctx.restore();
+    cctx.font='600 11px JetBrains Mono, monospace'; cctx.fillStyle='rgba(232,207,122,0.9)'; cctx.textAlign='center';
+    cctx.fillText(state.Vm+'V AC', x, y-38);
+  }
+
+  // Exact-match AC source symbol — plain black circle + sine, for the white-background reference diagram
+  function drawACSourceExact(x,y,phase){
+    cctx.strokeStyle='#1a1a1a'; cctx.lineWidth=2;
+    cctx.beginPath(); cctx.arc(x,y,26,0,Math.PI*2); cctx.stroke();
+    cctx.beginPath();
+    for(let i=-19;i<=19;i++){
+      const yy = y + Math.sin((i/19)*Math.PI*2+phase)*11;
+      if (i===-19) cctx.moveTo(x+i,yy); else cctx.lineTo(x+i,yy);
+    }
+    cctx.stroke();
+    cctx.font='600 11px JetBrains Mono, monospace'; cctx.fillStyle='rgba(30,30,30,0.85)'; cctx.textAlign='center';
+    cctx.fillText(state.Vm+'V AC', x, y-38);
+  }
+
+  // Glowing light bulb load — brightness reflects the instantaneous rectified output at this moment
+  function drawBulb(x,y,brightness){
+    const r = 26;
+    cctx.save();
+    if (brightness>0.02){
+      cctx.shadowColor = `rgba(255,220,140,${brightness})`;
+      cctx.shadowBlur = 10+brightness*30;
+    }
+    const glassGrad = cctx.createRadialGradient(x-6,y-8,2,x,y,r);
+    const glow = Math.min(1,brightness);
+    glassGrad.addColorStop(0, `rgba(255,240,200,${0.35+glow*0.6})`);
+    glassGrad.addColorStop(1, `rgba(120,110,70,${0.15+glow*0.25})`);
+    cctx.fillStyle = glassGrad;
+    cctx.beginPath(); cctx.arc(x,y,r,0,Math.PI*2); cctx.fill();
+    cctx.strokeStyle = 'rgba(220,225,240,0.6)'; cctx.lineWidth=1.5;
+    cctx.stroke();
+
+    // filament (zig-zag), glows brighter with current brightness
+    cctx.shadowBlur = brightness*18;
+    cctx.strokeStyle = `rgba(255,${200+Math.round(40*glow)},${120+Math.round(80*glow)},${0.5+glow*0.5})`;
+    cctx.lineWidth = 1.8;
+    cctx.beginPath();
+    cctx.moveTo(x-10,y+10); cctx.lineTo(x-4,y-8); cctx.lineTo(x+4,y+8); cctx.lineTo(x+10,y-10);
+    cctx.stroke();
+    cctx.restore();
+
+    cctx.font='11px JetBrains Mono, monospace'; cctx.fillStyle='rgba(138,147,184,0.75)'; cctx.textAlign='center';
+    cctx.fillText('Load (lamp)', x, y+r+18);
+  }
+
+  function drawCurrentDots(x1,y1,x2,y2,active,phaseOffset,color){
+    if (!active) return;
+    const dotColor = color || '#ffe6a8';
+    const n = 4;
+    cctx.save();
+    cctx.shadowColor=dotColor; cctx.shadowBlur=8;
+    for(let i=0;i<n;i++){
+      const t = ((animT*0.6+phaseOffset+i/n)%1);
+      const x = x1+(x2-x1)*t, y = y1+(y2-y1)*t;
+      cctx.fillStyle=dotColor;
+      cctx.beginPath(); cctx.arc(x,y,3.4,0,Math.PI*2); cctx.fill();
+    }
+    cctx.restore();
+  }
+
+  function drawBackgroundGrid(W,H){
+    cctx.strokeStyle='rgba(138,147,184,0.06)'; cctx.lineWidth=1;
+    for(let x=0;x<W;x+=30){ cctx.beginPath(); cctx.moveTo(x,0); cctx.lineTo(x,H); cctx.stroke(); }
+    for(let y=0;y<H;y+=30){ cctx.beginPath(); cctx.moveTo(0,y); cctx.lineTo(W,y); cctx.stroke(); }
+  }
+
+  // ---------- Circuit diagrams ----------
+  function drawHalfWaveCircuit(){
+    const W=circuitCanvas.width, H=circuitCanvas.height;
+    cctx.clearRect(0,0,W,H);
+    drawBackgroundGrid(W,H);
+    const phase = animT*state.freqVisual*1.2;
+    const vNow = Math.sin(phase);
+    const conducting = vNow>0;
+    const brightness = conducting ? vNow : 0;
+
+    const srcX=100, srcY=H*0.5;
+    const diodeX=W*0.42, diodeY=H*0.28;
+    const bulbX=W*0.72, bulbY=H*0.28;
+    const botY = H*0.66;
+
+    drawACSource(srcX,srcY,phase);
+
+    drawWire(srcX+26,srcY,srcX+26,diodeY, conducting);
+    drawWire(srcX+26,diodeY,diodeX-17,diodeY, conducting);
+    drawDiode(diodeX,diodeY,0,conducting,'D1');
+    drawWire(diodeX+17,diodeY,bulbX,bulbY-26, conducting);
+    drawBulb(bulbX,bulbY,brightness);
+    drawWire(bulbX,bulbY+26, bulbX, botY, conducting);
+    drawWire(bulbX,botY,srcX-26,botY,conducting);
+    drawWire(srcX-26,botY,srcX-26,srcY,conducting);
+
+    drawCurrentDots(srcX+26,srcY,srcX+26,diodeY,conducting,0);
+    drawCurrentDots(srcX+26,diodeY,diodeX-17,diodeY,conducting,0.3);
+    drawCurrentDots(diodeX+17,diodeY,bulbX,bulbY-26,conducting,0.6);
+    drawCurrentDots(bulbX,botY,srcX-26,botY,conducting,0.15);
+
+    cctx.font='600 12px Poppins'; cctx.fillStyle = conducting?'#5fd0a3':'#e0715f'; cctx.textAlign='center';
+    cctx.fillText(conducting ? 'Diode FORWARD biased — conducting' : 'Diode REVERSE biased — blocked', W/2, H-16);
+  }
+
+  function drawZigzagResistor(x,y,len,active,vertical){
+    cctx.save();
+    if (active){ cctx.shadowColor='rgba(232,207,122,0.6)'; cctx.shadowBlur=8; }
+    cctx.strokeStyle = active ? '#e8cf7a' : 'rgba(138,147,184,0.5)';
+    cctx.lineWidth = 2.2;
+    const zigs = 6, amp = 10;
+    cctx.beginPath();
+    if (vertical){
+      cctx.moveTo(x, y-len/2);
+      for(let i=1;i<=zigs;i++){
+        const yy = y-len/2 + (len/zigs)*i;
+        const xx = x + (i%2===0 ? amp : -amp);
+        cctx.lineTo(xx, yy-(len/zigs)/2);
+        cctx.lineTo(x, yy);
+      }
+    } else {
+      cctx.moveTo(x-len/2, y);
+      for(let i=1;i<=zigs;i++){
+        const xx = x-len/2 + (len/zigs)*i;
+        const yy = y + (i%2===0 ? amp : -amp);
+        cctx.lineTo(xx-(len/zigs)/2, yy);
+        cctx.lineTo(xx, y);
+      }
+    }
+    cctx.stroke();
+    cctx.restore();
+    cctx.font='11px JetBrains Mono, monospace'; cctx.fillStyle='rgba(138,147,184,0.75)'; cctx.textAlign='center';
+    cctx.fillText('R (load)', vertical? x+34 : x, vertical? y : y+26);
+  }
+
+  // small "hop" bump where one wire crosses another without electrically connecting
+  function drawWireHop(x,y,horizontal){
+    cctx.strokeStyle='rgba(138,147,184,0.35)'; cctx.lineWidth=1.5;
+    cctx.beginPath();
+    if (horizontal) cctx.arc(x,y,9,Math.PI,0,false);
+    else cctx.arc(x,y,9,Math.PI*1.5,Math.PI*0.5,false);
+    cctx.stroke();
+  }
+
+  function drawWireExact(x1,y1,x2,y2){
+    cctx.strokeStyle = '#1a1a1a';
+    cctx.lineWidth = 1.8;
+    cctx.beginPath(); cctx.moveTo(x1,y1); cctx.lineTo(x2,y2); cctx.stroke();
+  }
+
+  function drawFullWaveCircuit(){
+    const W=circuitCanvas.width, H=circuitCanvas.height;
+    cctx.clearRect(0,0,W,H);
+    cctx.fillStyle = '#ffffff';
+    cctx.fillRect(0,0,W,H);
+    const phase = animT*state.freqVisual*1.2;
+    const vNow = Math.sin(phase);
+    const positiveHalf = vNow>0;
+
+    const srcX=95, srcY=H*0.42;
+    const cx=W*0.5, cy=H*0.42;
+    const s=100; // half-diagonal of the diamond
+
+    const topV = {x:cx, y:cy-s};
+    const rightV = {x:cx+s, y:cy};
+    const bottomV = {x:cx, y:cy+s};
+    const leftV = {x:cx-s, y:cy};
+
+    drawACSourceExact(srcX,srcY,phase);
+
+    const topWireY = H*0.09;
+    const hopWireY = leftV.y; // source's bottom wire runs at the same height as the left vertex
+    const returnLowY = H*0.86;
+    const resX = W*0.87, resY = cy;
+
+    // top wire: source -> right along the very top -> down into top vertex
+    drawWireExact(srcX, srcY-30, srcX, topWireY);
+    drawWireExact(srcX, topWireY, topV.x, topWireY);
+    drawWireExact(topV.x, topWireY, topV.x, topV.y);
+
+    // bottom wire: source -> right, straight into the left vertex (this wire "hops" over the return wire below)
+    drawWireExact(srcX, srcY+30, srcX, hopWireY);
+    drawWireExact(srcX, hopWireY, leftV.x, hopWireY);
+
+    // return wire from bottom vertex: down, then left under the hop, then further down, then right to resistor
+    const hopX = (srcX+leftV.x)/2 - 40;
+    drawWireExact(bottomV.x, bottomV.y, bottomV.x, returnLowY-40);
+    drawWireExact(bottomV.x, returnLowY-40, hopX, returnLowY-40);
+    drawWireHop(hopX, hopWireY, true); // bump on the source-to-left-vertex wire, where this return path crosses beneath it
+    drawWireExact(hopX, returnLowY-40, hopX, returnLowY);
+    drawWireExact(hopX, returnLowY, resX, returnLowY);
+    drawWireExact(resX, returnLowY, resX, resY+42);
+
+    // diamond outline (thin dark-olive-green, matching the reference — NOT filled)
+    cctx.strokeStyle = '#5a6b1e';
+    cctx.lineWidth = 1.8;
+    cctx.beginPath();
+    cctx.moveTo(topV.x,topV.y); cctx.lineTo(rightV.x,rightV.y); cctx.lineTo(bottomV.x,bottomV.y); cctx.lineTo(leftV.x,leftV.y);
+    cctx.closePath();
+    cctx.stroke();
+
+    // diodes drawn directly on each edge — always solid black, matching the reference exactly
+    const d1x=(leftV.x+topV.x)/2, d1y=(leftV.y+topV.y)/2;
+    const angle1 = Math.atan2(topV.y-leftV.y, topV.x-leftV.x);
+    drawDiodeExact(d1x,d1y,angle1,'D1');
+
+    const d2x=(rightV.x+topV.x)/2, d2y=(rightV.y+topV.y)/2;
+    const angle2 = Math.atan2(topV.y-rightV.y, topV.x-rightV.x);
+    drawDiodeExact(d2x,d2y,angle2,'D2');
+
+    const d3x=(bottomV.x+leftV.x)/2, d3y=(bottomV.y+leftV.y)/2;
+    const angle3 = Math.atan2(leftV.y-bottomV.y, leftV.x-bottomV.x);
+    drawDiodeExact(d3x,d3y,angle3,'D3');
+
+    const d4x=(bottomV.x+rightV.x)/2, d4y=(bottomV.y+rightV.y)/2;
+    const angle4 = Math.atan2(rightV.y-bottomV.y, rightV.x-bottomV.x);
+    drawDiodeExact(d4x,d4y,angle4,'D4');
+
+    // right vertex -> load resistor
+    drawWireExact(rightV.x, rightV.y, resX, rightV.y);
+    drawWireExact(resX, rightV.y, resX, resY-42);
+    drawZigzagResistor(resX, resY, 84, true, true);
+
+    // animated current-flow dots (informational overlay only — doesn't change the diagram's appearance)
+    drawCurrentDots(srcX, topWireY, topV.x, topWireY, positiveHalf, 0, '#c0392b');
+    drawCurrentDots(rightV.x, rightV.y, resX, rightV.y, positiveHalf, 0.4, '#c0392b');
+    drawCurrentDots(hopX, returnLowY, resX, returnLowY, true, 0.2, '#c0392b');
+
+    cctx.font='600 11px JetBrains Mono, monospace'; cctx.fillStyle='rgba(60,60,60,0.85)'; cctx.textAlign='center';
+    cctx.fillText('+', rightV.x-16, rightV.y-6);
+    cctx.fillText('−', bottomV.x, bottomV.y+22);
+
+    cctx.font='600 12px Poppins'; cctx.fillStyle = '#1e7d4a'; cctx.textAlign='center';
+    cctx.fillText(positiveHalf ? 'D1 & D4 conducting (positive half-cycle)' : 'D2 & D3 conducting (negative half-cycle)', W/2, H-16);
+  }
+
+  // ---------- Waveform drawing ----------
+  function drawFilterCircuit(){
+    const W=circuitCanvas.width, H=circuitCanvas.height;
+    cctx.clearRect(0,0,W,H);
+    drawBackgroundGrid(W,H);
+    const rf = calcFilter();
+    const t = (animT % rf.period)/rf.period;
+    // approximate instantaneous smoothed voltage: quick charge to peak, slow exponential-ish discharge
+    const instV = 1 - (rf.VrPP/state.Vm)*t;
+    const brightness = Math.max(0.3, instV);
+
+    const srcX=90, srcY=H*0.5;
+    const rectX=W*0.4;
+    const capX=W*0.58, capY=H*0.5;
+    const bulbX=W*0.82, bulbY=H*0.28;
+
+    drawACSource(srcX,srcY,animT*3);
+
+    // simplified rectifier block
+    cctx.strokeStyle='rgba(138,147,184,0.5)'; cctx.lineWidth=1.5;
+    cctx.strokeRect(rectX-40,H*0.28,80,H*0.44);
+    cctx.font='600 11px JetBrains Mono, monospace'; cctx.fillStyle='rgba(138,147,184,0.8)'; cctx.textAlign='center';
+    cctx.fillText(state.filterType==='full'?'Bridge':'Diode', rectX, H*0.5-6);
+    cctx.fillText('Rectifier', rectX, H*0.5+10);
+
+    drawWire(srcX+26,srcY,rectX-40,H*0.38,true);
+    drawWire(srcX-26,srcY,srcX-26,H*0.62,true);
+    drawWire(srcX-26,H*0.62,rectX-40,H*0.62,true);
+
+    // capacitor symbol (two parallel plates) across the rectifier output, before load
+    drawWire(rectX+40,H*0.38, capX, H*0.32, true);
+    drawWire(rectX+40,H*0.62, capX, H*0.68, true);
+    cctx.save();
+    cctx.shadowColor='rgba(232,207,122,0.5)'; cctx.shadowBlur=8;
+    cctx.strokeStyle='#e8cf7a'; cctx.lineWidth=3;
+    cctx.beginPath(); cctx.moveTo(capX-14,H*0.32-14); cctx.lineTo(capX+14,H*0.32-14); cctx.stroke();
+    cctx.beginPath(); cctx.moveTo(capX-14,H*0.68+14); cctx.lineTo(capX+14,H*0.68+14); cctx.stroke();
+    cctx.restore();
+    drawWire(capX,H*0.32-14,capX,H*0.32,true);
+    drawWire(capX,H*0.68+14,capX,H*0.68,true);
+    cctx.font='11px JetBrains Mono, monospace'; cctx.fillStyle='rgba(232,207,122,0.85)'; cctx.textAlign='center';
+    cctx.fillText('C = '+state.C+'µF', capX, H*0.32-26);
+
+    // to load bulb
+    drawWire(capX,H*0.32,bulbX,bulbY-26,true);
+    drawBulb(bulbX,bulbY,brightness);
+    drawWire(bulbX,bulbY+26,bulbX,H*0.68,true);
+    drawWire(bulbX,H*0.68,capX,H*0.68,true);
+
+    cctx.font='600 12px Poppins'; cctx.fillStyle='#5fd0a3'; cctx.textAlign='center';
+    cctx.fillText('Capacitor charges at each peak, discharges slowly through R — smoothing the ripple', W/2, H-16);
+  }
+
+  function drawWaveforms(){
+    const W=waveCanvas.width, H=waveCanvas.height;
+    wctx.clearRect(0,0,W,H);
+
+    if (mode==='filter'){
+      const rf = calcFilter();
+      const bandSplitY = H*0.5;
+      const topMidY = H*0.28, topAmp = H*0.2;
+      const botBaseY = H*0.94, botAmp = H*0.36;
+
+      wctx.strokeStyle='rgba(138,147,184,0.15)'; wctx.lineWidth=1;
+      wctx.beginPath(); wctx.moveTo(0,bandSplitY); wctx.lineTo(W,bandSplitY); wctx.stroke();
+
+      // top: raw rectified pulses (before filter) — faint reference
+      wctx.strokeStyle='rgba(232,113,95,0.55)'; wctx.lineWidth=1.8;
+      wctx.beginPath();
+      const k = state.filterType==='full' ? 2 : 1;
+      for(let x=0;x<W;x++){
+        const theta = (x/W)*4*Math.PI*k - animT*3;
+        const s = Math.sin(theta);
+        const outVal = state.filterType==='full' ? Math.abs(Math.sin(theta/k)) : Math.max(0,Math.sin(theta/k));
+        const y = (topMidY+topAmp*0.5) - outVal*topAmp;
+        if (x===0) wctx.moveTo(x,y); else wctx.lineTo(x,y);
+      }
+      wctx.stroke();
+      wctx.font='10px JetBrains Mono, monospace'; wctx.fillStyle='rgba(232,113,95,0.8)'; wctx.textAlign='left';
+      wctx.fillText('Raw rectified output (before filter — before capacitor)', 10, topMidY-topAmp-8);
+
+      // bottom: smoothed/filtered output — sawtooth ripple pattern
+      wctx.strokeStyle='#5fd0a3'; wctx.lineWidth=2.6;
+      wctx.shadowColor='rgba(95,208,163,0.5)'; wctx.shadowBlur=6;
+      wctx.beginPath();
+      const cyclesShown = 4;
+      const cycleWidth = W/cyclesShown;
+      for(let x=0;x<W;x++){
+        const cyclePos = (x % cycleWidth)/cycleWidth; // 0..1 within one ripple period
+        const ripplePeak = 1;
+        const rippleFrac = rf.VrPP/state.Vm;
+        const val = ripplePeak - rippleFrac*cyclePos; // charges instantly at 0, decays across the cycle
+        const y = botBaseY - val*botAmp;
+        if (x===0) wctx.moveTo(x,y); else wctx.lineTo(x,y);
+      }
+      wctx.stroke();
+      wctx.shadowBlur=0;
+      wctx.font='10px JetBrains Mono, monospace'; wctx.fillStyle='rgba(95,208,163,0.85)'; wctx.textAlign='left';
+      wctx.fillText('Smoothed output (after capacitor filter — much less fluctuation)', 10, bandSplitY+16);
+      return;
+    }
+
+    // two clean bands: top band for AC input, bottom band for rectified output
+    const bandSplitY = H*0.5;
+    const inMidY = H*0.26, inAmp = H*0.19;
+    const outBaseY = H*0.94, outAmp = H*0.36;
+
+    // band divider
+    wctx.strokeStyle='rgba(138,147,184,0.15)'; wctx.lineWidth=1;
+    wctx.beginPath(); wctx.moveTo(0,bandSplitY); wctx.lineTo(W,bandSplitY); wctx.stroke();
+    // zero-lines for each band
+    wctx.strokeStyle='rgba(138,147,184,0.12)';
+    wctx.beginPath(); wctx.moveTo(0,inMidY); wctx.lineTo(W,inMidY); wctx.stroke();
+    wctx.beginPath(); wctx.moveTo(0,outBaseY); wctx.lineTo(W,outBaseY); wctx.stroke();
+
+    // input AC waveform (fully contained in top band)
+    wctx.strokeStyle='#e8cf7a'; wctx.lineWidth=2.2;
+    wctx.shadowColor='rgba(232,207,122,0.5)'; wctx.shadowBlur=6;
+    wctx.beginPath();
+    for(let x=0;x<W;x++){
+      const theta = (x/W)*4*Math.PI - animT*state.freqVisual*1.2;
+      const y = inMidY - Math.sin(theta)*inAmp;
+      if (x===0) wctx.moveTo(x,y); else wctx.lineTo(x,y);
+    }
+    wctx.stroke();
+    wctx.shadowBlur=0;
+
+    // rectified output waveform (fully contained in bottom band, rising up from its own baseline)
+    wctx.strokeStyle='#5fd0a3'; wctx.lineWidth=2.6;
+    wctx.shadowColor='rgba(95,208,163,0.5)'; wctx.shadowBlur=6;
+    wctx.beginPath();
+    for(let x=0;x<W;x++){
+      const theta = (x/W)*4*Math.PI - animT*state.freqVisual*1.2;
+      const s = Math.sin(theta);
+      let outVal;
+      if (mode==='half'){
+        outVal = s>0 ? s : 0;
+      } else {
+        outVal = Math.abs(s);
+      }
+      const y = outBaseY - outVal*outAmp;
+      if (x===0) wctx.moveTo(x,y); else wctx.lineTo(x,y);
+    }
+    wctx.stroke();
+    wctx.shadowBlur=0;
+
+    wctx.font='10px JetBrains Mono, monospace'; wctx.fillStyle='rgba(232,207,122,0.85)'; wctx.textAlign='left';
+    wctx.fillText('AC input (oscillates + and −)', 10, inMidY-inAmp-8);
+    wctx.fillStyle='rgba(95,208,163,0.85)';
+    wctx.fillText('Rectified output (never goes negative)', 10, bandSplitY+16);
+  }
+
+  const titles = { half:'Half-Wave Rectifier — 1 Diode', full:'Full-Wave Bridge Rectifier — 4 Diodes', filter:'Capacitor Filter Circuit — Smoothing the Output' };
+  const notes = {
+    half:'Only ONE half-cycle passes through the diode; the other half is blocked completely — the output has gaps.',
+    full:'Both half-cycles are converted to positive pulses using two pairs of diodes that alternate conduction — no gaps, smoother DC, higher efficiency.',
+    filter:'A capacitor across the load charges up to the peak voltage, then discharges slowly through R between pulses — this fills in the gaps and smooths the fluctuation (ripple).'
+  };
+
+  function render(){
+    vizTitle.textContent = mode==='filter' ? titles.filter : ('Circuit Diagram — ' + titles[mode]);
+    vizNote.innerHTML = '<b>Note:</b> ' + notes[mode];
+    renderReadouts();
+    if (mode==='half') drawHalfWaveCircuit();
+    else if (mode==='full') drawFullWaveCircuit();
+    else drawFilterCircuit();
+    drawWaveforms();
+  }
+
+  modeTabs.forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      modeTabs.forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      mode = tab.dataset.mode;
+      renderControls();
+      render();
+    });
+  });
+
+  function loop(){
+    animT += 0.02;
+    render();
+    requestAnimationFrame(loop);
+  }
+
+  renderControls();
+  loop();
+})();
+</script>
+</body>
+</html>

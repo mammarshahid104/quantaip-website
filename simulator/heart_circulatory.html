@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>QUANTAIP Simulator — Human Heart &amp; Circulatory System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-deep:#060c1c; --navy:#0b1530; --navy-panel:#101c3d; --navy-line:#1e2c54;
+    --gold:#d4af37; --gold-soft:#e8cf7a; --text:#eef1fb; --text-dim:#8a93b8;
+    --good:#5fd0a3; --red:#e0715f; --blue:#6fa8dc; --purple:#c084fc;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: radial-gradient(1200px 600px at 15% -10%, #12234f 0%, transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, #14183a 0%, transparent 55%), var(--navy-deep);
+    color:var(--text); font-family:'Poppins',sans-serif; min-height:100vh;
+    display:flex; flex-direction:column; align-items:center; padding:28px 16px 60px;
+  }
+  .header{ width:100%; max-width:1100px; display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom:22px; flex-wrap:wrap; gap:8px; border-bottom:1px solid var(--navy-line); padding-bottom:18px; }
+  .brand{ display:flex; align-items:baseline; gap:10px; }
+  .brand .mark{ font-weight:700; letter-spacing:0.14em; font-size:13px; color:var(--gold); text-transform:uppercase; }
+  .brand .name{ font-weight:300; font-size:22px; letter-spacing:0.01em; }
+  .brand .name b{ font-weight:600; color:var(--gold-soft); }
+  .exp-label{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); letter-spacing:0.08em; }
+
+  .container{ width:100%; max-width:1100px; }
+
+  .mode-tabs{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px; }
+  .mode-tab{
+    font-family:'JetBrains Mono',monospace; font-size:11.5px; letter-spacing:0.02em;
+    padding:9px 16px; border-radius:999px; border:1px solid var(--navy-line);
+    background:var(--navy-deep); color:var(--text-dim); cursor:pointer;
+  }
+  .mode-tab:hover{ color:var(--text); border-color:#33407a; }
+  .mode-tab.active{ background:var(--gold); color:#191204; border-color:var(--gold); font-weight:600; }
+
+  .layout{ display:grid; grid-template-columns:1.4fr 1fr; gap:20px; }
+  @media (max-width:900px){ .layout{ grid-template-columns:1fr; } }
+
+  .panel{
+    background:linear-gradient(180deg, var(--navy-panel), var(--navy));
+    border:1px solid var(--navy-line); border-radius:14px; padding:20px; margin-bottom:20px;
+  }
+  .panel h2{ margin:0 0 14px; font-size:12px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-dim); }
+
+  #mainCanvas{ width:100%; aspect-ratio:16/12; border-radius:10px; background:linear-gradient(180deg, #0a1330 0%, #060c1c 100%); border:1px solid var(--navy-line); display:block; }
+
+  .field{ display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
+  .field label{ display:flex; justify-content:space-between; font-size:12.5px; color:var(--text-dim); }
+  .field label span.v{ font-family:'JetBrains Mono',monospace; color:var(--gold-soft); }
+  input[type=range]{ -webkit-appearance:none; width:100%; height:4px; border-radius:2px; background:var(--navy-line); outline:none; }
+  input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:15px; height:15px; border-radius:50%; background:var(--gold); cursor:pointer; border:2px solid var(--navy-deep); }
+
+  .legend{ display:flex; gap:16px; justify-content:center; margin-top:10px; font-size:11px; color:var(--text-dim); font-family:'JetBrains Mono',monospace; flex-wrap:wrap; }
+  .legend span{ display:inline-flex; align-items:center; gap:5px; }
+  .legend .dot{ width:12px; height:12px; border-radius:3px; display:inline-block; }
+
+  .readouts{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+  .readout{ background:var(--navy-deep); border:1px solid var(--navy-line); border-radius:8px; padding:10px 12px; }
+  .readout .lbl{ font-size:10px; color:var(--text-dim); letter-spacing:0.06em; text-transform:uppercase; }
+  .readout .val{ font-family:'JetBrains Mono',monospace; font-size:15px; color:var(--gold-soft); margin-top:4px; }
+  .readout.wide{ grid-column:1/-1; }
+
+  .note{ font-size:11.5px; color:var(--text-dim); line-height:1.6; margin-top:14px; border-top:1px solid var(--navy-line); padding-top:14px; }
+  .note b{ color:var(--gold-soft); font-weight:600; }
+
+  footer{ margin-top:6px; font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--text-dim); letter-spacing:0.06em; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">
+    <span class="mark">QUANTAIP</span>
+    <span class="name">Simulator — <b>Human Heart &amp; Circulatory System</b></span>
+  </div>
+  <div class="exp-label">EXPERIMENT / CARDIOVASCULAR SYSTEM</div>
+</div>
+
+<div class="container">
+
+  <div class="mode-tabs" id="modeTabs">
+    <div class="mode-tab active" data-mode="anatomy">Heart Anatomy</div>
+    <div class="mode-tab" data-mode="cycle">Cardiac Cycle (Systole/Diastole)</div>
+    <div class="mode-tab" data-mode="circulation">Double Circulation</div>
+    <div class="mode-tab" data-mode="ecg">ECG &amp; Heart Rate</div>
+  </div>
+
+  <div class="layout">
+
+    <div class="panel">
+      <h2 id="vizTitle">Visualization</h2>
+      <canvas id="mainCanvas" width="720" height="540"></canvas>
+      <div class="legend" id="legendBox"></div>
+      <div class="note" id="vizNote"></div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h2>Parameters</h2>
+        <div id="controlsBox"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Readouts</h2>
+        <div class="readouts" id="readoutsBox"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>QUANTAIP EDUOS · VIRTUAL LAB MODULE · PROTOTYPE BUILD</footer>
+
+<script>
+(function(){
+  const canvas = document.getElementById('mainCanvas');
+  const ctx = canvas.getContext('2d');
+  const controlsBox = document.getElementById('controlsBox');
+  const readoutsBox = document.getElementById('readoutsBox');
+  const legendBox = document.getElementById('legendBox');
+  const vizTitle = document.getElementById('vizTitle');
+  const vizNote = document.getElementById('vizNote');
+  const modeTabs = document.querySelectorAll('.mode-tab');
+
+  const OXY = '#e0524a';   // oxygenated blood (bright red)
+  const DEOXY = '#3d6fb5'; // deoxygenated blood (blue)
+
+  let mode = 'anatomy';
+  let animT = 0;
+
+  const state = { bpm: 72 };
+
+  function beatPhase(){
+    const period = 60/state.bpm; // seconds per beat, mapped to animT units (we treat animT as seconds)
+    const t = (animT % period)/period; // 0..1 within one cardiac cycle
+    return t;
+  }
+
+  // systole (contraction) roughly first 35% of cycle, diastole (relaxation) the rest — simplified teaching model
+  function isVentricularSystole(t){ return t < 0.35; }
+  function isAtrialSystole(t){ return t >= 0.85 || t < 0.05; } // atria contract just before ventricles
+
+  function renderControls(){
+    controlsBox.innerHTML = `
+      <div class="field"><label>Heart Rate <span class="v" id="v_bpm">${state.bpm} bpm</span></label>
+        <input type="range" id="s_bpm" min="40" max="180" step="1" value="${state.bpm}"></div>`;
+    document.getElementById('s_bpm').addEventListener('input', e=>{
+      state.bpm = parseFloat(e.target.value); document.getElementById('v_bpm').textContent = state.bpm+' bpm';
+    });
+  }
+
+  function heartRateCategory(bpm){
+    if (bpm<60) return {label:'Bradycardia (below normal)', color:'#6fa8dc'};
+    if (bpm<=100) return {label:'Normal resting range', color:'#5fd0a3'};
+    return {label:'Tachycardia (above normal)', color:'#e0715f'};
+  }
+
+  function renderReadouts(){
+    const t = beatPhase();
+    const cat = heartRateCategory(state.bpm);
+    const cycleLen = 60/state.bpm;
+    const phaseLabel = isVentricularSystole(t) ? 'Ventricular Systole (contracting)' : 'Ventricular Diastole (relaxing)';
+
+    if (mode==='ecg'){
+      readoutsBox.innerHTML = `
+        <div class="readout"><div class="lbl">Heart Rate</div><div class="val" style="color:${cat.color}">${state.bpm} bpm</div></div>
+        <div class="readout"><div class="lbl">Category</div><div class="val" style="color:${cat.color};font-size:12px;">${cat.label}</div></div>
+        <div class="readout"><div class="lbl">Cardiac Cycle Duration</div><div class="val">${cycleLen.toFixed(2)} s</div></div>
+        <div class="readout"><div class="lbl">Cycles per Minute</div><div class="val">${state.bpm}</div></div>
+        <div class="readout wide"><div class="lbl">Typical Blood Pressure</div><div class="val">120 / 80 mmHg (systolic / diastolic)</div></div>
+        <div class="readout wide"><div class="lbl">ECG Waves</div><div class="val" style="font-size:11.5px;">P = atrial depolarization · QRS = ventricular depolarization · T = ventricular repolarization</div></div>
+      `;
+    } else {
+      readoutsBox.innerHTML = `
+        <div class="readout"><div class="lbl">Heart Rate</div><div class="val" style="color:${cat.color}">${state.bpm} bpm</div></div>
+        <div class="readout"><div class="lbl">Current Phase</div><div class="val">${phaseLabel}</div></div>
+        <div class="readout wide"><div class="lbl">Blood Colour Key</div><div class="val" style="font-size:11.5px;">Blue = deoxygenated (returning from body) &nbsp; Red = oxygenated (from lungs, going to body)</div></div>
+        <div class="readout wide"><div class="lbl">Valves</div><div class="val" style="font-size:11.5px;">Tricuspid &amp; Mitral (between atria/ventricles) · Pulmonary &amp; Aortic (ventricle outlets) — all prevent backflow</div></div>
+      `;
+    }
+  }
+
+  function updateLegend(){
+    legendBox.innerHTML = `
+      <span><span class="dot" style="background:${DEOXY}"></span> Deoxygenated blood</span>
+      <span><span class="dot" style="background:${OXY}"></span> Oxygenated blood</span>`;
+  }
+
+  // ---------- Heart Anatomy + Cardiac Cycle drawing ----------
+  function drawHeart(showLabels){
+    const W=canvas.width, H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+    const t = beatPhase();
+    const vSys = isVentricularSystole(t);
+    const aSys = isAtrialSystole(t);
+    const beatScale = vSys ? 0.94 : 1; // whole heart contracts slightly during systole
+    const atriumPulse = aSys ? 0.9 : 1;
+
+    const cx = W*0.5, cy = H*0.5;
+    const heartW = 300, heartH = 340;
+
+    ctx.save();
+    ctx.translate(cx,cy);
+    ctx.scale(beatScale,beatScale);
+    ctx.translate(-cx,-cy);
+
+    // ---- Outer muscular wall (myocardium) — organic heart silhouette, apex tilted left ----
+    const top = cy - heartH*0.36;
+    const bottom = cy + heartH*0.5;
+    const leftX = cx - heartW*0.52;
+    const rightX = cx + heartW*0.46;
+    const apexX = cx - heartW*0.12;
+
+    ctx.beginPath();
+    ctx.moveTo(cx-6, top+heartH*0.1); // dip between the two atrial bulges, where great vessels emerge
+    ctx.bezierCurveTo(cx-heartW*0.16, top-heartH*0.05, leftX+heartW*0.06, top+heartH*0.02, leftX, top+heartH*0.22);
+    ctx.bezierCurveTo(leftX-heartW*0.06, cy-heartH*0.02, leftX+heartW*0.02, bottom-heartH*0.22, apexX, bottom);
+    ctx.bezierCurveTo(cx+heartW*0.06, bottom-heartH*0.2, rightX-heartW*0.02, cy+heartH*0.06, rightX, top+heartH*0.24);
+    ctx.bezierCurveTo(rightX-heartW*0.05, top+heartH*0.04, cx+heartW*0.16, top-heartH*0.04, cx+6, top+heartH*0.1);
+    ctx.closePath();
+
+    const wallGrad = ctx.createRadialGradient(cx-40,cy-60,20,cx,cy,220);
+    wallGrad.addColorStop(0,'#a84848');
+    wallGrad.addColorStop(0.6,'#7d2f2f');
+    wallGrad.addColorStop(1,'#5e2020');
+    ctx.fillStyle = wallGrad;
+    ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,0.35)'; ctx.lineWidth=2;
+    ctx.stroke();
+
+    // ---- Septum (internal dividing wall) ----
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(cx, top+heartH*0.14);
+    ctx.quadraticCurveTo(cx-8, cy, apexX+18, bottom-18);
+    ctx.lineTo(apexX+38, bottom-30);
+    ctx.quadraticCurveTo(cx+14, cy, cx+16, top+heartH*0.16);
+    ctx.closePath();
+    ctx.fillStyle='rgba(0,0,0,0.28)';
+    ctx.fill();
+    ctx.restore();
+
+    // Right side (viewer's LEFT, anatomically the heart's right)
+    const raX = cx-72, raY = top+heartH*0.20;
+    const rvX = cx-58, rvY = cy+heartH*0.10;
+    // Left side (viewer's RIGHT) — left ventricle wall is thicker (pumps to whole body)
+    const laX = cx+70, laY = top+heartH*0.22;
+    const lvX = cx+56, lvY = cy+heartH*0.08;
+
+    // ---- Chambers (cut-away, filled with blood colour) ----
+    function atrium(x,y,scale,color,label,flipAuricle){
+      ctx.save();
+      ctx.translate(x,y); ctx.scale(scale,scale);
+      // main atrial body
+      ctx.beginPath();
+      ctx.ellipse(0,0,46,36,0,0,Math.PI*2);
+      ctx.fillStyle=color; ctx.fill();
+      // auricle (small ear-like pouch) — a classic identifying feature of real atria
+      ctx.beginPath();
+      const ax = flipAuricle? 30:-30;
+      ctx.ellipse(ax,-22,16,20,flipAuricle?0.5:-0.5,0,Math.PI*2);
+      ctx.fill();
+      ctx.strokeStyle='rgba(0,0,0,0.3)'; ctx.lineWidth=1.5; ctx.stroke();
+      ctx.restore();
+      if (showLabels){
+        ctx.font='600 11px JetBrains Mono, monospace'; ctx.fillStyle='rgba(255,255,255,0.9)'; ctx.textAlign='center';
+        ctx.fillText(label, x, y+4);
+      }
+    }
+
+    function ventricle(x,y,rx,ry,scale,color,label,wallThickness){
+      ctx.save();
+      ctx.translate(x,y); ctx.scale(scale,scale);
+      // muscular wall ring (thicker for LV)
+      ctx.beginPath();
+      ctx.ellipse(0,4,rx+wallThickness,ry+wallThickness,0,0,Math.PI*2);
+      ctx.fillStyle='rgba(90,30,30,0.9)';
+      ctx.fill();
+      // inner blood-filled cavity
+      ctx.beginPath();
+      ctx.ellipse(0,0,rx,ry,0,0,Math.PI*2);
+      ctx.fillStyle=color;
+      ctx.fill();
+      ctx.strokeStyle='rgba(0,0,0,0.25)'; ctx.lineWidth=1.5; ctx.stroke();
+      ctx.restore();
+      if (showLabels){
+        ctx.font='600 11px JetBrains Mono, monospace'; ctx.fillStyle='rgba(255,255,255,0.9)'; ctx.textAlign='center';
+        ctx.fillText(label, x, y+4);
+      }
+    }
+
+    atrium(raX,raY,atriumPulse,DEOXY,'RA',false);
+    atrium(laX,laY,atriumPulse,OXY,'LA',true);
+    ventricle(rvX,rvY,52,58,beatScale===1?1:1, DEOXY,'RV',8);   // thinner wall
+    ventricle(lvX,lvY,54,62,beatScale===1?1:1, OXY,'LV',16);    // thicker wall — does more work
+
+    // ---- Valves — flap shapes that visibly open/close ----
+    function valve(x,y,open,label){
+      ctx.save();
+      ctx.translate(x,y);
+      const gap = open? 11 : 2;
+      ctx.strokeStyle='rgba(255,255,255,0.85)'; ctx.lineWidth=3; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(-14,-gap); ctx.lineTo(14,-gap); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-14,gap); ctx.lineTo(14,gap); ctx.stroke();
+      ctx.restore();
+      if (showLabels){
+        ctx.font='9px JetBrains Mono, monospace'; ctx.fillStyle='rgba(200,210,230,0.75)'; ctx.textAlign='center';
+        ctx.fillText(label, x, y+22);
+      }
+    }
+    valve((raX+rvX)/2, (raY+rvY)/2+10, !vSys, 'Tricuspid');
+    valve((laX+lvX)/2, (laY+lvY)/2+10, !vSys, 'Mitral');
+
+    ctx.restore(); // end whole-heart beat scale
+
+    // ---- Major vessels (drawn outside the beat-scale transform so they stay anchored) ----
+    // Superior vena cava into RA
+    ctx.strokeStyle=DEOXY; ctx.lineWidth=16; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(raX-6, top-40); ctx.quadraticCurveTo(raX-10,top-5, raX, top+heartH*0.12); ctx.stroke();
+    // Pulmonary trunk from RV, arching left then splitting
+    ctx.beginPath(); ctx.moveTo(rvX-20, rvY-40); ctx.quadraticCurveTo(rvX-60,rvY-70, rvX-50, rvY-110); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(rvX-50, rvY-110); ctx.lineTo(rvX-80, rvY-135); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(rvX-50, rvY-110); ctx.lineTo(rvX-20, rvY-140); ctx.stroke();
+
+    // Pulmonary veins into LA (two small vessels for realism)
+    ctx.strokeStyle=OXY; ctx.lineWidth=10;
+    ctx.beginPath(); ctx.moveTo(laX-14, top-30); ctx.quadraticCurveTo(laX-10,top-5, laX-10, top+heartH*0.14); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(laX+16, top-30); ctx.quadraticCurveTo(laX+12,top-5, laX+10, top+heartH*0.14); ctx.stroke();
+    // Aorta — arches up and over from LV, the thickest vessel
+    ctx.lineWidth=18;
+    ctx.beginPath();
+    ctx.moveTo(lvX+18, lvY-50);
+    ctx.quadraticCurveTo(lvX+30, rvY-150, cx-10, top-45);
+    ctx.quadraticCurveTo(cx-60, top-60, cx-90, top-30);
+    ctx.stroke();
+
+    if (showLabels){
+      ctx.font='10px JetBrains Mono, monospace'; ctx.fillStyle='rgba(138,147,184,0.85)'; ctx.textAlign='center';
+      ctx.fillText('Vena Cava', raX-6, top-48);
+      ctx.fillText('Pulmonary Trunk →lungs', rvX-65, rvY-148);
+      ctx.fillText('Pulmonary Veins', laX, top-38);
+      ctx.fillText('Aorta →body', cx-90, top-38);
+    }
+
+    return { raX,raY,rvX,rvY,laX,laY,lvX,lvY };
+  }
+
+  function drawAnatomy(){
+    drawHeart(true);
+    ctx.font='600 13px Poppins'; ctx.fillStyle='#e8cf7a'; ctx.textAlign='center';
+    ctx.fillText('4 Chambers: RA · RV (right side, deoxygenated) — LA · LV (left side, oxygenated)', canvas.width/2, canvas.height-16);
+  }
+
+  function drawCycle(){
+    const W=canvas.width, H=canvas.height*0.75;
+    drawHeart(false);
+    // ECG-style strip at the bottom showing systole/diastole timing
+    const stripY = canvas.height*0.86, stripH = 60;
+    ctx.strokeStyle='rgba(138,147,184,0.2)'; ctx.lineWidth=1;
+    ctx.strokeRect(40, stripY-stripH/2, canvas.width-80, stripH);
+    ctx.beginPath();
+    ctx.strokeStyle='#5fd0a3'; ctx.lineWidth=2;
+    for(let x=40;x<canvas.width-40;x++){
+      const frac = (x-40)/(canvas.width-80);
+      const cyclePos = (frac*2 + animT/(60/state.bpm)) % 1;
+      const val = isVentricularSystole(cyclePos) ? 1 : 0.15;
+      const y = stripY + stripH/2 - val*stripH;
+      if (x===40) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+    ctx.font='10px JetBrains Mono, monospace'; ctx.fillStyle='rgba(138,147,184,0.8)'; ctx.textAlign='center';
+    ctx.fillText('Ventricular contraction timing (systole = high, diastole = low)', canvas.width/2, stripY+stripH/2+18);
+
+    ctx.font='600 13px Poppins'; ctx.fillStyle = isVentricularSystole(beatPhase()) ? '#e0715f' : '#5fd0a3'; ctx.textAlign='center';
+    ctx.fillText(isVentricularSystole(beatPhase()) ? 'SYSTOLE — ventricles contracting, pumping blood out' : 'DIASTOLE — ventricles relaxed, filling with blood', canvas.width/2, 30);
+  }
+
+  // ---------- Double Circulation drawing ----------
+  function drawCirculation(){
+    const W=canvas.width, H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+    const t = beatPhase();
+
+    const heartX=W*0.5, heartY=H*0.55;
+    const lungsX=W*0.5, lungsY=H*0.18;
+    const bodyX=W*0.5, bodyY=H*0.88;
+
+    // lungs
+    ctx.font='34px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('🫁', lungsX, lungsY);
+    ctx.font='11px JetBrains Mono, monospace'; ctx.fillStyle='rgba(138,147,184,0.8)';
+    ctx.fillText('Lungs (gas exchange)', lungsX, lungsY+26);
+
+    // heart (small version)
+    ctx.font='30px sans-serif';
+    ctx.fillText('❤️', heartX, heartY);
+
+    // body
+    ctx.font='30px sans-serif';
+    ctx.fillText('🧍', bodyX, bodyY);
+    ctx.font='11px JetBrains Mono, monospace'; ctx.fillStyle='rgba(138,147,184,0.8)';
+    ctx.fillText('Body tissues (need oxygen)', bodyX, bodyY+26);
+
+    // pulmonary circuit (heart <-> lungs), right side path deoxygenated up, left side path oxygenated down
+    function pathWithDots(x1,y1,x2,y2,color,phaseOffset,curve){
+      ctx.strokeStyle=color; ctx.lineWidth=4; ctx.lineCap='round';
+      ctx.beginPath();
+      if (curve){
+        ctx.moveTo(x1,y1);
+        ctx.quadraticCurveTo(curve.x,curve.y,x2,y2);
+      } else {
+        ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
+      }
+      ctx.stroke();
+      // moving dots
+      const n=3;
+      for(let i=0;i<n;i++){
+        const tt = ((animT*0.3+phaseOffset+i/n)%1);
+        let x,y;
+        if (curve){
+          const mt=1-tt;
+          x = mt*mt*x1 + 2*mt*tt*curve.x + tt*tt*x2;
+          y = mt*mt*y1 + 2*mt*tt*curve.y + tt*tt*y2;
+        } else {
+          x = x1+(x2-x1)*tt; y = y1+(y2-y1)*tt;
+        }
+        ctx.fillStyle=color;
+        ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fill();
+      }
+    }
+
+    // Pulmonary circuit: heart->lungs (deoxygenated, right offset), lungs->heart (oxygenated, left offset)
+    pathWithDots(heartX+30,heartY-30, lungsX+40,lungsY+30, DEOXY, 0, {x:W*0.62,y:H*0.35});
+    pathWithDots(lungsX-40,lungsY+30, heartX-30,heartY-30, OXY, 0.4, {x:W*0.38,y:H*0.35});
+
+    // Systemic circuit: heart->body (oxygenated), body->heart (deoxygenated)
+    pathWithDots(heartX+30,heartY+40, bodyX+40,bodyY-30, OXY, 0.2, {x:W*0.62,y:H*0.72});
+    pathWithDots(bodyX-40,bodyY-30, heartX-30,heartY+40, DEOXY, 0.6, {x:W*0.38,y:H*0.72});
+
+    ctx.font='600 11px JetBrains Mono, monospace'; ctx.textAlign='left';
+    ctx.fillStyle=DEOXY; ctx.fillText('Pulmonary circuit: heart → lungs (pick up O₂)', 20, H*0.30);
+    ctx.fillStyle=OXY; ctx.fillText('Systemic circuit: heart → body (deliver O₂)', 20, H*0.68);
+
+    ctx.font='600 13px Poppins'; ctx.fillStyle='#e8cf7a'; ctx.textAlign='center';
+    ctx.fillText('Double Circulation — blood passes through the heart TWICE per full loop', W/2, H-16);
+  }
+
+  // ---------- ECG drawing ----------
+  function ecgValue(cyclePos){
+    // Simplified idealized PQRST waveform as a function of position within one cardiac cycle (0..1)
+    let v = 0;
+    // P wave (atrial depolarization) - small bump early
+    v += 0.15*Math.exp(-Math.pow((cyclePos-0.08)/0.03,2));
+    // Q dip
+    v -= 0.1*Math.exp(-Math.pow((cyclePos-0.18)/0.008,2));
+    // R spike (tall)
+    v += 1.0*Math.exp(-Math.pow((cyclePos-0.2)/0.012,2));
+    // S dip
+    v -= 0.25*Math.exp(-Math.pow((cyclePos-0.225)/0.01,2));
+    // T wave (ventricular repolarization) - broader bump
+    v += 0.3*Math.exp(-Math.pow((cyclePos-0.45)/0.05,2));
+    return v;
+  }
+
+  function drawECG(){
+    const W=canvas.width, H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+
+    // small heart icon pulsing at top
+    const t = beatPhase();
+    const pulse = isVentricularSystole(t) ? 1.15 : 1;
+    ctx.save();
+    ctx.translate(W*0.5, H*0.18);
+    ctx.scale(pulse,pulse);
+    ctx.font='50px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('❤️', 0, 0);
+    ctx.restore();
+
+    ctx.font='600 13px Poppins'; ctx.fillStyle='#e8cf7a'; ctx.textAlign='center';
+    ctx.fillText(state.bpm+' bpm', W*0.5, H*0.32);
+
+    // ECG trace
+    const midY = H*0.62, amp = H*0.22;
+    const cyclesShown = 4;
+    ctx.strokeStyle='rgba(138,147,184,0.12)'; ctx.lineWidth=1;
+    for(let gx=0;gx<W;gx+=30){ ctx.beginPath(); ctx.moveTo(gx,H*0.42); ctx.lineTo(gx,H*0.82); ctx.stroke(); }
+    ctx.beginPath(); ctx.moveTo(0,midY); ctx.lineTo(W,midY); ctx.stroke();
+
+    ctx.strokeStyle='#5fd0a3'; ctx.lineWidth=2.2;
+    ctx.shadowColor='rgba(95,208,163,0.5)'; ctx.shadowBlur=6;
+    ctx.beginPath();
+    const period = 60/state.bpm;
+    for(let x=0;x<W;x++){
+      const globalPos = (x/W)*cyclesShown - (animT/period);
+      const cyclePos = ((globalPos%1)+1)%1;
+      const v = ecgValue(cyclePos);
+      const y = midY - v*amp;
+      if (x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+    ctx.shadowBlur=0;
+
+    ctx.font='11px JetBrains Mono, monospace'; ctx.fillStyle='rgba(138,147,184,0.8)'; ctx.textAlign='center';
+    ctx.fillText('P — Q R S — T   (repeats every heartbeat)', W/2, H*0.9);
+  }
+
+  const titles = {
+    anatomy:'Heart Anatomy — 4 Chambers &amp; Valves',
+    cycle:'Cardiac Cycle — Systole &amp; Diastole',
+    circulation:'Double Circulation — Pulmonary &amp; Systemic',
+    ecg:'ECG Trace &amp; Heart Rate'
+  };
+  const notes = {
+    anatomy:'The heart has 4 chambers: 2 atria (receive blood) on top, 2 ventricles (pump blood out) below. The right side handles deoxygenated blood, the left side handles oxygenated blood — they never mix.',
+    cycle:'Systole = contraction (ejects blood), Diastole = relaxation (chambers refill). Atria contract just before ventricles to complete filling.',
+    circulation:'Blood passes through the heart TWICE for one full loop of the body: once for the pulmonary circuit (to the lungs and back), once for the systemic circuit (to the body and back).',
+    ecg:'The ECG records the electrical activity of the heart: P wave = atria depolarizing, QRS = ventricles depolarizing (and contracting), T wave = ventricles recovering.'
+  };
+
+  function render(){
+    vizTitle.innerHTML = titles[mode];
+    vizNote.innerHTML = '<b>Note:</b> ' + notes[mode];
+    renderReadouts();
+    updateLegend();
+    if (mode==='anatomy') drawAnatomy();
+    else if (mode==='cycle') drawCycle();
+    else if (mode==='circulation') drawCirculation();
+    else drawECG();
+  }
+
+  modeTabs.forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      modeTabs.forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      mode = tab.dataset.mode;
+      render();
+    });
+  });
+
+  let lastTime = null;
+  function loop(timestamp){
+    if (lastTime===null) lastTime = timestamp;
+    const dt = (timestamp-lastTime)/1000;
+    lastTime = timestamp;
+    animT += dt;
+    render();
+    requestAnimationFrame(loop);
+  }
+
+  renderControls();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

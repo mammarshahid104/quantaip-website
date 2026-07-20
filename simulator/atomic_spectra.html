@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>QUANTAIP Simulator — Atomic Spectra Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-deep:#060c1c; --navy:#0b1530; --navy-panel:#101c3d; --navy-line:#1e2c54;
+    --gold:#d4af37; --gold-soft:#e8cf7a; --text:#eef1fb; --text-dim:#8a93b8;
+    --good:#5fd0a3; --red:#e0715f; --blue:#6fa8dc; --purple:#c084fc;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: radial-gradient(1200px 600px at 15% -10%, #12234f 0%, transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, #14183a 0%, transparent 55%), var(--navy-deep);
+    color:var(--text); font-family:'Poppins',sans-serif; min-height:100vh;
+    display:flex; flex-direction:column; align-items:center; padding:28px 16px 60px;
+  }
+  .header{ width:100%; max-width:1100px; display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom:22px; flex-wrap:wrap; gap:8px; border-bottom:1px solid var(--navy-line); padding-bottom:18px; }
+  .brand{ display:flex; align-items:baseline; gap:10px; }
+  .brand .mark{ font-weight:700; letter-spacing:0.14em; font-size:13px; color:var(--gold); text-transform:uppercase; }
+  .brand .name{ font-weight:300; font-size:22px; letter-spacing:0.01em; }
+  .brand .name b{ font-weight:600; color:var(--gold-soft); }
+  .exp-label{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); letter-spacing:0.08em; }
+
+  .container{ width:100%; max-width:1100px; }
+
+  .tab-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+  .elem-tab{
+    font-family:'JetBrains Mono',monospace; font-size:11.5px; letter-spacing:0.03em;
+    padding:9px 16px; border-radius:999px; border:1px solid var(--navy-line);
+    background:var(--navy-deep); color:var(--text-dim); cursor:pointer; white-space:nowrap;
+  }
+  .elem-tab:hover{ color:var(--text); border-color:#33407a; }
+  .elem-tab.active{ background:var(--gold); color:#191204; border-color:var(--gold); font-weight:600; }
+
+  .series-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px; }
+  .series-tab{
+    font-family:'JetBrains Mono',monospace; font-size:11px;
+    padding:7px 13px; border-radius:8px; border:1px solid var(--navy-line);
+    background:var(--navy-deep); color:var(--text-dim); cursor:pointer;
+  }
+  .series-tab:hover{ color:var(--text); }
+  .series-tab.active{ background:var(--blue); color:#0a1128; border-color:var(--blue); font-weight:600; }
+
+  .layout{ display:grid; grid-template-columns:1.4fr 1fr; gap:20px; }
+  @media (max-width:900px){ .layout{ grid-template-columns:1fr; } }
+
+  .panel{
+    background:linear-gradient(180deg, var(--navy-panel), var(--navy));
+    border:1px solid var(--navy-line); border-radius:14px; padding:20px; margin-bottom:20px;
+  }
+  .panel h2{ margin:0 0 14px; font-size:12px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-dim); }
+
+  #mainCanvas{ width:100%; aspect-ratio:16/11; border-radius:10px; background:linear-gradient(180deg, #0a1330 0%, #060c1c 100%); border:1px solid var(--navy-line); display:block; }
+  #levelCanvas{ width:100%; aspect-ratio:4/5; border-radius:10px; background:linear-gradient(180deg, #0a1330 0%, #060c1c 100%); border:1px solid var(--navy-line); display:block; }
+
+  .lines-list{ display:flex; flex-direction:column; gap:8px; margin-top:6px; }
+  .line-item{ display:flex; align-items:center; gap:10px; background:var(--navy-deep); border:1px solid var(--navy-line); border-radius:8px; padding:9px 12px; }
+  .line-swatch{ width:26px; height:14px; border-radius:3px; flex:none; }
+  .line-info{ flex:1; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text); }
+  .line-info .transition{ color:var(--text-dim); font-size:10.5px; }
+  .line-tag{ font-size:9.5px; padding:2px 7px; border-radius:999px; background:var(--navy-line); color:var(--text-dim); }
+  .line-tag.visible{ background:rgba(95,208,163,0.2); color:var(--good); }
+
+  .note{ font-size:11.5px; color:var(--text-dim); line-height:1.6; margin-top:14px; border-top:1px solid var(--navy-line); padding-top:14px; }
+  .note b{ color:var(--gold-soft); font-weight:600; }
+
+  footer{ margin-top:6px; font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--text-dim); letter-spacing:0.06em; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">
+    <span class="mark">QUANTAIP</span>
+    <span class="name">Simulator — <b>Atomic Spectra Lab</b></span>
+  </div>
+  <div class="exp-label">EXPERIMENT / DISCHARGE TUBE &amp; SPECTRAL SERIES</div>
+</div>
+
+<div class="container">
+
+  <div class="tab-row" id="categoryTabs">
+    <div class="elem-tab active" data-cat="gases">Discharge Gases</div>
+    <div class="elem-tab" data-cat="alkali">Alkali Metals (Flame Test)</div>
+    <div class="elem-tab" data-cat="alkaline">Alkaline Earth Metals</div>
+    <div class="elem-tab" data-cat="other">Other</div>
+  </div>
+
+  <div class="tab-row" id="elemTabs"></div>
+
+  <div class="series-row" id="seriesRow"></div>
+
+  <div class="layout">
+
+    <div class="panel">
+      <h2 id="vizTitle">Discharge Tube → Prism → Spectrum</h2>
+      <canvas id="mainCanvas" width="720" height="495"></canvas>
+      <div class="note" id="vizNote"></div>
+    </div>
+
+    <div>
+      <div class="panel" id="levelPanel">
+        <h2 id="levelTitle">Energy Level Diagram (Bohr Model)</h2>
+        <canvas id="levelCanvas" width="480" height="600"></canvas>
+      </div>
+
+      <div class="panel">
+        <h2>Spectral Lines</h2>
+        <div class="lines-list" id="linesList"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>QUANTAIP EDUOS · VIRTUAL LAB MODULE · PROTOTYPE BUILD</footer>
+
+<script>
+(function(){
+  const canvas = document.getElementById('mainCanvas');
+  const ctx = canvas.getContext('2d');
+  const levelCanvas = document.getElementById('levelCanvas');
+  const lctx = levelCanvas.getContext('2d');
+  // (element tabs are now rendered dynamically per category — see renderElemTabs below)
+  const seriesRow = document.getElementById('seriesRow');
+  const linesList = document.getElementById('linesList');
+  const vizTitle = document.getElementById('vizTitle');
+  const vizNote = document.getElementById('vizNote');
+  const levelPanel = document.getElementById('levelPanel');
+  const levelTitle = document.getElementById('levelTitle');
+
+  const H_EV = 4.1357e-15; // eV·s
+  const C_LIGHT = 3e8;
+  const RYDBERG = 1.097e7; // m^-1
+
+  let element = 'H';
+  let series = 'balmer';
+  let animT = 0;
+
+  // ---------- Spectral colour helper (Dan Bruton approximation) ----------
+  function wavelengthToRGB(wl){
+    let r,g,b;
+    if (wl>=380 && wl<440){ r=-(wl-440)/(440-380); g=0; b=1; }
+    else if (wl>=440 && wl<490){ r=0; g=(wl-440)/(490-440); b=1; }
+    else if (wl>=490 && wl<510){ r=0; g=1; b=-(wl-510)/(510-490); }
+    else if (wl>=510 && wl<580){ r=(wl-510)/(580-510); g=1; b=0; }
+    else if (wl>=580 && wl<645){ r=1; g=-(wl-645)/(645-580); b=0; }
+    else if (wl>=645 && wl<=780){ r=1; g=0; b=0; }
+    else { r=0.4; g=0.4; b=0.4; } // outside visible: neutral placeholder colour
+    let factor;
+    if (wl>=380 && wl<420) factor = 0.3+0.7*(wl-380)/(420-380);
+    else if (wl>=420 && wl<701) factor = 1;
+    else if (wl>=701 && wl<=780) factor = 0.3+0.7*(780-wl)/(780-700);
+    else factor = 0.35;
+    const gamma = 0.8;
+    function adjust(c){ return c<=0 ? 0 : Math.round(255*Math.pow(c*factor, gamma)); }
+    return `rgb(${adjust(r)},${adjust(g)},${adjust(b)})`;
+  }
+
+  // ---------- Hydrogen series (Rydberg formula) ----------
+  const seriesDefs = {
+    lyman:    { name:'Lyman',    n1:1, region:'UV',      desc:'Transitions ending at n=1 — all in the ultraviolet, invisible to the eye.' },
+    balmer:   { name:'Balmer',   n1:2, region:'Visible',  desc:'Transitions ending at n=2 — the ONLY hydrogen series with visible lines (this is what you see through the prism).' },
+    paschen:  { name:'Paschen',  n1:3, region:'IR',       desc:'Transitions ending at n=3 — all in the infrared.' },
+    brackett: { name:'Brackett', n1:4, region:'IR',       desc:'Transitions ending at n=4 — infrared, longer wavelength than Paschen.' },
+    pfund:    { name:'Pfund',    n1:5, region:'IR',       desc:'Transitions ending at n=5 — far infrared.' }
+  };
+
+  function hydrogenLines(seriesKey){
+    const def = seriesDefs[seriesKey];
+    const n1 = def.n1;
+    const lines = [];
+    for(let n2=n1+1; n2<=n1+5; n2++){
+      const invLambda = RYDBERG*(1/(n1*n1) - 1/(n2*n2));
+      const lambdaM = 1/invLambda;
+      const nm = lambdaM*1e9;
+      const isVisible = nm>=380 && nm<=750;
+      const E_eV = (H_EV*C_LIGHT)/lambdaM;
+      lines.push({ n1, n2, nm, isVisible, E_eV });
+    }
+    return lines;
+  }
+
+  // ---------- Other elements: known characteristic emission lines (experimental "fingerprint") ----------
+  // Wavelengths are widely-cited approximate values (strongest/most characteristic lines) used for
+  // educational spectroscopy demonstrations — not full NIST-precision tables.
+  const elementLines = {
+    He: [ {nm:667.8},{nm:587.6},{nm:501.6},{nm:492.2},{nm:471.3},{nm:447.1} ],
+    Hg: [ {nm:690.7},{nm:579.1},{nm:577.0},{nm:546.1},{nm:435.8},{nm:404.7} ],
+    Ne: [ {nm:703.2},{nm:667.8},{nm:640.2},{nm:626.6},{nm:614.3},{nm:585.2} ],
+    Ar: [ {nm:811.5},{nm:763.5},{nm:750.4},{nm:696.5},{nm:419.8} ],
+    Kr: [ {nm:587.1},{nm:557.0},{nm:476.2},{nm:431.9} ],
+    Xe: [ {nm:542.0},{nm:480.7},{nm:467.1},{nm:462.4} ],
+    N2: [ {nm:746.8},{nm:589.4},{nm:568.0},{nm:500.5} ],
+    O2: [ {nm:844.6},{nm:777.4},{nm:630.0},{nm:557.7} ],
+
+    Na: [ {nm:589.6},{nm:589.0} ],
+    Li: [ {nm:670.8},{nm:610.4},{nm:460.3} ],
+    K:  [ {nm:769.9},{nm:766.5},{nm:404.7},{nm:404.4} ],
+    Rb: [ {nm:794.8},{nm:780.0},{nm:421.6},{nm:420.2} ],
+    Cs: [ {nm:894.3},{nm:852.1},{nm:459.3},{nm:455.5} ],
+
+    Ca: [ {nm:643.9},{nm:616.2},{nm:422.7},{nm:396.8} ],
+    Sr: [ {nm:674.8},{nm:460.7},{nm:421.6},{nm:407.8} ],
+    Ba: [ {nm:611.1},{nm:553.5},{nm:493.4},{nm:455.4} ],
+    Cu: [ {nm:521.8},{nm:515.3},{nm:510.5},{nm:427.5} ]
+  };
+
+  const elementInfo = {
+    H:  { name:'Hydrogen', glow:'rgb(220,120,200)', cat:'gases',   desc:'Follows the Rydberg formula exactly — the only atom simple enough for a clean mathematical series.' },
+    He: { name:'Helium',   glow:'rgb(255,240,200)', cat:'gases',   desc:'Multiple visible lines; helium was first discovered from an unexplained line in the Sun spectrum.' },
+    Hg: { name:'Mercury',  glow:'rgb(160,210,255)', cat:'gases',   desc:'Strong blue-violet and green lines — used in older fluorescent and street lamps.' },
+    Ne: { name:'Neon',     glow:'rgb(255,110,80)',  cat:'gases',   desc:'Dominant red-orange lines — this is exactly why neon signs glow red-orange.' },
+    Ar: { name:'Argon',    glow:'rgb(150,170,255)', cat:'gases',   desc:'Pale violet-blue discharge glow — commonly used as an inert fill gas and in welding.' },
+    Kr: { name:'Krypton',  glow:'rgb(230,255,190)', cat:'gases',   desc:'Pale yellowish-green glow — used in some photographic flash lamps and high-power lamps.' },
+    Xe: { name:'Xenon',    glow:'rgb(200,220,255)', cat:'gases',   desc:'Blue-white glow with a broad-looking visible output — used in xenon flash lamps and car headlights.' },
+    N2: { name:'Nitrogen', glow:'rgb(220,120,200)', cat:'gases',   desc:'Pink-purple discharge glow — nitrogen makes up about 78% of the Earth atmosphere.' },
+    O2: { name:'Oxygen',   glow:'rgb(150,255,150)', cat:'gases',   desc:'Its green (557.7 nm) and red (630.0 nm) lines are exactly what colour the aurora borealis.' },
+
+    Na: { name:'Sodium',    glow:'rgb(255,210,80)',  cat:'alkali', desc:'A famous tight yellow doublet (589.0 / 589.6 nm) — the classic sodium street-lamp colour.' },
+    Li: { name:'Lithium',   glow:'rgb(255,70,70)',   cat:'alkali', desc:'Crimson-red flame test colour — dominant line at 670.8 nm.' },
+    K:  { name:'Potassium', glow:'rgb(200,140,255)', cat:'alkali', desc:'Lilac (pale violet) flame test colour — often masked by sodium contamination in real experiments.' },
+    Rb: { name:'Rubidium',  glow:'rgb(220,80,160)',  cat:'alkali', desc:'Red-violet flame test colour, part of the same alkali-metal family as sodium and potassium.' },
+    Cs: { name:'Cesium',    glow:'rgb(120,140,255)', cat:'alkali', desc:'Blue-violet flame test colour — used in atomic clocks (the SI second is defined from Cesium-133).' },
+
+    Ca: { name:'Calcium',   glow:'rgb(255,140,90)',  cat:'alkaline', desc:'Orange-red flame test colour — an alkaline earth metal found in bones, chalk and limestone.' },
+    Sr: { name:'Strontium', glow:'rgb(255,50,80)',   cat:'alkaline', desc:'Deep crimson-red flame test colour — this is the chemical behind red fireworks.' },
+    Ba: { name:'Barium',    glow:'rgb(140,255,140)', cat:'alkaline', desc:'Apple-green flame test colour — this is the chemical behind green fireworks.' },
+
+    Cu: { name:'Copper',    glow:'rgb(80,220,200)',  cat:'other', desc:'Blue-green flame test colour — one of the easiest flame tests to see in a classroom.' }
+  };
+
+  const categoryNames = { gases:'Discharge Gases', alkali:'Alkali Metals (Flame Test)', alkaline:'Alkaline Earth Metals', other:'Other' };
+  let category = 'gases';
+
+  // ---------- UI: category + element + series tabs ----------
+  const categoryTabs = document.querySelectorAll('#categoryTabs .elem-tab');
+  categoryTabs.forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      categoryTabs.forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      category = tab.dataset.cat;
+      renderElemTabs();
+    });
+  });
+
+  function renderElemTabs(){
+    const elemTabsBox = document.getElementById('elemTabs');
+    elemTabsBox.innerHTML = '';
+    const keysInCat = Object.keys(elementInfo).filter(k=>elementInfo[k].cat===category);
+    if (!keysInCat.includes(element)) element = keysInCat[0];
+    keysInCat.forEach(key=>{
+      const tab = document.createElement('div');
+      tab.className = 'elem-tab' + (key===element?' active':'');
+      tab.textContent = elementInfo[key].name;
+      tab.dataset.elem = key;
+      tab.addEventListener('click', ()=>{
+        elemTabsBox.querySelectorAll('.elem-tab').forEach(t=>t.classList.remove('active'));
+        tab.classList.add('active');
+        element = key;
+        render();
+      });
+      elemTabsBox.appendChild(tab);
+    });
+    render();
+  }
+
+  // ---------- UI: series tabs (Hydrogen only) ----------
+  function renderSeriesRow(){
+    if (element!=='H'){ seriesRow.style.display='none'; return; }
+    seriesRow.style.display='flex';
+    seriesRow.innerHTML = '';
+    Object.keys(seriesDefs).forEach(key=>{
+      const tab = document.createElement('div');
+      tab.className = 'series-tab' + (key===series?' active':'');
+      tab.textContent = seriesDefs[key].name + ' (n→' + seriesDefs[key].n1 + ')';
+      tab.addEventListener('click', ()=>{ series = key; render(); });
+      seriesRow.appendChild(tab);
+    });
+  }
+
+  // ---------- Readouts / line list ----------
+  function renderLinesList(){
+    let lines, isHydrogen = element==='H';
+    if (isHydrogen) lines = hydrogenLines(series);
+    else lines = elementLines[element];
+
+    let html = '';
+    lines.forEach(l=>{
+      const color = wavelengthToRGB(l.nm);
+      const vis = isHydrogen ? l.isVisible : (l.nm>=380 && l.nm<=750);
+      html += `
+        <div class="line-item">
+          <div class="line-swatch" style="background:${color}; box-shadow:0 0 8px ${color};"></div>
+          <div class="line-info">
+            ${l.nm.toFixed(1)} nm
+            ${isHydrogen ? `<div class="transition">n=${l.n2} → n=${l.n1} &nbsp; (E=${l.E_eV.toFixed(2)} eV)</div>` : ''}
+          </div>
+          <div class="line-tag ${vis?'visible':''}">${vis?'visible':(l.nm<380?'UV':'IR')}</div>
+        </div>`;
+    });
+    linesList.innerHTML = html;
+  }
+
+  // ---------- Main visualization: discharge tube -> prism -> dispersed spectrum ----------
+  function drawMain(){
+    const W=canvas.width, H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+    const tubeX = 60, tubeY = H*0.42, tubeW = 140, tubeH = 34;
+    const info = elementInfo[element] || elementInfo.H;
+
+    // discharge tube glow
+    const flicker = 0.85+0.15*Math.sin(animT*8);
+    const grad = ctx.createLinearGradient(tubeX,0,tubeX+tubeW,0);
+    grad.addColorStop(0, 'rgba(255,255,255,0.5)');
+    grad.addColorStop(0.5, info.glow);
+    grad.addColorStop(1, 'rgba(255,255,255,0.5)');
+    ctx.save();
+    ctx.shadowColor = info.glow; ctx.shadowBlur = 25*flicker;
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.roundRect ? ctx.roundRect(tubeX,tubeY,tubeW,tubeH,17) : ctx.rect(tubeX,tubeY,tubeW,tubeH);
+    ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle = 'rgba(200,210,230,0.6)'; ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.roundRect ? ctx.roundRect(tubeX,tubeY,tubeW,tubeH,17) : ctx.rect(tubeX,tubeY,tubeW,tubeH);
+    ctx.stroke();
+    ctx.font='600 11px Poppins'; ctx.fillStyle='rgba(255,255,255,0.85)'; ctx.textAlign='center';
+    ctx.fillText(info.name+' discharge tube', tubeX+tubeW/2, tubeY+tubeH+18);
+
+    // beam to prism
+    const beamY = tubeY+tubeH/2;
+    const prismX = W*0.44, prismY = beamY;
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.moveTo(tubeX+tubeW, beamY); ctx.lineTo(prismX-10, beamY); ctx.stroke();
+
+    // prism (triangle)
+    const prismSize = 70;
+    ctx.beginPath();
+    ctx.moveTo(prismX, prismY-prismSize*0.55);
+    ctx.lineTo(prismX-prismSize*0.5, prismY+prismSize*0.5);
+    ctx.lineTo(prismX+prismSize*0.5, prismY+prismSize*0.5);
+    ctx.closePath();
+    const pgrad = ctx.createLinearGradient(prismX-30,prismY-30,prismX+30,prismY+30);
+    pgrad.addColorStop(0,'rgba(200,220,255,0.25)');
+    pgrad.addColorStop(1,'rgba(140,160,220,0.15)');
+    ctx.fillStyle = pgrad;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(220,230,255,0.7)'; ctx.lineWidth=1.5;
+    ctx.stroke();
+
+    // dispersed lines fanning out onto a "screen" on the right
+    const screenX = W-70;
+    const lines = element==='H' ? hydrogenLines(series).filter(l=>l.isVisible) : elementLines[element].filter(l=>l.nm>=380&&l.nm<=750);
+    const originX = prismX+prismSize*0.4, originY = prismY;
+    const fanTop = H*0.12, fanBottom = H*0.92;
+
+    if (lines.length===0){
+      ctx.font='12px JetBrains Mono, monospace'; ctx.fillStyle='rgba(224,113,95,0.9)'; ctx.textAlign='center';
+      ctx.fillText('This series has no visible lines (all '+seriesDefs[series].region+') — nothing reaches the screen.', W/2, H*0.5);
+    } else {
+      lines.forEach((l,i)=>{
+        const t = lines.length>1 ? i/(lines.length-1) : 0.5;
+        const endY = fanTop + t*(fanBottom-fanTop);
+        const color = wavelengthToRGB(l.nm);
+        ctx.strokeStyle = color; ctx.lineWidth=2.2;
+        ctx.globalAlpha = 0.5+0.5*Math.sin(animT*4+i);
+        ctx.beginPath(); ctx.moveTo(originX,originY); ctx.lineTo(screenX,endY); ctx.stroke();
+        ctx.globalAlpha = 1;
+        // spectral line on screen
+        ctx.fillStyle = color;
+        ctx.shadowColor = color; ctx.shadowBlur=10;
+        ctx.fillRect(screenX, endY-2, 26, 4);
+        ctx.shadowBlur = 0;
+        ctx.font='10px JetBrains Mono, monospace'; ctx.fillStyle='rgba(255,255,255,0.8)'; ctx.textAlign='left';
+        ctx.fillText(l.nm.toFixed(0)+' nm', screenX+32, endY+4);
+      });
+    }
+
+    // "screen" bar
+    ctx.strokeStyle='rgba(138,147,184,0.3)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(screenX,fanTop-10); ctx.lineTo(screenX,fanBottom+10); ctx.stroke();
+  }
+
+  // ---------- Energy level diagram (Bohr model) for Hydrogen ----------
+  function drawLevels(){
+    const W=levelCanvas.width, H=levelCanvas.height;
+    lctx.clearRect(0,0,W,H);
+    if (element!=='H'){
+      lctx.font='12px Poppins'; lctx.fillStyle='rgba(138,147,184,0.6)'; lctx.textAlign='center';
+      lctx.fillText('Energy-level series apply to Hydrogen', W/2, H/2-10);
+      lctx.fillText('(single-electron atom — exact Rydberg formula).', W/2, H/2+12);
+      return;
+    }
+    const maxN = 6;
+    const marginTop=30, marginBottom=40;
+    const usableH = H-marginTop-marginBottom;
+    // energy levels compressed non-linearly (like -13.6/n^2 eV), map n=1..6 to y positions
+    function levelY(n){
+      const E = -13.6/(n*n); // eV, negative
+      const Emax = -13.6/(1*1); // n=1 (most negative / bottom)
+      const Emin = 0; // ionization limit (top)
+      const frac = (E-Emax)/(Emin-Emax); // 0 at n=1, →1 as n→∞
+      return marginTop + (1-frac)*usableH;
+    }
+    for(let n=1;n<=maxN;n++){
+      const y = levelY(n);
+      lctx.strokeStyle = 'rgba(138,147,184,0.35)'; lctx.lineWidth=1.5;
+      lctx.beginPath(); lctx.moveTo(50,y); lctx.lineTo(W-20,y); lctx.stroke();
+      lctx.font='11px JetBrains Mono, monospace'; lctx.fillStyle='rgba(138,147,184,0.8)'; lctx.textAlign='left';
+      lctx.fillText('n='+n, 8, y+4);
+    }
+    // ionization limit line
+    lctx.strokeStyle='rgba(224,113,95,0.4)'; lctx.setLineDash([4,4]);
+    lctx.beginPath(); lctx.moveTo(50,marginTop); lctx.lineTo(W-20,marginTop); lctx.stroke();
+    lctx.setLineDash([]);
+    lctx.fillStyle='rgba(224,113,95,0.7)'; lctx.font='10px JetBrains Mono, monospace';
+    lctx.fillText('ionization limit (n→∞)', 55, marginTop-6);
+
+    // transition arrows for the selected series
+    const def = seriesDefs[series];
+    const n1 = def.n1;
+    const arrowX = W*0.65;
+    for(let n2=n1+1; n2<=Math.min(n1+5,maxN); n2++){
+      const y1 = levelY(n2), y2 = levelY(n1);
+      const lambda = 1/(RYDBERG*(1/(n1*n1)-1/(n2*n2)))*1e9;
+      const color = (lambda>=380&&lambda<=750) ? wavelengthToRGB(lambda) : (def.region==='UV' ? '#8b00ff' : '#e0715f');
+      const xOff = (n2-n1)*10;
+      lctx.strokeStyle = color; lctx.lineWidth=2;
+      lctx.globalAlpha = 0.4+0.6*(0.5+0.5*Math.sin(animT*3 - n2));
+      lctx.beginPath(); lctx.moveTo(arrowX+xOff,y1); lctx.lineTo(arrowX+xOff,y2); lctx.stroke();
+      // arrowhead pointing down (emission, high->low)
+      lctx.beginPath();
+      lctx.moveTo(arrowX+xOff, y2);
+      lctx.lineTo(arrowX+xOff-5, y2-9);
+      lctx.lineTo(arrowX+xOff+5, y2-9);
+      lctx.closePath(); lctx.fillStyle=color; lctx.fill();
+      lctx.globalAlpha=1;
+    }
+    lctx.font='600 11px Poppins'; lctx.fillStyle='var(--gold-soft)'; lctx.fillStyle='#e8cf7a'; lctx.textAlign='center';
+    lctx.fillText(def.name+' series → n='+n1, W*0.72, marginTop-6);
+  }
+
+  function render(){
+    renderSeriesRow();
+    renderLinesList();
+
+    const info = elementInfo[element] || elementInfo.H;
+    if (element==='H'){
+      vizTitle.textContent = 'Hydrogen Discharge Tube → Prism → '+seriesDefs[series].name+' Series';
+      vizNote.innerHTML = '<b>'+seriesDefs[series].name+':</b> '+seriesDefs[series].desc;
+      levelPanel.style.display = 'block';
+    } else {
+      vizTitle.textContent = info.name+' Discharge Tube → Prism → Line Spectrum';
+      vizNote.innerHTML = '<b>'+info.name+':</b> '+info.desc+' Unlike hydrogen, multi-electron atoms do not follow a simple Rydberg-type formula — these are each element experimentally measured "fingerprint" lines.';
+      levelPanel.style.display = 'block';
+    }
+    drawMain();
+    drawLevels();
+  }
+
+  function loop(){
+    animT += 0.02;
+    drawMain();
+    drawLevels();
+    requestAnimationFrame(loop);
+  }
+
+  renderElemTabs();
+  loop();
+})();
+</script>
+</body>
+</html>

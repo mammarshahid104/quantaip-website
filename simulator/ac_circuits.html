@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>QUANTAIP Simulator — AC Circuits Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-deep:#060c1c; --navy:#0b1530; --navy-panel:#101c3d; --navy-line:#1e2c54;
+    --gold:#d4af37; --gold-soft:#e8cf7a; --text:#eef1fb; --text-dim:#8a93b8;
+    --good:#5fd0a3; --red:#e0715f; --blue:#6fa8dc;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: radial-gradient(1200px 600px at 15% -10%, #12234f 0%, transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, #14183a 0%, transparent 55%), var(--navy-deep);
+    color:var(--text); font-family:'Poppins',sans-serif; min-height:100vh;
+    display:flex; flex-direction:column; align-items:center; padding:28px 16px 60px;
+  }
+  .header{ width:100%; max-width:1100px; display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom:22px; flex-wrap:wrap; gap:8px; border-bottom:1px solid var(--navy-line); padding-bottom:18px; }
+  .brand{ display:flex; align-items:baseline; gap:10px; }
+  .brand .mark{ font-weight:700; letter-spacing:0.14em; font-size:13px; color:var(--gold); text-transform:uppercase; }
+  .brand .name{ font-weight:300; font-size:22px; letter-spacing:0.01em; }
+  .brand .name b{ font-weight:600; color:var(--gold-soft); }
+  .exp-label{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); letter-spacing:0.08em; }
+
+  .container{ width:100%; max-width:1100px; }
+
+  .mode-tabs{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px; }
+  .mode-tab{
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.03em;
+    padding:9px 14px; border-radius:999px; border:1px solid var(--navy-line);
+    background:var(--navy-deep); color:var(--text-dim); cursor:pointer; white-space:nowrap;
+  }
+  .mode-tab:hover{ color:var(--text); border-color:#33407a; }
+  .mode-tab.active{ background:var(--gold); color:#191204; border-color:var(--gold); font-weight:600; }
+
+  .layout{ display:grid; grid-template-columns:1.4fr 1fr; gap:20px; }
+  @media (max-width:900px){ .layout{ grid-template-columns:1fr; } }
+
+  .panel{
+    background:linear-gradient(180deg, var(--navy-panel), var(--navy));
+    border:1px solid var(--navy-line); border-radius:14px; padding:20px; margin-bottom:20px;
+  }
+  .panel h2{ margin:0 0 14px; font-size:12px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-dim); }
+
+  .canvas-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:640px){ .canvas-row{ grid-template-columns:1fr; } }
+  canvas{ width:100%; aspect-ratio:1/1; border-radius:10px; background:linear-gradient(180deg, #0a1330 0%, #060c1c 100%); border:1px solid var(--navy-line); display:block; }
+  #waveCanvas{ aspect-ratio:1/1; }
+  .canvas-label{ font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-dim); text-align:center; margin-top:6px; letter-spacing:0.05em; text-transform:uppercase; }
+
+  .field{ display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
+  .field label{ display:flex; justify-content:space-between; font-size:12.5px; color:var(--text-dim); }
+  .field label span.v{ font-family:'JetBrains Mono',monospace; color:var(--gold-soft); }
+  input[type=range]{ -webkit-appearance:none; width:100%; height:4px; border-radius:2px; background:var(--navy-line); outline:none; }
+  input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:15px; height:15px; border-radius:50%; background:var(--gold); cursor:pointer; border:2px solid var(--navy-deep); }
+
+  .readouts{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+  .readout{ background:var(--navy-deep); border:1px solid var(--navy-line); border-radius:8px; padding:10px 12px; }
+  .readout .lbl{ font-size:10px; color:var(--text-dim); letter-spacing:0.06em; text-transform:uppercase; }
+  .readout .val{ font-family:'JetBrains Mono',monospace; font-size:15px; color:var(--gold-soft); margin-top:4px; }
+  .readout .val.lead{ color:var(--good); }
+  .readout .val.lag{ color:var(--blue); }
+  .readout.wide{ grid-column:1/-1; }
+
+  .note{ font-size:11.5px; color:var(--text-dim); line-height:1.6; margin-top:14px; border-top:1px solid var(--navy-line); padding-top:14px; }
+  .note b{ color:var(--gold-soft); font-weight:600; }
+
+  .legend{ display:flex; gap:16px; justify-content:center; margin-top:8px; font-size:11px; color:var(--text-dim); font-family:'JetBrains Mono',monospace; }
+  .legend span{ display:inline-flex; align-items:center; gap:5px; }
+  .legend .dot{ width:10px; height:3px; border-radius:2px; display:inline-block; }
+
+  footer{ margin-top:6px; font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--text-dim); letter-spacing:0.06em; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">
+    <span class="mark">QUANTAIP</span>
+    <span class="name">Simulator — <b>AC Circuits Lab</b></span>
+  </div>
+  <div class="exp-label">EXPERIMENT / ALTERNATING CURRENT CIRCUITS</div>
+</div>
+
+<div class="container">
+
+  <div class="mode-tabs" id="modeTabs">
+    <div class="mode-tab active" data-mode="R">AC + Resistor</div>
+    <div class="mode-tab" data-mode="C">AC + Capacitor</div>
+    <div class="mode-tab" data-mode="L">AC + Inductor</div>
+    <div class="mode-tab" data-mode="RC">RC Circuit</div>
+    <div class="mode-tab" data-mode="RL">RL Circuit</div>
+    <div class="mode-tab" data-mode="RLC_S">RLC Series (Resonance)</div>
+    <div class="mode-tab" data-mode="RLC_P">RLC Parallel (Resonance)</div>
+    <div class="mode-tab" data-mode="P3">3-Phase Supply</div>
+  </div>
+
+  <div class="layout">
+
+    <div class="panel">
+      <h2 id="vizTitle">Phasor Diagram &amp; Waveform</h2>
+      <div class="canvas-row">
+        <div>
+          <canvas id="phasorCanvas" width="480" height="480"></canvas>
+          <div class="canvas-label">Phasor / Vector Diagram</div>
+        </div>
+        <div>
+          <canvas id="waveCanvas" width="480" height="480"></canvas>
+          <div class="canvas-label">Voltage &amp; Current vs Time</div>
+        </div>
+      </div>
+      <div class="legend" id="legendBox">
+        <span><span class="dot" style="background:#e8cf7a"></span> Voltage</span>
+        <span><span class="dot" style="background:#5fd0a3"></span> Current</span>
+      </div>
+      <div class="note">Animation speed is slowed down for clarity — it does <b>not</b> represent the real frequency in real time. Phase relationships and magnitudes shown are physically accurate for the values you set.</div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h2>Parameters</h2>
+        <div id="controlsBox"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Readouts</h2>
+        <div class="readouts" id="readoutsBox"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>QUANTAIP EDUOS · VIRTUAL LAB MODULE · PROTOTYPE BUILD</footer>
+
+<script>
+(function(){
+  const phasorCanvas = document.getElementById('phasorCanvas');
+  const waveCanvas = document.getElementById('waveCanvas');
+  const pctx = phasorCanvas.getContext('2d');
+  const wctx = waveCanvas.getContext('2d');
+  const controlsBox = document.getElementById('controlsBox');
+  const readoutsBox = document.getElementById('readoutsBox');
+  const legendBox = document.getElementById('legendBox');
+  const vizTitle = document.getElementById('vizTitle');
+  const modeTabs = document.querySelectorAll('.mode-tab');
+
+  let mode = 'R';
+  let params = { V0:100, f:150, R:100, L:100, C:10 }; // L in mH, C in µF
+  let animAngle = 0;
+
+  // ---------- Parameter field definitions per mode ----------
+  const fieldDefs = {
+    V0: {label:'Voltage Amplitude (V₀)', min:10, max:300, step:5, unit:'V'},
+    f:  {label:'Frequency (f)', min:1, max:2000, step:1, unit:'Hz'},
+    R:  {label:'Resistance (R)', min:1, max:1000, step:1, unit:'Ω'},
+    L:  {label:'Inductance (L)', min:1, max:1000, step:1, unit:'mH'},
+    C:  {label:'Capacitance (C)', min:1, max:1000, step:1, unit:'µF'}
+  };
+
+  const modeFields = {
+    R:      ['V0','f','R'],
+    C:      ['V0','f','C'],
+    L:      ['V0','f','L'],
+    RC:     ['V0','f','R','C'],
+    RL:     ['V0','f','R','L'],
+    RLC_S:  ['V0','f','R','L','C'],
+    RLC_P:  ['V0','f','R','L','C'],
+    P3:     ['V0','f']
+  };
+
+  function renderControls(){
+    controlsBox.innerHTML = '';
+    modeFields[mode].forEach(key=>{
+      const def = fieldDefs[key];
+      const field = document.createElement('div');
+      field.className = 'field';
+      field.innerHTML = `
+        <label>${def.label} <span class="v" id="v_${key}">${params[key]} ${def.unit}</span></label>
+        <input type="range" id="s_${key}" min="${def.min}" max="${def.max}" step="${def.step}" value="${params[key]}">
+      `;
+      controlsBox.appendChild(field);
+    });
+    modeFields[mode].forEach(key=>{
+      const slider = document.getElementById('s_'+key);
+      slider.addEventListener('input', ()=>{
+        params[key] = parseFloat(slider.value);
+        document.getElementById('v_'+key).textContent = params[key]+' '+fieldDefs[key].unit;
+      });
+    });
+  }
+
+  // ---------- Physics calculation ----------
+  function calc(){
+    const V0 = params.V0;
+    const f = params.f;
+    const omega = 2*Math.PI*f;
+    const R = params.R;
+    const L = params.L/1000; // mH -> H
+    const C = params.C*1e-6; // µF -> F
+    const XL = omega*L;
+    const XC = (omega>0 && C>0) ? 1/(omega*C) : Infinity;
+
+    let Z, phi, I0, f0=null, extra={};
+
+    switch(mode){
+      case 'R':
+        Z = R; phi = 0; I0 = V0/Z;
+        break;
+      case 'C':
+        Z = XC; phi = Math.PI/2; I0 = V0/Z;
+        break;
+      case 'L':
+        Z = XL; phi = -Math.PI/2; I0 = V0/Z;
+        break;
+      case 'RC':
+        Z = Math.sqrt(R*R + XC*XC); phi = Math.atan(XC/R); I0 = V0/Z;
+        break;
+      case 'RL':
+        Z = Math.sqrt(R*R + XL*XL); phi = -Math.atan(XL/R); I0 = V0/Z;
+        break;
+      case 'RLC_S': {
+        const X = XL - XC;
+        Z = Math.sqrt(R*R + X*X);
+        phi = -Math.atan(X/R);
+        I0 = V0/Z;
+        f0 = 1/(2*Math.PI*Math.sqrt(L*C));
+        break;
+      }
+      case 'RLC_P': {
+        const IR = V0/R, IL = V0/XL, IC = V0/XC;
+        const Ix = IC - IL;
+        I0 = Math.sqrt(IR*IR + Ix*Ix);
+        phi = Math.atan2(Ix, IR);
+        Z = V0/I0;
+        f0 = 1/(2*Math.PI*Math.sqrt(L*C));
+        extra = {IR, IL, IC};
+        break;
+      }
+      case 'P3':
+        Z = null; phi = 0; I0 = null;
+        break;
+    }
+
+    const Vrms = V0/Math.sqrt(2);
+    const Irms = I0!==null ? I0/Math.sqrt(2) : null;
+    const P = Irms!==null ? Vrms*Irms*Math.cos(phi) : null;
+    const Q = Irms!==null ? Vrms*Irms*Math.sin(phi) : null;
+    const S = Irms!==null ? Vrms*Irms : null;
+
+    return { V0, I0, Z, phi, Vrms, Irms, P, Q, S, f0, XL, XC, extra };
+  }
+
+  // ---------- Readouts rendering ----------
+  function fmt(v, decimals){
+    if (v===null || v===undefined || !Number.isFinite(v)) return '—';
+    return v.toFixed(decimals!==undefined?decimals:2);
+  }
+
+  function renderReadouts(r){
+    const phiDeg = r.phi*180/Math.PI;
+    const phaseWord = Math.abs(phiDeg)<0.5 ? 'In Phase' : (phiDeg>0 ? 'Current LEADS' : 'Current LAGS');
+    const phaseClass = phiDeg>0.5 ? 'lead' : (phiDeg<-0.5 ? 'lag' : '');
+
+    let html = '';
+    if (mode==='P3'){
+      const Vphase = r.Vrms;
+      const Vline = Vphase*Math.sqrt(3);
+      html = `
+        <div class="readout"><div class="lbl">Phase Voltage (RMS)</div><div class="val">${fmt(Vphase,1)} V</div></div>
+        <div class="readout"><div class="lbl">Line Voltage (RMS, star)</div><div class="val">${fmt(Vline,1)} V</div></div>
+        <div class="readout"><div class="lbl">Phase Angle Between Lines</div><div class="val">120°</div></div>
+        <div class="readout"><div class="lbl">Phase Sequence</div><div class="val">A → B → C</div></div>
+        <div class="readout wide"><div class="lbl">Frequency</div><div class="val">${params.f} Hz</div></div>
+      `;
+    } else {
+      html = `
+        <div class="readout"><div class="lbl">Impedance (Z)</div><div class="val">${fmt(r.Z)} Ω</div></div>
+        <div class="readout"><div class="lbl">Phase Angle (φ)</div><div class="val ${phaseClass}">${fmt(phiDeg,1)}°</div></div>
+        <div class="readout wide"><div class="lbl">Phase Relationship</div><div class="val ${phaseClass}">${phaseWord}${Math.abs(phiDeg)>=0.5 ? ' by '+fmt(Math.abs(phiDeg),1)+'°' : ''}</div></div>
+        <div class="readout"><div class="lbl">Peak Current (I₀)</div><div class="val">${fmt(r.I0,3)} A</div></div>
+        <div class="readout"><div class="lbl">RMS Current</div><div class="val">${fmt(r.Irms,3)} A</div></div>
+        <div class="readout"><div class="lbl">Real Power (P)</div><div class="val">${fmt(r.P,2)} W</div></div>
+        <div class="readout"><div class="lbl">Reactive Power (Q)</div><div class="val">${fmt(r.Q,2)} VAR</div></div>
+        <div class="readout"><div class="lbl">Apparent Power (S)</div><div class="val">${fmt(r.S,2)} VA</div></div>
+        <div class="readout"><div class="lbl">Power Factor</div><div class="val">${fmt(Math.cos(r.phi),3)}</div></div>
+      `;
+      if (r.f0!==null){
+        const atRes = Math.abs(params.f - r.f0) < r.f0*0.02;
+        html += `<div class="readout wide"><div class="lbl">Resonance Frequency (f₀)</div><div class="val ${atRes?'lead':''}">${fmt(r.f0,1)} Hz ${atRes ? ' ← at resonance!' : ''}</div></div>`;
+      }
+      if (mode==='RLC_P' && r.extra){
+        html += `<div class="readout"><div class="lbl">I through R</div><div class="val">${fmt(r.extra.IR,3)} A</div></div>
+                 <div class="readout"><div class="lbl">I through L / C</div><div class="val">${fmt(r.extra.IL,3)} / ${fmt(r.extra.IC,3)} A</div></div>`;
+      }
+    }
+    readoutsBox.innerHTML = html;
+  }
+
+  // ---------- Phasor diagram drawing ----------
+  function drawPhasor(r){
+    const W = phasorCanvas.width, H = phasorCanvas.height;
+    pctx.clearRect(0,0,W,H);
+    const cx = W/2, cy = H/2;
+    const maxR = Math.min(W,H)*0.36;
+
+    // reference circle + axes
+    pctx.strokeStyle = 'rgba(138,147,184,0.15)';
+    pctx.lineWidth = 1;
+    pctx.beginPath(); pctx.arc(cx,cy,maxR,0,Math.PI*2); pctx.stroke();
+    pctx.beginPath(); pctx.moveTo(cx-maxR-20,cy); pctx.lineTo(cx+maxR+20,cy); pctx.stroke();
+    pctx.beginPath(); pctx.moveTo(cx,cy-maxR-20); pctx.lineTo(cx,cy+maxR+20); pctx.stroke();
+
+    function drawArrow(angle, length, color, label){
+      const x = cx + length*Math.cos(-angle);
+      const y = cy + length*Math.sin(-angle);
+      pctx.strokeStyle = color; pctx.fillStyle = color; pctx.lineWidth = 2.5;
+      pctx.beginPath(); pctx.moveTo(cx,cy); pctx.lineTo(x,y); pctx.stroke();
+      // arrowhead
+      const ah = 9, aang = Math.atan2(cy-y, x-cx);
+      pctx.beginPath();
+      pctx.moveTo(x,y);
+      pctx.lineTo(x-ah*Math.cos(aang-0.4), y+ah*Math.sin(aang-0.4));
+      pctx.lineTo(x-ah*Math.cos(aang+0.4), y+ah*Math.sin(aang+0.4));
+      pctx.closePath(); pctx.fill();
+      pctx.font = '600 13px Poppins';
+      pctx.fillText(label, x + 10*Math.cos(-angle), y - 10*Math.sin(-angle));
+    }
+
+    if (mode==='P3'){
+      const colors = ['#e8cf7a','#5fd0a3','#6fa8dc'];
+      const labels = ['Vₐ','V_b','V_c'];
+      for(let i=0;i<3;i++){
+        const ang = animAngle - i*(2*Math.PI/3);
+        drawArrow(ang, maxR*0.85, colors[i], labels[i]);
+      }
+    } else {
+      drawArrow(animAngle, maxR*0.85, '#e8cf7a', 'V');
+      if (mode==='RLC_P' && r.extra){
+        // show branch currents individually for parallel circuit clarity
+        drawArrow(animAngle, maxR*0.55, '#5fd0a3', 'Iᵣ');
+        drawArrow(animAngle - Math.PI/2, maxR*0.4, '#6fa8dc', 'I_L');
+        drawArrow(animAngle + Math.PI/2, maxR*0.4, '#c084fc', 'I_C');
+        drawArrow(animAngle + r.phi, maxR*0.7, '#f0a868', 'Iₜₒₜₐₗ');
+      } else {
+        drawArrow(animAngle + r.phi, maxR*0.6, '#5fd0a3', 'I');
+      }
+
+      // phase angle arc
+      if (Math.abs(r.phi) > 0.01){
+        pctx.strokeStyle = 'rgba(232,207,122,0.5)';
+        pctx.lineWidth = 1.5;
+        pctx.beginPath();
+        const startA = animAngle, endA = animAngle + r.phi;
+        pctx.arc(cx, cy, 28, -startA, -endA, r.phi>0);
+        pctx.stroke();
+      }
+    }
+  }
+
+  // ---------- Waveform drawing ----------
+  function drawWave(r){
+    const W = waveCanvas.width, H = waveCanvas.height;
+    wctx.clearRect(0,0,W,H);
+    const midY = H/2;
+    const amp = H*0.34;
+
+    wctx.strokeStyle = 'rgba(138,147,184,0.15)';
+    wctx.lineWidth = 1;
+    wctx.beginPath(); wctx.moveTo(0,midY); wctx.lineTo(W,midY); wctx.stroke();
+
+    function plotWave(phaseOffset, color){
+      wctx.strokeStyle = color; wctx.lineWidth = 2.2;
+      wctx.beginPath();
+      for(let x=0;x<W;x++){
+        const theta = (x/W)*4*Math.PI - animAngle + phaseOffset;
+        const y = midY - Math.sin(theta)*amp;
+        if (x===0) wctx.moveTo(x,y); else wctx.lineTo(x,y);
+      }
+      wctx.stroke();
+    }
+
+    if (mode==='P3'){
+      plotWave(0, '#e8cf7a');
+      plotWave(-2*Math.PI/3, '#5fd0a3');
+      plotWave(-4*Math.PI/3, '#6fa8dc');
+    } else {
+      plotWave(0, '#e8cf7a');       // voltage reference
+      plotWave(r.phi, '#5fd0a3');   // current, shifted by phi
+    }
+
+    // moving marker line at x=0 reference point (t=0 "now")
+    wctx.strokeStyle = 'rgba(232,207,122,0.25)';
+    wctx.lineWidth = 1;
+    wctx.beginPath(); wctx.moveTo(W*0.25,0); wctx.lineTo(W*0.25,H); wctx.stroke();
+  }
+
+  function updateLegend(){
+    if (mode==='P3'){
+      legendBox.innerHTML = `
+        <span><span class="dot" style="background:#e8cf7a"></span> Phase A</span>
+        <span><span class="dot" style="background:#5fd0a3"></span> Phase B</span>
+        <span><span class="dot" style="background:#6fa8dc"></span> Phase C</span>`;
+    } else if (mode==='RLC_P'){
+      legendBox.innerHTML = `
+        <span><span class="dot" style="background:#e8cf7a"></span> Voltage</span>
+        <span><span class="dot" style="background:#f0a868"></span> Total Current</span>`;
+    } else {
+      legendBox.innerHTML = `
+        <span><span class="dot" style="background:#e8cf7a"></span> Voltage</span>
+        <span><span class="dot" style="background:#5fd0a3"></span> Current</span>`;
+    }
+  }
+
+  function render(){
+    const r = calc();
+    renderReadouts(r);
+    drawPhasor(r);
+    drawWave(r);
+  }
+
+  modeTabs.forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      modeTabs.forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      mode = tab.dataset.mode;
+      renderControls();
+      updateLegend();
+    });
+  });
+
+  function loop(){
+    animAngle += 0.012;
+    render();
+    requestAnimationFrame(loop);
+  }
+
+  renderControls();
+  updateLegend();
+  loop();
+})();
+</script>
+</body>
+</html>

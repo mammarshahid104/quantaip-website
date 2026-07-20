@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>QUANTAIP Simulator — Electromagnetic Waves Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-deep:#060c1c; --navy:#0b1530; --navy-panel:#101c3d; --navy-line:#1e2c54;
+    --gold:#d4af37; --gold-soft:#e8cf7a; --text:#eef1fb; --text-dim:#8a93b8;
+    --good:#5fd0a3; --red:#e0715f; --blue:#6fa8dc; --purple:#c084fc;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: radial-gradient(1200px 600px at 15% -10%, #12234f 0%, transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, #14183a 0%, transparent 55%), var(--navy-deep);
+    color:var(--text); font-family:'Poppins',sans-serif; min-height:100vh;
+    display:flex; flex-direction:column; align-items:center; padding:28px 16px 60px;
+  }
+  .header{ width:100%; max-width:1100px; display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom:22px; flex-wrap:wrap; gap:8px; border-bottom:1px solid var(--navy-line); padding-bottom:18px; }
+  .brand{ display:flex; align-items:baseline; gap:10px; }
+  .brand .mark{ font-weight:700; letter-spacing:0.14em; font-size:13px; color:var(--gold); text-transform:uppercase; }
+  .brand .name{ font-weight:300; font-size:22px; letter-spacing:0.01em; }
+  .brand .name b{ font-weight:600; color:var(--gold-soft); }
+  .exp-label{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); letter-spacing:0.08em; }
+
+  .container{ width:100%; max-width:1100px; }
+
+  .mode-tabs{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px; }
+  .mode-tab{
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.03em;
+    padding:9px 14px; border-radius:999px; border:1px solid var(--navy-line);
+    background:var(--navy-deep); color:var(--text-dim); cursor:pointer; white-space:nowrap;
+  }
+  .mode-tab:hover{ color:var(--text); border-color:#33407a; }
+  .mode-tab.active{ background:var(--gold); color:#191204; border-color:var(--gold); font-weight:600; }
+
+  .layout{ display:grid; grid-template-columns:1.4fr 1fr; gap:20px; }
+  @media (max-width:900px){ .layout{ grid-template-columns:1fr; } }
+
+  .panel{
+    background:linear-gradient(180deg, var(--navy-panel), var(--navy));
+    border:1px solid var(--navy-line); border-radius:14px; padding:20px; margin-bottom:20px;
+  }
+  .panel h2{ margin:0 0 14px; font-size:12px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-dim); }
+
+  #mainCanvas{ width:100%; aspect-ratio:4/3; border-radius:10px; background:linear-gradient(180deg, #0a1330 0%, #060c1c 100%); border:1px solid var(--navy-line); display:block; }
+
+  .field{ display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
+  .field label{ display:flex; justify-content:space-between; font-size:12.5px; color:var(--text-dim); }
+  .field label span.v{ font-family:'JetBrains Mono',monospace; color:var(--gold-soft); }
+  input[type=range]{ -webkit-appearance:none; width:100%; height:4px; border-radius:2px; background:var(--navy-line); outline:none; }
+  input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:15px; height:15px; border-radius:50%; background:var(--gold); cursor:pointer; border:2px solid var(--navy-deep); }
+
+  .toggle-row{ display:flex; gap:8px; margin-bottom:14px; }
+  .toggle-btn{
+    flex:1; font-family:'JetBrains Mono',monospace; font-size:12px; text-align:center;
+    padding:10px 8px; border-radius:8px; border:1px solid var(--navy-line);
+    background:var(--navy-deep); color:var(--text-dim); cursor:pointer;
+  }
+  .toggle-btn.active{ background:var(--gold); color:#191204; border-color:var(--gold); font-weight:600; }
+
+  .bit-row{ display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap; }
+  .bit-btn{
+    width:36px; height:36px; border-radius:8px; border:1px solid var(--navy-line);
+    background:var(--navy-deep); color:var(--gold-soft); font-family:'JetBrains Mono',monospace;
+    font-size:15px; font-weight:600; cursor:pointer;
+  }
+  .bit-btn.on{ background:var(--good); color:#062018; border-color:var(--good); }
+
+  .readouts{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+  .readout{ background:var(--navy-deep); border:1px solid var(--navy-line); border-radius:8px; padding:10px 12px; }
+  .readout .lbl{ font-size:10px; color:var(--text-dim); letter-spacing:0.06em; text-transform:uppercase; }
+  .readout .val{ font-family:'JetBrains Mono',monospace; font-size:14px; color:var(--gold-soft); margin-top:4px; }
+  .readout.wide{ grid-column:1/-1; }
+
+  .band-desc{ font-size:12px; color:var(--text-dim); line-height:1.6; margin-top:4px; }
+  .band-desc b{ color:var(--gold-soft); }
+
+  .note{ font-size:11.5px; color:var(--text-dim); line-height:1.6; margin-top:14px; border-top:1px solid var(--navy-line); padding-top:14px; }
+  .note b{ color:var(--gold-soft); font-weight:600; }
+
+  footer{ margin-top:6px; font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--text-dim); letter-spacing:0.06em; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">
+    <span class="mark">QUANTAIP</span>
+    <span class="name">Simulator — <b>Electromagnetic Waves Lab</b></span>
+  </div>
+  <div class="exp-label">EXPERIMENT / EM WAVES &amp; COMMUNICATION</div>
+</div>
+
+<div class="container">
+
+  <div class="mode-tabs" id="modeTabs">
+    <div class="mode-tab active" data-mode="spectrum">EM Spectrum</div>
+    <div class="mode-tab" data-mode="production">Production</div>
+    <div class="mode-tab" data-mode="transmission">Transmission</div>
+    <div class="mode-tab" data-mode="reception">Reception</div>
+    <div class="mode-tab" data-mode="modulation">Modulation (AM/FM)</div>
+    <div class="mode-tab" data-mode="digital">Modern (Digital) Modulation</div>
+  </div>
+
+  <div class="layout">
+
+    <div class="panel">
+      <h2 id="vizTitle">Visualization</h2>
+      <canvas id="mainCanvas" width="720" height="540"></canvas>
+      <div class="note" id="vizNote"></div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h2>Parameters</h2>
+        <div id="controlsBox"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Readouts</h2>
+        <div class="readouts" id="readoutsBox"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>QUANTAIP EDUOS · VIRTUAL LAB MODULE · PROTOTYPE BUILD</footer>
+
+<script>
+(function(){
+  const canvas = document.getElementById('mainCanvas');
+  const ctx = canvas.getContext('2d');
+  const controlsBox = document.getElementById('controlsBox');
+  const readoutsBox = document.getElementById('readoutsBox');
+  const vizTitle = document.getElementById('vizTitle');
+  const vizNote = document.getElementById('vizNote');
+  const modeTabs = document.querySelectorAll('.mode-tab');
+
+  const C_LIGHT = 3e8; // m/s
+  const H_EV = 4.1357e-15; // eV·s
+
+  let mode = 'spectrum';
+  let animT = 0;
+
+  const state = {
+    logFreq: 14.9,       // spectrum: log10(frequency)
+    prodFreq: 5,          // production: antenna oscillation (Hz, visual)
+    transFreq: 4,          // transmission: wave frequency (visual)
+    tuneFreq: 5, signalFreq: 5, // reception
+    carrierFreq: 8, msgFreq: 1, modIndex: 50, modType:'AM', // modulation
+    bits: [1,0,1,1,0,0,1,0], digitalType:'ASK'
+  };
+
+  // ---------- EM Spectrum band data ----------
+  const bands = [
+    { name:'Radio Waves', min:3, max:9,  color:'#c084fc', use:'Broadcasting (AM/FM), Wi-Fi, Bluetooth, TV signals.' },
+    { name:'Microwaves',  min:9, max:11.5, color:'#6fa8dc', use:'Radar, satellite links, microwave ovens, mobile networks.' },
+    { name:'Infrared',    min:11.5, max:14.602, color:'#e0715f', use:'Remote controls, thermal imaging, night vision, fibre-optic short links.' },
+    { name:'Red',    min:14.602, max:14.685, color:'#ff3b30', use:'Visible light — longest wavelength (~620–750 nm), lowest energy of the visible band.' },
+    { name:'Orange', min:14.685, max:14.706, color:'#ff8800', use:'Visible light (~590–620 nm) — between red and yellow in the rainbow.' },
+    { name:'Yellow', min:14.706, max:14.721, color:'#ffee00', use:'Visible light (~570–590 nm) — peak sensitivity region of the human eye.' },
+    { name:'Green',  min:14.721, max:14.783, color:'#00e676', use:'Visible light (~495–570 nm) — most abundant colour in natural daylight scenes.' },
+    { name:'Blue',   min:14.783, max:14.824, color:'#2979ff', use:'Visible light (~450–495 nm) — why the clear sky appears blue (Rayleigh scattering).' },
+    { name:'Violet', min:14.824, max:14.897, color:'#8b00ff', use:'Visible light — shortest wavelength (~380–450 nm), highest energy of the visible band.' },
+    { name:'Ultraviolet', min:14.897, max:16.5, color:'#8a93f0', use:'Sterilization, sun tanning/burning, fluorescent lamps.' },
+    { name:'X-Rays',      min:16.5, max:19.5, color:'#e8cf7a', use:'Medical imaging, airport security scanners, crystallography.' },
+    { name:'Gamma Rays',  min:19.5, max:22, color:'#ffffff', use:'Nuclear decay, cancer radiotherapy, sterilizing medical equipment.' }
+  ];
+  function bandFor(logf){
+    return bands.find(b=>logf>=b.min && logf<b.max) || bands[bands.length-1];
+  }
+  const VISIBLE_MIN_LOG = 14.602, VISIBLE_MAX_LOG = 14.897;
+
+  // Accurate spectral wavelength (nm) -> RGB colour approximation (Dan Bruton's algorithm)
+  function wavelengthToRGB(wl){
+    let r,g,b;
+    if (wl>=380 && wl<440){ r=-(wl-440)/(440-380); g=0; b=1; }
+    else if (wl>=440 && wl<490){ r=0; g=(wl-440)/(490-440); b=1; }
+    else if (wl>=490 && wl<510){ r=0; g=1; b=-(wl-510)/(510-490); }
+    else if (wl>=510 && wl<580){ r=(wl-510)/(580-510); g=1; b=0; }
+    else if (wl>=580 && wl<645){ r=1; g=-(wl-645)/(645-580); b=0; }
+    else if (wl>=645 && wl<=780){ r=1; g=0; b=0; }
+    else { r=0; g=0; b=0; }
+
+    let factor;
+    if (wl>=380 && wl<420) factor = 0.3+0.7*(wl-380)/(420-380);
+    else if (wl>=420 && wl<701) factor = 1;
+    else if (wl>=701 && wl<=780) factor = 0.3+0.7*(780-wl)/(780-700);
+    else factor = 0;
+
+    const gamma = 0.8;
+    function adjust(c){ return c<=0 ? 0 : Math.round(255*Math.pow(c*factor, gamma)); }
+    return `rgb(${adjust(r)},${adjust(g)},${adjust(b)})`;
+  }
+
+  function freqToWavelengthNm(logf){
+    const f = Math.pow(10, logf);
+    return (C_LIGHT/f)*1e9;
+  }
+
+  // ---------- Control field renderers per mode ----------
+  function renderControls(){
+    controlsBox.innerHTML = '';
+    if (mode==='spectrum'){
+      controlsBox.innerHTML = `
+        <div class="field">
+          <label>Frequency (log scale) <span class="v" id="v_logFreq">${state.logFreq.toFixed(1)}</span></label>
+          <input type="range" id="s_logFreq" min="3" max="22" step="0.05" value="${state.logFreq}">
+        </div>`;
+      document.getElementById('s_logFreq').addEventListener('input', e=>{
+        state.logFreq = parseFloat(e.target.value);
+        document.getElementById('v_logFreq').textContent = state.logFreq.toFixed(1);
+      });
+    }
+    else if (mode==='production'){
+      controlsBox.innerHTML = `
+        <div class="field">
+          <label>Antenna Oscillation Rate <span class="v" id="v_prodFreq">${state.prodFreq}</span></label>
+          <input type="range" id="s_prodFreq" min="1" max="12" step="1" value="${state.prodFreq}">
+        </div>`;
+      document.getElementById('s_prodFreq').addEventListener('input', e=>{
+        state.prodFreq = parseFloat(e.target.value);
+        document.getElementById('v_prodFreq').textContent = state.prodFreq;
+      });
+    }
+    else if (mode==='transmission'){
+      controlsBox.innerHTML = `
+        <div class="field">
+          <label>Wave Frequency (visual) <span class="v" id="v_transFreq">${state.transFreq}</span></label>
+          <input type="range" id="s_transFreq" min="1" max="10" step="1" value="${state.transFreq}">
+        </div>`;
+      document.getElementById('s_transFreq').addEventListener('input', e=>{
+        state.transFreq = parseFloat(e.target.value);
+        document.getElementById('v_transFreq').textContent = state.transFreq;
+      });
+    }
+    else if (mode==='reception'){
+      controlsBox.innerHTML = `
+        <div class="field">
+          <label>Incoming Signal Frequency <span class="v" id="v_signalFreq">${state.signalFreq}</span></label>
+          <input type="range" id="s_signalFreq" min="1" max="10" step="0.1" value="${state.signalFreq}">
+        </div>
+        <div class="field">
+          <label>Receiver Tuned Frequency <span class="v" id="v_tuneFreq">${state.tuneFreq}</span></label>
+          <input type="range" id="s_tuneFreq" min="1" max="10" step="0.1" value="${state.tuneFreq}">
+        </div>`;
+      document.getElementById('s_signalFreq').addEventListener('input', e=>{
+        state.signalFreq = parseFloat(e.target.value);
+        document.getElementById('v_signalFreq').textContent = state.signalFreq.toFixed(1);
+      });
+      document.getElementById('s_tuneFreq').addEventListener('input', e=>{
+        state.tuneFreq = parseFloat(e.target.value);
+        document.getElementById('v_tuneFreq').textContent = state.tuneFreq.toFixed(1);
+      });
+    }
+    else if (mode==='modulation'){
+      controlsBox.innerHTML = `
+        <div class="toggle-row">
+          <div class="toggle-btn ${state.modType==='AM'?'active':''}" data-mtype="AM">AM (Amplitude)</div>
+          <div class="toggle-btn ${state.modType==='FM'?'active':''}" data-mtype="FM">FM (Frequency)</div>
+        </div>
+        <div class="field">
+          <label>Carrier Frequency <span class="v" id="v_carrierFreq">${state.carrierFreq}</span></label>
+          <input type="range" id="s_carrierFreq" min="4" max="16" step="1" value="${state.carrierFreq}">
+        </div>
+        <div class="field">
+          <label>Message Frequency <span class="v" id="v_msgFreq">${state.msgFreq}</span></label>
+          <input type="range" id="s_msgFreq" min="1" max="4" step="1" value="${state.msgFreq}">
+        </div>
+        <div class="field">
+          <label>Modulation Depth/Index <span class="v" id="v_modIndex">${state.modIndex}%</span></label>
+          <input type="range" id="s_modIndex" min="0" max="100" step="1" value="${state.modIndex}">
+        </div>`;
+      controlsBox.querySelectorAll('[data-mtype]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          state.modType = btn.dataset.mtype;
+          renderControls();
+        });
+      });
+      document.getElementById('s_carrierFreq').addEventListener('input', e=>{
+        state.carrierFreq = parseFloat(e.target.value);
+        document.getElementById('v_carrierFreq').textContent = state.carrierFreq;
+      });
+      document.getElementById('s_msgFreq').addEventListener('input', e=>{
+        state.msgFreq = parseFloat(e.target.value);
+        document.getElementById('v_msgFreq').textContent = state.msgFreq;
+      });
+      document.getElementById('s_modIndex').addEventListener('input', e=>{
+        state.modIndex = parseFloat(e.target.value);
+        document.getElementById('v_modIndex').textContent = state.modIndex+'%';
+      });
+    }
+    else if (mode==='digital'){
+      let bitsHtml = '<div class="bit-row">';
+      state.bits.forEach((b,i)=>{ bitsHtml += `<div class="bit-btn ${b?'on':''}" data-bit="${i}">${b}</div>`; });
+      bitsHtml += '</div>';
+      controlsBox.innerHTML = `
+        <label style="font-size:12.5px;color:var(--text-dim);display:block;margin-bottom:8px;">Click bits to toggle 0/1:</label>
+        ${bitsHtml}
+        <div class="toggle-row">
+          <div class="toggle-btn ${state.digitalType==='ASK'?'active':''}" data-dtype="ASK">ASK</div>
+          <div class="toggle-btn ${state.digitalType==='FSK'?'active':''}" data-dtype="FSK">FSK</div>
+          <div class="toggle-btn ${state.digitalType==='PSK'?'active':''}" data-dtype="PSK">PSK</div>
+        </div>`;
+      controlsBox.querySelectorAll('[data-bit]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const i = parseInt(btn.dataset.bit);
+          state.bits[i] = state.bits[i] ? 0 : 1;
+          renderControls();
+        });
+      });
+      controlsBox.querySelectorAll('[data-dtype]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          state.digitalType = btn.dataset.dtype;
+          renderControls();
+        });
+      });
+    }
+  }
+
+  // ---------- Readouts per mode ----------
+  function renderReadouts(){
+    if (mode==='spectrum'){
+      const f = Math.pow(10, state.logFreq);
+      const lambda = C_LIGHT/f;
+      const E_eV = H_EV*f;
+      const b = bandFor(state.logFreq);
+      const isVisible = state.logFreq>=VISIBLE_MIN_LOG && state.logFreq<VISIBLE_MAX_LOG;
+      let lambdaStr;
+      if (lambda >= 1) lambdaStr = lambda.toFixed(2)+' m';
+      else if (lambda >= 1e-3) lambdaStr = (lambda*1e3).toFixed(2)+' mm';
+      else if (lambda >= 1e-6) lambdaStr = (lambda*1e6).toFixed(2)+' µm';
+      else if (lambda >= 1e-9) lambdaStr = (lambda*1e9).toFixed(2)+' nm';
+      else lambdaStr = (lambda*1e12).toFixed(2)+' pm';
+
+      const swatchHtml = isVisible
+        ? `<div class="readout wide"><div class="lbl">Actual Colour (this wavelength)</div>
+             <div style="display:flex;align-items:center;gap:10px;margin-top:6px;">
+               <div style="width:36px;height:36px;border-radius:8px;background:${wavelengthToRGB(freqToWavelengthNm(state.logFreq))};box-shadow:0 0 14px ${wavelengthToRGB(freqToWavelengthNm(state.logFreq))};border:1px solid rgba(255,255,255,0.3);"></div>
+               <div class="val" style="margin-top:0;">${freqToWavelengthNm(state.logFreq).toFixed(0)} nm</div>
+             </div>
+           </div>`
+        : '';
+
+      readoutsBox.innerHTML = `
+        <div class="readout wide"><div class="lbl">Band</div><div class="val" style="color:${b.color}">${b.name}</div></div>
+        <div class="readout"><div class="lbl">Frequency</div><div class="val">${f.toExponential(2)} Hz</div></div>
+        <div class="readout"><div class="lbl">Wavelength</div><div class="val">${lambdaStr}</div></div>
+        <div class="readout wide"><div class="lbl">Photon Energy (E=hf)</div><div class="val">${E_eV<1e-3?E_eV.toExponential(2):E_eV.toFixed(4)} eV</div></div>
+        ${swatchHtml}
+        <div class="readout wide"><div class="band-desc"><b>${b.name}:</b> ${b.use}</div></div>
+      `;
+    }
+    else if (mode==='production'){
+      readoutsBox.innerHTML = `
+        <div class="readout wide"><div class="lbl">Mechanism</div><div class="val" style="font-size:12px;">Accelerating charge radiates</div></div>
+        <div class="readout wide"><div class="band-desc">An <b>oscillating electric charge</b> in the antenna creates a changing electric field, which in turn creates a changing magnetic field (Maxwell's equations) — together they radiate outward as a self-sustaining EM wave, perpendicular E and B fields, moving at speed <b>c</b>.</div></div>
+      `;
+    }
+    else if (mode==='transmission'){
+      readoutsBox.innerHTML = `
+        <div class="readout"><div class="lbl">Propagation Speed</div><div class="val">c = 3×10⁸ m/s</div></div>
+        <div class="readout"><div class="lbl">Fields</div><div class="val" style="font-size:12px;">E ⊥ B ⊥ direction</div></div>
+        <div class="readout wide"><div class="band-desc">E and B fields oscillate <b>in phase</b>, perpendicular to each other and to the direction of travel. No medium is required — EM waves travel through vacuum.</div></div>
+      `;
+    }
+    else if (mode==='reception'){
+      const detuning = Math.abs(state.signalFreq - state.tuneFreq);
+      const strength = Math.max(0, 1 - detuning/3);
+      readoutsBox.innerHTML = `
+        <div class="readout"><div class="lbl">Signal Frequency</div><div class="val">${state.signalFreq.toFixed(1)}</div></div>
+        <div class="readout"><div class="lbl">Tuned Frequency</div><div class="val">${state.tuneFreq.toFixed(1)}</div></div>
+        <div class="readout wide"><div class="lbl">Received Signal Strength</div><div class="val" style="color:${strength>0.8?'var(--good)':strength>0.3?'var(--gold-soft)':'var(--red)'}">${(strength*100).toFixed(0)}%</div></div>
+        <div class="readout wide"><div class="band-desc">The receiving antenna feeds a <b>tuned LC circuit</b> (resonant circuit). Signal is strongest when the receiver's natural frequency <b>matches</b> the incoming wave's frequency — exactly like RLC resonance.</div></div>
+      `;
+    }
+    else if (mode==='modulation'){
+      readoutsBox.innerHTML = `
+        <div class="readout"><div class="lbl">Type</div><div class="val">${state.modType}</div></div>
+        <div class="readout"><div class="lbl">Carrier : Message</div><div class="val">${state.carrierFreq} : ${state.msgFreq}</div></div>
+        <div class="readout wide"><div class="band-desc">
+          ${state.modType==='AM'
+            ? '<b>AM:</b> the carrier amplitude (envelope) is varied in proportion to the message signal, while frequency stays constant.'
+            : '<b>FM:</b> the carrier instantaneous frequency is varied in proportion to the message signal, while amplitude stays constant — more resistant to noise than AM.'}
+        </div></div>
+      `;
+    }
+    else if (mode==='digital'){
+      const desc = {
+        ASK:'<b>ASK (Amplitude Shift Keying):</b> bit 1 → carrier at full amplitude, bit 0 → carrier off (or low amplitude).',
+        FSK:'<b>FSK (Frequency Shift Keying):</b> bit 1 → higher frequency carrier, bit 0 → lower frequency carrier.',
+        PSK:'<b>PSK (Phase Shift Keying):</b> bit 1 → one phase (0°), bit 0 → shifted phase (180°) — same frequency and amplitude throughout.'
+      };
+      readoutsBox.innerHTML = `
+        <div class="readout wide"><div class="lbl">Technique</div><div class="val">${state.digitalType}</div></div>
+        <div class="readout wide"><div class="lbl">Bit Sequence</div><div class="val">${state.bits.join('')}</div></div>
+        <div class="readout wide"><div class="band-desc">${desc[state.digitalType]}</div></div>
+      `;
+    }
+  }
+
+  // ---------- Drawing functions per mode ----------
+  function roundRectPath(x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+  }
+
+  function drawSpectrum(){
+    const W=canvas.width, H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+    const barY = H*0.36, barH = 84, marginX = 40;
+    const barW = W - marginX*2;
+    const minLog=3, maxLog=22;
+
+    function logToX(logf){ return marginX + ((logf-minLog)/(maxLog-minLog))*barW; }
+
+    // soft outer glow behind the whole bar
+    ctx.save();
+    ctx.shadowColor = 'rgba(212,175,55,0.25)';
+    ctx.shadowBlur = 24;
+    roundRectPath(marginX, barY, barW, barH, 14);
+    ctx.fillStyle = 'rgba(255,255,255,0.02)';
+    ctx.fill();
+    ctx.restore();
+
+    // clip to rounded rect so band fills respect corners
+    ctx.save();
+    roundRectPath(marginX, barY, barW, barH, 14);
+    ctx.clip();
+
+    bands.forEach(b=>{
+      const x1 = logToX(b.min), x2 = logToX(b.max);
+      if (b.name==='Red' || b.name==='Orange' || b.name==='Yellow' || b.name==='Green' || b.name==='Blue' || b.name==='Violet'){
+        // precise spectral gradient within the visible sub-band, sampled at fine wavelength steps
+        const grad = ctx.createLinearGradient(x1,0,x2,0);
+        const wl1 = freqToWavelengthNm(b.max), wl2 = freqToWavelengthNm(b.min); // note: higher freq = shorter wavelength
+        const steps = 8;
+        for(let i=0;i<=steps;i++){
+          const wl = wl1 + (wl2-wl1)*(i/steps);
+          grad.addColorStop(i/steps, wavelengthToRGB(wl));
+        }
+        ctx.fillStyle = grad;
+      } else {
+        const grad = ctx.createLinearGradient(0, barY, 0, barY+barH);
+        grad.addColorStop(0, b.color);
+        grad.addColorStop(1, shadeColor(b.color, -30));
+        ctx.fillStyle = grad;
+      }
+      ctx.fillRect(x1, barY, Math.max(x2-x1,1), barH);
+    });
+
+    // subtle top highlight sheen
+    const sheen = ctx.createLinearGradient(0,barY,0,barY+barH*0.4);
+    sheen.addColorStop(0,'rgba(255,255,255,0.18)');
+    sheen.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.fillStyle = sheen;
+    ctx.fillRect(marginX, barY, barW, barH*0.4);
+
+    // divider lines between bands
+    ctx.strokeStyle = 'rgba(6,12,28,0.5)';
+    ctx.lineWidth = 1.5;
+    bands.forEach(b=>{
+      const x1 = logToX(b.min);
+      ctx.beginPath(); ctx.moveTo(x1,barY); ctx.lineTo(x1,barY+barH); ctx.stroke();
+    });
+
+    ctx.restore(); // remove clip
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+    ctx.lineWidth = 1.5;
+    roundRectPath(marginX, barY, barW, barH, 14);
+    ctx.stroke();
+
+    // labels (rotate narrow visible sub-bands so they fit)
+    bands.forEach(b=>{
+      const x1 = logToX(b.min), x2 = logToX(b.max);
+      const cx2 = (x1+x2)/2;
+      const narrow = (x2-x1) < 46;
+      ctx.font = '600 11px Poppins';
+      ctx.fillStyle = (b.name==='Yellow'||b.name==='Green') ? '#06121c' : '#ffffff';
+      ctx.save();
+      ctx.translate(cx2, barY+barH/2);
+      if (narrow) ctx.rotate(-Math.PI/2);
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(b.name, 0, 0);
+      ctx.restore();
+    });
+
+    // marker (glowing pointer line + diamond)
+    const markerX = logToX(state.logFreq);
+    ctx.save();
+    ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 10;
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(markerX, barY-24); ctx.lineTo(markerX, barY+barH+24); ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.moveTo(markerX, barY-30); ctx.lineTo(markerX+8,barY-20); ctx.lineTo(markerX,barY-10); ctx.lineTo(markerX-8,barY-20);
+    ctx.closePath(); ctx.fill();
+
+    ctx.font = '11px JetBrains Mono, monospace';
+    ctx.fillStyle = 'rgba(138,147,184,0.8)';
+    ctx.textAlign = 'left';
+    ctx.fillText('10³ Hz (long radio waves)', marginX, barY+barH+34);
+    ctx.textAlign = 'right';
+    ctx.fillText('10²² Hz (gamma rays)', marginX+barW, barY+barH+34);
+    ctx.textAlign = 'center';
+    ctx.font = '600 12px Poppins';
+    ctx.fillStyle = 'rgba(232,207,122,0.85)';
+    ctx.fillText('← increasing wavelength   |   increasing frequency & energy →', marginX+barW/2, barY+barH+58);
+
+    // zoomed-in visible-light ribbon below, for extra detail/attractiveness
+    const ribY = barY+barH+80, ribH = 46;
+    const visSteps = 200;
+    for(let i=0;i<visSteps;i++){
+      const wl = 750 - (750-380)*(i/visSteps);
+      const x = marginX + (i/visSteps)*barW;
+      ctx.fillStyle = wavelengthToRGB(wl);
+      ctx.fillRect(x, ribY, barW/visSteps+1, ribH);
+    }
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth=1.5;
+    ctx.strokeRect(marginX, ribY, barW, ribH);
+    ctx.font = '600 11px Poppins'; ctx.fillStyle='rgba(138,147,184,0.8)'; ctx.textAlign='center';
+    ctx.fillText('Visible spectrum — precise, continuous rainbow (380–750 nm)', marginX+barW/2, ribY-10);
+
+    // marker on the ribbon too, if currently in visible range
+    if (state.logFreq>=VISIBLE_MIN_LOG && state.logFreq<VISIBLE_MAX_LOG){
+      const wlNow = freqToWavelengthNm(state.logFreq);
+      const ribX = marginX + ((750-wlNow)/(750-380))*barW;
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth=2.5;
+      ctx.beginPath(); ctx.moveTo(ribX,ribY-4); ctx.lineTo(ribX,ribY+ribH+4); ctx.stroke();
+    }
+  }
+
+  function shadeColor(hex, percent){
+    const num = parseInt(hex.replace('#',''),16);
+    let r=(num>>16)+Math.round(255*(percent/100));
+    let g=((num>>8)&0x00FF)+Math.round(255*(percent/100));
+    let b=(num&0x0000FF)+Math.round(255*(percent/100));
+    r=Math.max(0,Math.min(255,r)); g=Math.max(0,Math.min(255,g)); b=Math.max(0,Math.min(255,b));
+    return `rgb(${r},${g},${b})`;
+  }
+
+  function drawProduction(){
+    const W=canvas.width, H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+    const cx = W/2, cy = H/2;
+    const omega = state.prodFreq*0.6;
+    const osc = Math.sin(animT*omega);
+
+    // antenna (vertical dipole)
+    const antennaHalf = 60;
+    ctx.strokeStyle = '#8a93b8'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(cx, cy-antennaHalf); ctx.lineTo(cx, cy+antennaHalf); ctx.stroke();
+
+    // charge indicators
+    ctx.font = 'bold 20px Poppins';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = osc>0 ? '#e0715f' : '#6fa8dc';
+    ctx.fillText(osc>0?'+':'−', cx, cy-antennaHalf-14);
+    ctx.fillStyle = osc>0 ? '#6fa8dc' : '#e0715f';
+    ctx.fillText(osc>0?'−':'+', cx, cy+antennaHalf+26);
+
+    // expanding radiated wavefronts (circles)
+    const maxR = Math.min(W,H)*0.42;
+    const numRings = 5;
+    for(let i=0;i<numRings;i++){
+      const phase = (animT*omega*0.15 + i/numRings) % 1;
+      const r = phase*maxR;
+      const alpha = 1-phase;
+      ctx.strokeStyle = `rgba(232,207,122,${alpha*0.6})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke();
+    }
+
+    ctx.fillStyle = 'rgba(138,147,184,0.7)';
+    ctx.font = '11px JetBrains Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('Alternating current in antenna → oscillating charge → radiating EM wave', cx, H-24);
+  }
+
+  function drawTransmission(){
+    const W=canvas.width, H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+    const midY = H*0.56;
+    const amp = H*0.19;
+    const k = state.transFreq*0.02;
+    const perspAngle = -42 * Math.PI/180;   // depth direction for B (into/out of the page)
+    const perspScale = 0.62;                 // foreshortening for the depth axis
+
+    function bVec(val){
+      return { dx: val*amp*perspScale*Math.cos(perspAngle), dy: val*amp*perspScale*Math.sin(perspAngle) };
+    }
+
+    // propagation axis
+    ctx.strokeStyle = 'rgba(138,147,184,0.3)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(20,midY); ctx.lineTo(W-20,midY); ctx.stroke();
+    ctx.fillStyle='rgba(138,147,184,0.6)'; ctx.font='11px JetBrains Mono, monospace'; ctx.textAlign='right';
+    ctx.fillText('propagation (z) →', W-24, midY-8);
+
+    // faint envelope curve for E (vertical plane)
+    ctx.strokeStyle = 'rgba(232,207,122,0.45)'; ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    for(let x=20;x<W-20;x++){
+      const e = Math.sin(k*x - animT*3);
+      const y = midY - e*amp;
+      if (x===20) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+
+    // faint envelope curve for B (oblique depth plane, same phase = in phase with E)
+    ctx.strokeStyle = 'rgba(111,168,220,0.45)'; ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    for(let x=20;x<W-20;x++){
+      const bval = Math.sin(k*x - animT*3);
+      const v = bVec(bval);
+      const px=x+v.dx, py=midY+v.dy;
+      if (x===20) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+    }
+    ctx.stroke();
+
+    // discrete vector arrows showing true perpendicularity between E and B
+    function drawArrowVec(x0,y0,dx,dy,color){
+      const x1=x0+dx, y1=y0+dy;
+      ctx.strokeStyle=color; ctx.fillStyle=color; ctx.lineWidth=2.2;
+      ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y1); ctx.stroke();
+      if (Math.abs(dx)+Math.abs(dy) > 4){
+        const ang = Math.atan2(dy,dx);
+        const ah=7;
+        ctx.beginPath();
+        ctx.moveTo(x1,y1);
+        ctx.lineTo(x1-ah*Math.cos(ang-0.4), y1-ah*Math.sin(ang-0.4));
+        ctx.lineTo(x1-ah*Math.cos(ang+0.4), y1-ah*Math.sin(ang+0.4));
+        ctx.closePath(); ctx.fill();
+      }
+    }
+
+    const step = 30;
+    for(let x=30; x<W-30; x+=step){
+      const phase = k*x - animT*3;
+      const val = Math.sin(phase);
+      drawArrowVec(x, midY, 0, -val*amp, '#e8cf7a');       // E: purely vertical
+      const v = bVec(val);
+      drawArrowVec(x, midY, v.dx, v.dy, '#6fa8dc');        // B: oblique depth direction
+    }
+
+    // explicit right-angle indicator at the first arrow position (x=30)
+    const rax = 30, ray = midY;
+    const armLen = 16;
+    ctx.strokeStyle = 'rgba(255,255,255,0.6)'; ctx.lineWidth = 1.3;
+    // small square marker between the vertical (E) direction and the oblique (B) direction
+    const ex = 0, ey = -armLen;
+    const bx = armLen*Math.cos(perspAngle), by = armLen*Math.sin(perspAngle);
+    ctx.beginPath();
+    ctx.moveTo(rax+ex, ray+ey);
+    ctx.lineTo(rax+ex+bx, ray+ey+by);
+    ctx.lineTo(rax+bx, ray+by);
+    ctx.stroke();
+    ctx.font = '600 11px JetBrains Mono, monospace';
+    ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.textAlign='left';
+    ctx.fillText('90°', rax+8, ray-armLen-6);
+
+    ctx.font = '600 12px Poppins';
+    ctx.textAlign='left';
+    ctx.fillStyle='#e8cf7a'; ctx.fillText('E — electric field (vertical plane)', 24, midY-amp-24);
+    ctx.fillStyle='#6fa8dc';
+    const blabelY = midY + bVec(1).dy + 30;
+    ctx.fillText('B — magnetic field (horizontal plane, ⊥ to E)', 24, blabelY);
+  }
+
+  function drawReception(){
+    const W=canvas.width, H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+    const midY = H*0.35;
+    const amp = H*0.14;
+
+    // incoming wave
+    ctx.strokeStyle = '#e8cf7a'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    for(let x=20;x<W*0.7;x++){
+      const y = midY - Math.sin(state.signalFreq*0.05*x - animT*3)*amp;
+      if (x===20) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+
+    // receiving antenna
+    const antX = W*0.78, antY = midY;
+    ctx.strokeStyle = '#8a93b8'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(antX, antY-70); ctx.lineTo(antX, antY+70); ctx.stroke();
+
+    // induced signal graph (amplitude depends on resonance match)
+    const detuning = Math.abs(state.signalFreq - state.tuneFreq);
+    const strength = Math.max(0.05, 1 - detuning/3);
+    const sigY = H*0.75, sigAmp = 50*strength;
+    ctx.strokeStyle = strength>0.7?'#5fd0a3':(strength>0.3?'#e8cf7a':'#e0715f');
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    for(let x=W*0.15;x<W*0.85;x++){
+      const y = sigY - Math.sin(state.tuneFreq*0.05*x - animT*3)*sigAmp;
+      if (x===W*0.15) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+
+    ctx.font = '11px JetBrains Mono, monospace';
+    ctx.fillStyle = 'rgba(138,147,184,0.7)'; ctx.textAlign='center';
+    ctx.fillText('Incoming EM wave', W*0.35, midY-amp-20);
+    ctx.fillText('Induced signal in tuned receiver circuit (LC)', W*0.5, sigY-sigAmp-46>10?sigY-70:sigY-70);
+  }
+
+  function drawModulation(){
+    const W=canvas.width, H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+    const rows = [
+      {label:'Message Signal', y:H*0.18, color:'#5fd0a3'},
+      {label:'Carrier Signal', y:H*0.5, color:'#6fa8dc'},
+      {label:'Modulated Output', y:H*0.82, color:'#e8cf7a'}
+    ];
+    const amp = H*0.11;
+    const fc = state.carrierFreq*0.03, fm = state.msgFreq*0.015;
+    const depth = state.modIndex/100;
+
+    rows.forEach(r=>{
+      ctx.font = '600 11px Poppins'; ctx.fillStyle = r.color; ctx.textAlign='left';
+      ctx.fillText(r.label, 20, r.y-amp-10);
+    });
+
+    // message
+    ctx.strokeStyle = rows[0].color; ctx.lineWidth = 2;
+    ctx.beginPath();
+    for(let x=0;x<W;x++){
+      const y = rows[0].y - Math.sin(fm*x - animT*2)*amp;
+      if (x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+
+    // carrier
+    ctx.strokeStyle = rows[1].color; ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    for(let x=0;x<W;x++){
+      const y = rows[1].y - Math.sin(fc*x - animT*6)*amp;
+      if (x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+
+    // modulated
+    ctx.strokeStyle = rows[2].color; ctx.lineWidth = 2;
+    ctx.beginPath();
+    for(let x=0;x<W;x++){
+      let y;
+      if (state.modType==='AM'){
+        const env = 1 + depth*Math.sin(fm*x - animT*2);
+        y = rows[2].y - Math.sin(fc*x - animT*6)*amp*env;
+      } else {
+        const instFreq = fc + depth*3*fm*Math.cos(fm*x - animT*2);
+        y = rows[2].y - Math.sin(instFreq*x - animT*6)*amp;
+      }
+      if (x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+  }
+
+  function drawDigital(){
+    const W=canvas.width, H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+    const bits = state.bits;
+    const bitW = W/bits.length;
+    const baseY = H*0.2, modY = H*0.6, amp = H*0.13;
+
+    ctx.font = '600 11px Poppins'; ctx.fillStyle='#facc15'; ctx.textAlign='left';
+    ctx.fillText('Baseband bit sequence', 20, baseY-amp-12);
+    ctx.fillStyle = '#7dd3fc';
+    ctx.fillText(state.digitalType+' modulated signal', 20, modY-amp-12);
+
+    // baseband square wave
+    ctx.strokeStyle = '#facc15'; ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    bits.forEach((b,i)=>{
+      const x1=i*bitW, x2=(i+1)*bitW;
+      const y = baseY - (b?amp:-amp)*0.6;
+      if (i===0) ctx.moveTo(x1,y); else ctx.lineTo(x1,y);
+      ctx.lineTo(x2,y);
+    });
+    ctx.stroke();
+    // vertical connectors
+    ctx.lineWidth = 1;
+    for(let i=1;i<bits.length;i++){
+      const x=i*bitW;
+      const y1 = baseY - (bits[i-1]?amp:-amp)*0.6;
+      const y2 = baseY - (bits[i]?amp:-amp)*0.6;
+      ctx.beginPath(); ctx.moveTo(x,y1); ctx.lineTo(x,y2); ctx.stroke();
+    }
+
+    // modulated waveform
+    ctx.strokeStyle = '#7dd3fc'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    const samplesPerBit = 40;
+    for(let i=0;i<bits.length;i++){
+      const b = bits[i];
+      for(let s=0;s<samplesPerBit;s++){
+        const x = i*bitW + (s/samplesPerBit)*bitW;
+        const localPhase = (s/samplesPerBit)*2*Math.PI*4 - animT*2;
+        let y;
+        if (state.digitalType==='ASK'){
+          const a = b ? 1 : 0.08;
+          y = modY - Math.sin(localPhase)*amp*a;
+        } else if (state.digitalType==='FSK'){
+          const freqMul = b ? 2 : 1;
+          y = modY - Math.sin(localPhase*freqMul)*amp;
+        } else { // PSK
+          const phaseShift = b ? 0 : Math.PI;
+          y = modY - Math.sin(localPhase+phaseShift)*amp;
+        }
+        if (s===0 && i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      }
+    }
+    ctx.stroke();
+
+    // bit boundary gridlines
+    ctx.strokeStyle = 'rgba(138,147,184,0.15)'; ctx.lineWidth=1;
+    for(let i=0;i<=bits.length;i++){
+      const x=i*bitW;
+      ctx.beginPath(); ctx.moveTo(x,baseY-40); ctx.lineTo(x,modY+50); ctx.stroke();
+    }
+  }
+
+  const titles = {
+    spectrum:'The Electromagnetic Spectrum',
+    production:'Production of EM Waves',
+    transmission:'Transmission of EM Waves',
+    reception:'Reception of EM Waves',
+    modulation:'Modulation (AM / FM)',
+    digital:'Modern (Digital) Modulation'
+  };
+  const notes = {
+    spectrum:'Drag the slider to explore the spectrum from radio waves to gamma rays.',
+    production:'Oscillating current in an antenna radiates EM waves outward at speed c.',
+    transmission:'E and B fields propagate together, perpendicular to each other and the direction of travel.',
+    reception:'A receiving antenna + tuned circuit picks up a signal best when tuned to match the incoming frequency.',
+    modulation:'Compare how AM varies amplitude and FM varies frequency to carry the same message signal.',
+    digital:'Digital data (bits) modulates a carrier using amplitude, frequency, or phase shifts.'
+  };
+
+  function render(){
+    vizTitle.textContent = titles[mode];
+    vizNote.innerHTML = '<b>Note:</b> ' + notes[mode];
+    renderReadouts();
+    if (mode==='spectrum') drawSpectrum();
+    else if (mode==='production') drawProduction();
+    else if (mode==='transmission') drawTransmission();
+    else if (mode==='reception') drawReception();
+    else if (mode==='modulation') drawModulation();
+    else if (mode==='digital') drawDigital();
+  }
+
+  modeTabs.forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      modeTabs.forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      mode = tab.dataset.mode;
+      renderControls();
+    });
+  });
+
+  function loop(){
+    animT += 0.02;
+    render();
+    requestAnimationFrame(loop);
+  }
+
+  renderControls();
+  loop();
+})();
+</script>
+</body>
+</html>

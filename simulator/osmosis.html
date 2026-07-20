@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>QUANTAIP Simulator — Osmosis &amp; Diffusion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-deep:#060c1c; --navy:#0b1530; --navy-panel:#101c3d; --navy-line:#1e2c54;
+    --gold:#d4af37; --gold-soft:#e8cf7a; --text:#eef1fb; --text-dim:#8a93b8;
+    --good:#5fd0a3; --red:#e0715f; --blue:#6fa8dc; --purple:#c084fc;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: radial-gradient(1200px 600px at 15% -10%, #12234f 0%, transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, #14183a 0%, transparent 55%), var(--navy-deep);
+    color:var(--text); font-family:'Poppins',sans-serif; min-height:100vh;
+    display:flex; flex-direction:column; align-items:center; padding:28px 16px 60px;
+  }
+  .header{ width:100%; max-width:1100px; display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom:22px; flex-wrap:wrap; gap:8px; border-bottom:1px solid var(--navy-line); padding-bottom:18px; }
+  .brand{ display:flex; align-items:baseline; gap:10px; }
+  .brand .mark{ font-weight:700; letter-spacing:0.14em; font-size:13px; color:var(--gold); text-transform:uppercase; }
+  .brand .name{ font-weight:300; font-size:22px; letter-spacing:0.01em; }
+  .brand .name b{ font-weight:600; color:var(--gold-soft); }
+  .exp-label{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); letter-spacing:0.08em; }
+
+  .container{ width:100%; max-width:1100px; }
+
+  .mode-tabs{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px; }
+  .mode-tab{
+    font-family:'JetBrains Mono',monospace; font-size:11.5px; letter-spacing:0.02em;
+    padding:9px 16px; border-radius:999px; border:1px solid var(--navy-line);
+    background:var(--navy-deep); color:var(--text-dim); cursor:pointer;
+  }
+  .mode-tab:hover{ color:var(--text); border-color:#33407a; }
+  .mode-tab.active{ background:var(--gold); color:#191204; border-color:var(--gold); font-weight:600; }
+
+  .layout{ display:grid; grid-template-columns:1.4fr 1fr; gap:20px; }
+  @media (max-width:900px){ .layout{ grid-template-columns:1fr; } }
+
+  .panel{
+    background:linear-gradient(180deg, var(--navy-panel), var(--navy));
+    border:1px solid var(--navy-line); border-radius:14px; padding:20px; margin-bottom:20px;
+  }
+  .panel h2{ margin:0 0 14px; font-size:12px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-dim); }
+
+  #mainCanvas{ width:100%; aspect-ratio:16/12; border-radius:10px; background:linear-gradient(180deg, #0a1330 0%, #060c1c 100%); border:1px solid var(--navy-line); display:block; }
+
+  .field{ display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
+  .field label{ display:flex; justify-content:space-between; font-size:12.5px; color:var(--text-dim); }
+  .field label span.v{ font-family:'JetBrains Mono',monospace; color:var(--gold-soft); }
+  input[type=range]{ -webkit-appearance:none; width:100%; height:4px; border-radius:2px; background:var(--navy-line); outline:none; }
+  input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:15px; height:15px; border-radius:50%; background:var(--gold); cursor:pointer; border:2px solid var(--navy-deep); }
+
+  .toggle-row{ display:flex; gap:8px; margin-bottom:14px; }
+  .toggle-btn{
+    flex:1; font-family:'JetBrains Mono',monospace; font-size:11px; text-align:center;
+    padding:9px 4px; border-radius:8px; border:1px solid var(--navy-line);
+    background:var(--navy-deep); color:var(--text-dim); cursor:pointer;
+  }
+  .toggle-btn.active{ background:var(--gold); color:#191204; border-color:var(--gold); font-weight:600; }
+
+  .btn-row{ display:flex; gap:10px; margin-bottom:14px; }
+  button.action-btn{
+    flex:1; font-family:'Poppins',sans-serif; font-weight:600; font-size:13px;
+    padding:11px 14px; border-radius:8px; border:none; cursor:pointer;
+    background:linear-gradient(180deg, var(--gold-soft), var(--gold)); color:#191204;
+  }
+
+  .legend{ display:flex; gap:16px; justify-content:center; margin-top:10px; font-size:11px; color:var(--text-dim); font-family:'JetBrains Mono',monospace; flex-wrap:wrap; }
+  .legend span{ display:inline-flex; align-items:center; gap:5px; }
+  .legend .dot{ width:11px; height:11px; border-radius:50%; display:inline-block; }
+
+  .readouts{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+  .readout{ background:var(--navy-deep); border:1px solid var(--navy-line); border-radius:8px; padding:10px 12px; }
+  .readout .lbl{ font-size:10px; color:var(--text-dim); letter-spacing:0.06em; text-transform:uppercase; }
+  .readout .val{ font-family:'JetBrains Mono',monospace; font-size:14px; color:var(--gold-soft); margin-top:4px; }
+  .readout .val.warn{ color:var(--red); }
+  .readout.wide{ grid-column:1/-1; }
+
+  .note{ font-size:11.5px; color:var(--text-dim); line-height:1.6; margin-top:14px; border-top:1px solid var(--navy-line); padding-top:14px; }
+  .note b{ color:var(--gold-soft); font-weight:600; }
+
+  footer{ margin-top:6px; font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--text-dim); letter-spacing:0.06em; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">
+    <span class="mark">QUANTAIP</span>
+    <span class="name">Simulator — <b>Osmosis &amp; Diffusion</b></span>
+  </div>
+  <div class="exp-label">EXPERIMENT / MEMBRANE TRANSPORT</div>
+</div>
+
+<div class="container">
+
+  <div class="mode-tabs" id="modeTabs">
+    <div class="mode-tab active" data-mode="utube">U-Tube Osmosis</div>
+    <div class="mode-tab" data-mode="cell">Cell in Solution (Tonicity)</div>
+    <div class="mode-tab" data-mode="diffusion">Simple Diffusion</div>
+  </div>
+
+  <div class="layout">
+
+    <div class="panel">
+      <h2 id="vizTitle">Visualization</h2>
+      <canvas id="mainCanvas" width="720" height="540"></canvas>
+      <div class="legend" id="legendBox"></div>
+      <div class="note" id="vizNote"></div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h2>Parameters</h2>
+        <div id="controlsBox"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Readouts</h2>
+        <div class="readouts" id="readoutsBox"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>QUANTAIP EDUOS · VIRTUAL LAB MODULE · PROTOTYPE BUILD</footer>
+
+<script>
+(function(){
+  const canvas = document.getElementById('mainCanvas');
+  const ctx = canvas.getContext('2d');
+  const controlsBox = document.getElementById('controlsBox');
+  const readoutsBox = document.getElementById('readoutsBox');
+  const legendBox = document.getElementById('legendBox');
+  const vizTitle = document.getElementById('vizTitle');
+  const vizNote = document.getElementById('vizNote');
+  const modeTabs = document.querySelectorAll('.mode-tab');
+
+  const WATER = '#6fa8dc';
+  const SOLUTE = '#e8cf7a';
+
+  let mode = 'utube';
+  let animT = 0;
+  let lastTime = null;
+
+  const state = {
+    concLeft: 1.5,   // mol/L
+    concRight: 0.2,  // mol/L
+    tonicity: 'hypotonic', // for cell mode
+    cellStartTime: 0
+  };
+
+  const R = 0.0821; // L·atm/(mol·K)
+  const T = 298;    // K, room temperature
+
+  function osmoticPressure(C){ return C*R*T; } // atm
+
+  // ---------- U-Tube Osmosis ----------
+  let utubeLevelDiff = 0; // animated toward equilibrium
+
+  function renderControlsUtube(){
+    controlsBox.innerHTML = `
+      <div class="field"><label>Left Side Concentration <span class="v" id="v_cl">${state.concLeft.toFixed(1)} M</span></label>
+        <input type="range" id="s_cl" min="0" max="2" step="0.1" value="${state.concLeft}"></div>
+      <div class="field"><label>Right Side Concentration <span class="v" id="v_cr">${state.concRight.toFixed(1)} M</span></label>
+        <input type="range" id="s_cr" min="0" max="2" step="0.1" value="${state.concRight}"></div>
+      <div class="btn-row"><button class="action-btn" id="resetUtube">Reset Levels</button></div>`;
+    document.getElementById('s_cl').addEventListener('input', e=>{
+      state.concLeft=parseFloat(e.target.value); document.getElementById('v_cl').textContent=state.concLeft.toFixed(1)+' M';
+    });
+    document.getElementById('s_cr').addEventListener('input', e=>{
+      state.concRight=parseFloat(e.target.value); document.getElementById('v_cr').textContent=state.concRight.toFixed(1)+' M';
+    });
+    document.getElementById('resetUtube').addEventListener('click', ()=>{ utubeLevelDiff=0; animT=0; });
+  }
+
+  function renderReadoutsUtube(){
+    const piLeft = osmoticPressure(state.concLeft);
+    const piRight = osmoticPressure(state.concRight);
+    const deltaPi = Math.abs(piLeft-piRight);
+    const higherSide = state.concLeft>state.concRight ? 'LEFT' : (state.concRight>state.concLeft?'RIGHT':'Neither (equal)');
+    readoutsBox.innerHTML = `
+      <div class="readout"><div class="lbl">Osmotic Pressure (Left)</div><div class="val">${piLeft.toFixed(2)} atm</div></div>
+      <div class="readout"><div class="lbl">Osmotic Pressure (Right)</div><div class="val">${piRight.toFixed(2)} atm</div></div>
+      <div class="readout wide"><div class="lbl">Pressure Difference (Δπ)</div><div class="val">${deltaPi.toFixed(2)} atm</div></div>
+      <div class="readout wide"><div class="lbl">Water Level Rises On</div><div class="val" style="color:${deltaPi<0.01?'var(--good)':'var(--gold-soft)'}">${deltaPi<0.01?'Equal — no net movement':higherSide+' side (higher solute conc.)'}</div></div>
+      <div class="readout wide"><div class="lbl">Formula</div><div class="val" style="font-size:11.5px;">π = MRT (van't Hoff equation, dilute solution)</div></div>
+    `;
+  }
+
+  function drawUtube(dt){
+    const W=canvas.width, H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+
+    const piLeft = osmoticPressure(state.concLeft);
+    const piRight = osmoticPressure(state.concRight);
+    const targetDiff = (piLeft-piRight)*14; // scaled px per atm, positive = left side rises higher... actually water moves TOWARD higher conc, so that side's level rises
+    utubeLevelDiff += (targetDiff-utubeLevelDiff)*Math.min(1,dt*0.8);
+
+    const tubeW=90, tubeGap=140, tubeTop=H*0.15, tubeBottom=H*0.82;
+    const leftX=W*0.5-tubeGap/2-tubeW/2, rightX=W*0.5+tubeGap/2-tubeW/2;
+    const baseLevel = H*0.5;
+    const leftLevel = baseLevel + utubeLevelDiff*0.5;
+    const rightLevel = baseLevel - utubeLevelDiff*0.5;
+
+    // tube outline
+    ctx.strokeStyle='rgba(200,210,230,0.4)'; ctx.lineWidth=2;
+    ctx.strokeRect(leftX,tubeTop,tubeW,tubeBottom-tubeTop);
+    ctx.strokeRect(rightX,tubeTop,tubeW,tubeBottom-tubeTop);
+    ctx.beginPath(); ctx.moveTo(leftX,tubeBottom); ctx.lineTo(leftX+tubeW,tubeBottom); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(rightX,tubeBottom); ctx.lineTo(rightX+tubeW,tubeBottom); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(leftX+tubeW,tubeBottom-20); ctx.lineTo(rightX,tubeBottom-20); ctx.stroke();
+
+    // membrane (dashed line at the connecting bottom section)
+    ctx.strokeStyle='rgba(232,207,122,0.6)'; ctx.setLineDash([6,5]); ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo((leftX+tubeW+rightX)/2, tubeBottom-20); ctx.lineTo((leftX+tubeW+rightX)/2, tubeBottom+2); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // liquid fill
+    ctx.fillStyle='rgba(111,168,220,0.18)';
+    ctx.fillRect(leftX,leftLevel,tubeW,tubeBottom-leftLevel);
+    ctx.fillRect(rightX,rightLevel,tubeW,tubeBottom-rightLevel);
+    ctx.fillRect(leftX+tubeW,tubeBottom-20,rightX-(leftX+tubeW),20);
+
+    // solute dots (confined to their side, count proportional to concentration)
+    function soluteDots(x0,level,conc,seed){
+      const n = Math.round(conc*10);
+      for(let i=0;i<n;i++){
+        const fx = (Math.sin(i*12.9+seed)*0.5+0.5)*(tubeW-20)+10;
+        const fy = level + ((Math.cos(i*7.3+seed*2)*0.5+0.5))*(tubeBottom-level-10)+5;
+        if (fy<tubeBottom-4){
+          ctx.fillStyle=SOLUTE;
+          ctx.beginPath(); ctx.arc(x0+fx,fy,4,0,Math.PI*2); ctx.fill();
+        }
+      }
+    }
+    soluteDots(leftX,leftLevel,state.concLeft,1);
+    soluteDots(rightX,rightLevel,state.concRight,7);
+
+    // water molecule dots animated crossing the membrane
+    for(let i=0;i<6;i++){
+      const t=((animT*0.3+i/6)%1);
+      const y = tubeBottom-10;
+      const x = (leftX+tubeW) + t*(rightX-(leftX+tubeW));
+      ctx.fillStyle='rgba(111,168,220,0.9)';
+      ctx.beginPath(); ctx.arc(x,y,2.6,0,Math.PI*2); ctx.fill();
+    }
+
+    ctx.font='600 12px Poppins'; ctx.fillStyle='rgba(232,207,122,0.9)'; ctx.textAlign='center';
+    ctx.fillText('Left ('+state.concLeft.toFixed(1)+' M)', leftX+tubeW/2, tubeTop-14);
+    ctx.fillText('Right ('+state.concRight.toFixed(1)+' M)', rightX+tubeW/2, tubeTop-14);
+    ctx.font='11px JetBrains Mono, monospace'; ctx.fillStyle='rgba(138,147,184,0.8)';
+    ctx.fillText('Semi-permeable membrane (water passes, solute cannot)', W/2, tubeBottom+34);
+  }
+
+  // ---------- Cell in Solution (Tonicity) ----------
+  function renderControlsCell(){
+    controlsBox.innerHTML = `
+      <div class="toggle-row">
+        <div class="toggle-btn ${state.tonicity==='hypotonic'?'active':''}" data-t="hypotonic">Hypotonic</div>
+        <div class="toggle-btn ${state.tonicity==='isotonic'?'active':''}" data-t="isotonic">Isotonic</div>
+        <div class="toggle-btn ${state.tonicity==='hypertonic'?'active':''}" data-t="hypertonic">Hypertonic</div>
+      </div>`;
+    document.querySelectorAll('[data-t]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ state.tonicity=btn.dataset.t; state.cellStartTime=animT; renderControlsCell(); });
+    });
+  }
+
+  function cellSizeFactor(){
+    const elapsed = animT-state.cellStartTime;
+    const settle = 1-Math.exp(-elapsed/2.5);
+    if (state.tonicity==='hypotonic') return 1 + 0.55*settle;   // swells
+    if (state.tonicity==='hypertonic') return 1 - 0.42*settle;  // shrinks
+    return 1;
+  }
+
+  function renderReadoutsCell(){
+    const factor = cellSizeFactor();
+    const lysed = state.tonicity==='hypotonic' && factor>1.5;
+    const descriptions = {
+      hypotonic:'Solute concentration OUTSIDE is LOWER than inside the cell → water moves IN → cell SWELLS (may lyse/burst if extreme).',
+      isotonic:'Solute concentration is EQUAL inside and outside → no net water movement → cell keeps its normal shape.',
+      hypertonic:'Solute concentration OUTSIDE is HIGHER than inside the cell → water moves OUT → cell SHRINKS (crenation).'
+    };
+    readoutsBox.innerHTML = `
+      <div class="readout"><div class="lbl">Solution Type</div><div class="val" style="text-transform:capitalize;">${state.tonicity}</div></div>
+      <div class="readout"><div class="lbl">Cell Size (relative)</div><div class="val ${lysed?'warn':''}">${(factor*100).toFixed(0)}%</div></div>
+      <div class="readout wide"><div class="lbl">What's Happening</div><div class="val" style="font-size:11.5px;">${descriptions[state.tonicity]}</div></div>
+      ${lysed ? '<div class="readout wide"><div class="lbl">⚠ Result</div><div class="val warn">Cell has LYSED (burst) — too much water entered for the membrane to hold.</div></div>' : ''}
+    `;
+  }
+
+  function drawCell(){
+    const W=canvas.width, H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+    const cx=W*0.5, cy=H*0.48;
+    const factor = cellSizeFactor();
+    const lysed = state.tonicity==='hypotonic' && factor>1.5;
+    const baseR = 110;
+
+    // surrounding solution tint
+    const solColor = state.tonicity==='hypotonic' ? 'rgba(111,168,220,0.08)' : (state.tonicity==='hypertonic' ? 'rgba(232,207,122,0.1)' : 'rgba(138,147,184,0.06)');
+    ctx.fillStyle = solColor;
+    ctx.fillRect(0,0,W,H);
+
+    // solute dots in surrounding fluid (density reflects tonicity)
+    const outerSoluteCount = state.tonicity==='hypertonic' ? 60 : (state.tonicity==='isotonic'?25:8);
+    for(let i=0;i<outerSoluteCount;i++){
+      const ang = (i*137.5)%360*Math.PI/180;
+      const rad = baseR+30+((i*53)%150);
+      const x=cx+Math.cos(ang)*rad, y=cy+Math.sin(ang)*rad*0.8;
+      if (x>10&&x<W-10&&y>10&&y<H-10){
+        ctx.fillStyle=SOLUTE;
+        ctx.beginPath(); ctx.arc(x,y,3.5,0,Math.PI*2); ctx.fill();
+      }
+    }
+
+    if (!lysed){
+      // cell membrane
+      ctx.save();
+      ctx.translate(cx,cy); ctx.scale(factor,factor);
+      const grad = ctx.createRadialGradient(-20,-20,10,0,0,baseR);
+      grad.addColorStop(0,'rgba(224,113,95,0.5)');
+      grad.addColorStop(1,'rgba(180,70,60,0.35)');
+      ctx.fillStyle=grad;
+      ctx.beginPath(); ctx.arc(0,0,baseR,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle='rgba(255,255,255,0.5)'; ctx.lineWidth=2.5/factor;
+      ctx.stroke();
+      ctx.restore();
+
+      // internal solute dots (fixed count, spread with cell size)
+      for(let i=0;i<14;i++){
+        const ang=(i*137.5)%360*Math.PI/180;
+        const rad=(baseR*0.6)*((i%3)/3+0.3);
+        const x=cx+Math.cos(ang)*rad*factor, y=cy+Math.sin(ang)*rad*0.8*factor;
+        ctx.fillStyle=SOLUTE;
+        ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill();
+      }
+
+      // water arrows showing direction of net movement
+      if (state.tonicity!=='isotonic'){
+        const inward = state.tonicity==='hypertonic';
+        for(let i=0;i<8;i++){
+          const ang = i*(Math.PI*2/8);
+          const r1 = inward? baseR*factor+34 : baseR*factor*0.5;
+          const r2 = inward? baseR*factor+8 : baseR*factor*0.9;
+          const x1=cx+Math.cos(ang)*r1, y1=cy+Math.sin(ang)*r1*0.85;
+          const x2=cx+Math.cos(ang)*r2, y2=cy+Math.sin(ang)*r2*0.85;
+          ctx.strokeStyle=WATER; ctx.lineWidth=2;
+          ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+          const aAng=Math.atan2(y2-y1,x2-x1);
+          ctx.beginPath();
+          ctx.moveTo(x2,y2);
+          ctx.lineTo(x2-7*Math.cos(aAng-0.4), y2-7*Math.sin(aAng-0.4));
+          ctx.lineTo(x2-7*Math.cos(aAng+0.4), y2-7*Math.sin(aAng+0.4));
+          ctx.closePath(); ctx.fillStyle=WATER; ctx.fill();
+        }
+      }
+    } else {
+      // burst effect: scattered fragments + dots
+      ctx.font='40px sans-serif'; ctx.textAlign='center';
+      ctx.fillText('💥', cx, cy+14);
+      for(let i=0;i<20;i++){
+        const ang=(i*137.5)%360*Math.PI/180;
+        const rad=baseR*1.4+((i*17)%60);
+        ctx.fillStyle=SOLUTE;
+        ctx.beginPath(); ctx.arc(cx+Math.cos(ang)*rad, cy+Math.sin(ang)*rad*0.8, 3,0,Math.PI*2); ctx.fill();
+      }
+    }
+
+    ctx.font='600 13px Poppins'; ctx.fillStyle='#e8cf7a'; ctx.textAlign='center';
+    ctx.fillText(state.tonicity.toUpperCase()+' solution', W/2, H-16);
+  }
+
+  // ---------- Simple Diffusion ----------
+  let diffusionParticles = [];
+  function initDiffusion(){
+    diffusionParticles = [];
+    for(let i=0;i<80;i++){
+      diffusionParticles.push({
+        x: canvas.width*0.15 + Math.random()*canvas.width*0.15,
+        y: canvas.height*0.2 + Math.random()*canvas.height*0.6,
+        vx: (Math.random()-0.5)*60,
+        vy: (Math.random()-0.5)*60
+      });
+    }
+  }
+
+  function renderControlsDiffusion(){
+    controlsBox.innerHTML = `<div class="btn-row"><button class="action-btn" id="resetDiff">Restart Diffusion</button></div>`;
+    document.getElementById('resetDiff').addEventListener('click', initDiffusion);
+  }
+
+  function renderReadoutsDiffusion(){
+    // rough spread measure: standard deviation of x positions
+    const xs = diffusionParticles.map(p=>p.x);
+    const mean = xs.reduce((a,b)=>a+b,0)/xs.length;
+    const variance = xs.reduce((a,b)=>a+(b-mean)**2,0)/xs.length;
+    const spread = Math.sqrt(variance);
+    readoutsBox.innerHTML = `
+      <div class="readout wide"><div class="lbl">Particle Spread (std. dev.)</div><div class="val">${spread.toFixed(0)} px</div></div>
+      <div class="readout wide"><div class="lbl">Concept</div><div class="val" style="font-size:11.5px;">Particles move randomly (kinetic energy) from a region of HIGH concentration to LOW concentration — no membrane, no energy input required (passive process).</div></div>
+    `;
+  }
+
+  function drawDiffusion(dt){
+    const W=canvas.width, H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+    diffusionParticles.forEach(p=>{
+      p.x += p.vx*dt; p.y += p.vy*dt;
+      if (p.x<10||p.x>W-10) p.vx*=-1;
+      if (p.y<10||p.y>H-10) p.vy*=-1;
+      p.x = Math.max(10,Math.min(W-10,p.x));
+      p.y = Math.max(10,Math.min(H-10,p.y));
+      ctx.fillStyle=SOLUTE;
+      ctx.beginPath(); ctx.arc(p.x,p.y,4,0,Math.PI*2); ctx.fill();
+    });
+    ctx.strokeStyle='rgba(138,147,184,0.2)'; ctx.lineWidth=1.5;
+    ctx.strokeRect(10,10,W-20,H-20);
+    ctx.font='11px JetBrains Mono, monospace'; ctx.fillStyle='rgba(138,147,184,0.8)'; ctx.textAlign='center';
+    ctx.fillText('Particles start concentrated on the left, then spread evenly over time (diffusion)', W/2, H-16);
+  }
+
+  const titles = { utube:'U-Tube Osmosis Demonstration', cell:'Animal Cell in Different Solutions (Tonicity)', diffusion:'Simple Diffusion' };
+  const notes = {
+    utube:'Water moves through the membrane toward the side with HIGHER solute concentration, raising its level, until osmotic pressures balance.',
+    cell:'Animal cells (like red blood cells) have no cell wall, so they are very sensitive to the tonicity of their surrounding solution.',
+    diffusion:'Diffusion needs no membrane and no energy — particles simply spread from high to low concentration due to random thermal motion.'
+  };
+
+  function updateLegend(){
+    if (mode==='diffusion'){
+      legendBox.innerHTML = `<span><span class="dot" style="background:${SOLUTE}"></span> Solute particles</span>`;
+    } else {
+      legendBox.innerHTML = `
+        <span><span class="dot" style="background:${WATER}"></span> Water</span>
+        <span><span class="dot" style="background:${SOLUTE}"></span> Solute (cannot cross membrane)</span>`;
+    }
+  }
+
+  function render(dt){
+    vizTitle.textContent = titles[mode];
+    vizNote.innerHTML = '<b>Note:</b> ' + notes[mode];
+    updateLegend();
+    if (mode==='utube'){ renderReadoutsUtube(); drawUtube(dt||0.016); }
+    else if (mode==='cell'){ renderReadoutsCell(); drawCell(); }
+    else { renderReadoutsDiffusion(); drawDiffusion(dt||0.016); }
+  }
+
+  function switchMode(newMode){
+    mode = newMode;
+    if (mode==='utube') renderControlsUtube();
+    else if (mode==='cell') renderControlsCell();
+    else { renderControlsDiffusion(); if (diffusionParticles.length===0) initDiffusion(); }
+    render(0.016);
+  }
+
+  modeTabs.forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      modeTabs.forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      switchMode(tab.dataset.mode);
+    });
+  });
+
+  function loop(timestamp){
+    if (lastTime===null) lastTime=timestamp;
+    const dt = Math.min(0.05,(timestamp-lastTime)/1000);
+    lastTime = timestamp;
+    animT += dt;
+    render(dt);
+    requestAnimationFrame(loop);
+  }
+
+  renderControlsUtube();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
