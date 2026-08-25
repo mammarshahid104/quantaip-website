@@ -129,8 +129,15 @@
     margin-top:6px;
     line-height:1.5;
   }
-  .card .status{
+  .card .card-foot{
     margin-top:14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .card .status{
     display:flex;
     align-items:center;
     gap:6px;
@@ -144,6 +151,26 @@
   .dot.locked{ background:var(--locked); }
   .status.live{ color:var(--good); }
   .status.locked{ color:var(--locked); }
+
+  /* Secondary action: open the experiment's own URL in a new tab, so the
+     address bar shows e.g. /simulator/double_slit.html instead of the menu. */
+  .card .open-tab{
+    flex-shrink:0;
+    font-family:'JetBrains Mono',monospace;
+    font-size:9.5px;
+    letter-spacing:0.04em;
+    text-decoration:none;
+    white-space:nowrap;
+    color:var(--text-dim);
+    border:1px solid var(--navy-line);
+    border-radius:999px;
+    padding:4px 9px;
+    opacity:0.7;
+    transition:opacity .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .card:hover .open-tab{ opacity:1; }
+  .card .open-tab:hover{ color:var(--gold); border-color:var(--gold); }
+  .card .open-tab:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; opacity:1; }
 
   .card .icon{
     position:absolute;
@@ -293,13 +320,18 @@
           <div class="exp-title">${exp.title}</div>
           <div class="exp-desc">${exp.desc}</div>
         </div>
-        <div class="status ${exp.status}">
-          <span class="dot ${exp.status}"></span>
-          ${exp.status==='live' ? 'Available now' : 'Coming soon'}
+        <div class="card-foot">
+          <div class="status ${exp.status}">
+            <span class="dot ${exp.status}"></span>
+            ${exp.status==='live' ? 'Available now' : 'Coming soon'}
+          </div>
+          ${exp.status==='live' ? `<a class="open-tab" href="${exp.file}" target="_blank" rel="noopener" title="Open ${exp.title} in a new tab">🔗 Open in New Tab</a>` : ''}
         </div>
       `;
       if (exp.status==='live'){
         card.addEventListener('click', ()=> openExperiment(exp));
+        // Let the anchor navigate on its own — don't also open it in the iframe.
+        card.querySelector('.open-tab').addEventListener('click', e => e.stopPropagation());
       }
       grid.appendChild(card);
     });
