@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>QUANTAIP Simulator — Diffraction Grating</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-deep:#060c1c; --navy:#0b1530; --navy-panel:#101c3d; --navy-line:#1e2c54;
+    --gold:#d4af37; --gold-soft:#e8cf7a; --text:#eef1fb; --text-dim:#8a93b8;
+    --good:#5fd0a3; --red:#e0715f; --blue:#6fa8dc; --purple:#c084fc;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: radial-gradient(1200px 600px at 15% -10%, #12234f 0%, transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, #14183a 0%, transparent 55%), var(--navy-deep);
+    color:var(--text); font-family:'Poppins',sans-serif; min-height:100vh;
+    display:flex; flex-direction:column; align-items:center; padding:28px 16px 60px;
+  }
+  .header{ width:100%; max-width:1120px; display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom:20px; flex-wrap:wrap; gap:8px; border-bottom:1px solid var(--navy-line); padding-bottom:18px; }
+  .brand{ display:flex; align-items:baseline; gap:10px; }
+  .brand .mark{ font-weight:700; letter-spacing:0.14em; font-size:13px; color:var(--gold); text-transform:uppercase; }
+  .brand .name{ font-weight:300; font-size:22px; letter-spacing:0.01em; }
+  .brand .name b{ font-weight:600; color:var(--gold-soft); }
+  .exp-label{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); letter-spacing:0.08em; }
+
+  .container{ width:100%; max-width:1120px; }
+
+  .stage-tabs{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px; }
+  .stage-tab{
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.02em;
+    padding:9px 15px; border-radius:999px; border:1px solid var(--navy-line);
+    background:var(--navy-deep); color:var(--text-dim); cursor:pointer;
+  }
+  .stage-tab:hover{ color:var(--text); border-color:#33407a; }
+  .stage-tab.active{ background:var(--gold); color:#191204; border-color:var(--gold); font-weight:600; }
+
+  .layout{ display:grid; grid-template-columns:1.5fr 1fr; gap:20px; }
+  @media (max-width:920px){ .layout{ grid-template-columns:1fr; } }
+
+  .panel{
+    background:linear-gradient(180deg, var(--navy-panel), var(--navy));
+    border:1px solid var(--navy-line); border-radius:14px; padding:20px; margin-bottom:20px;
+  }
+  .panel h2{ margin:0 0 14px; font-size:12px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-dim); }
+
+  #mainCanvas{ width:100%; aspect-ratio:16/11; border-radius:10px; background:linear-gradient(180deg, #0a1330 0%, #060c1c 100%); border:1px solid var(--navy-line); display:block; cursor:pointer; }
+
+  .field{ display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
+  .field label{ display:flex; justify-content:space-between; font-size:12.5px; color:var(--text-dim); }
+  .field label span.v{ font-family:'JetBrains Mono',monospace; color:var(--gold-soft); }
+  input[type=range]{ -webkit-appearance:none; width:100%; height:4px; border-radius:2px; background:var(--navy-line); outline:none; }
+  input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:15px; height:15px; border-radius:50%; background:var(--gold); cursor:pointer; border:2px solid var(--navy-deep); }
+
+  .toggle-row{ display:flex; gap:8px; margin-bottom:14px; }
+  .toggle-btn{
+    flex:1; font-family:'JetBrains Mono',monospace; font-size:11px; text-align:center;
+    padding:9px 4px; border-radius:8px; border:1px solid var(--navy-line);
+    background:var(--navy-deep); color:var(--text-dim); cursor:pointer;
+  }
+  .toggle-btn.active{ background:var(--gold); color:#191204; border-color:var(--gold); font-weight:600; }
+
+  .order-row{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px; }
+  .order-btn{
+    font-family:'JetBrains Mono',monospace; font-size:11px; padding:6px 10px; border-radius:6px;
+    border:1px solid var(--navy-line); background:var(--navy-deep); color:var(--text-dim); cursor:pointer;
+  }
+  .order-btn.active{ background:var(--blue); color:#0a1128; border-color:var(--blue); font-weight:600; }
+  .order-btn:disabled{ opacity:0.3; cursor:not-allowed; }
+
+  .exp-grid{ display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }
+  .exp-btn{
+    font-family:'JetBrains Mono',monospace; font-size:11px; text-align:left;
+    padding:10px 12px; border-radius:8px; border:1px solid var(--navy-line);
+    background:var(--navy-deep); color:var(--text-dim); cursor:pointer;
+  }
+  .exp-btn:hover{ color:var(--gold-soft); border-color:var(--gold); }
+
+  .readouts{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+  .readout{ background:var(--navy-deep); border:1px solid var(--navy-line); border-radius:8px; padding:10px 12px; }
+  .readout .lbl{ font-size:10px; color:var(--text-dim); letter-spacing:0.06em; text-transform:uppercase; }
+  .readout .val{ font-family:'JetBrains Mono',monospace; font-size:14px; color:var(--gold-soft); margin-top:4px; }
+  .readout.wide{ grid-column:1/-1; }
+
+  .note{ font-size:11.5px; color:var(--text-dim); line-height:1.6; margin-top:14px; border-top:1px solid var(--navy-line); padding-top:14px; }
+  .note b{ color:var(--gold-soft); font-weight:600; }
+
+  footer{ margin-top:6px; font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--text-dim); letter-spacing:0.06em; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">
+    <span class="mark">QUANTAIP</span>
+    <span class="name">Simulator — <b>Diffraction Grating</b></span>
+  </div>
+  <div class="exp-label">EXPERIMENT / MULTIPLE-SLIT DIFFRACTION</div>
+</div>
+
+<div class="container">
+
+  <div class="stage-tabs" id="stageTabs">
+    <div class="stage-tab active" data-stage="pattern">1 · Diffraction Pattern</div>
+    <div class="stage-tab" data-stage="sharpness">2 · Effect of N (Sharpness)</div>
+    <div class="stage-tab" data-stage="spectrum">3 · White Light Spectrum</div>
+  </div>
+
+  <div class="layout">
+
+    <div class="panel">
+      <h2 id="vizTitle">Visualization</h2>
+      <canvas id="mainCanvas" width="760" height="522"></canvas>
+      <div class="note" id="vizNote"></div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h2>Controls</h2>
+        <div id="controlsBox"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Readouts</h2>
+        <div class="readouts" id="readoutsBox"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>QUANTAIP EDUOS · VIRTUAL LAB MODULE · PROTOTYPE BUILD</footer>
+
+<script>
+(function(){
+  const canvas = document.getElementById('mainCanvas');
+  const ctx = canvas.getContext('2d');
+  const controlsBox = document.getElementById('controlsBox');
+  const readoutsBox = document.getElementById('readoutsBox');
+  const vizTitle = document.getElementById('vizTitle');
+  const vizNote = document.getElementById('vizNote');
+  const stageTabs = document.querySelectorAll('.stage-tab');
+
+  let stage = 'pattern';
+  let animT = 0;
+
+  const state = {
+    lightType: 'mono',   // 'mono' | 'white'
+    lambda: 550,          // nm
+    d: 2.0,                // micrometres (grating spacing)
+    N: 8,                   // number of slits
+    L: 1.5,                  // metres (screen distance)
+    selectedOrder: 1,
+    Nsharpness: 8,
+    clickInfo: null,
+    showWaves: true,
+    showPathDiff: false,
+    paused: false,
+    measureClick: null       // {n, yMeasured, thetaMeasured}
+  };
+  const PX_PER_METRE = 130; // real-geometry scale: screen distance and y-positions both driven by this
+
+  // ---------- Wavelength -> visible colour ----------
+  function wavelengthToRGB(wl){
+    let r,g,b;
+    if (wl>=380 && wl<440){ r=-(wl-440)/(440-380); g=0; b=1; }
+    else if (wl>=440 && wl<490){ r=0; g=(wl-440)/(490-440); b=1; }
+    else if (wl>=490 && wl<510){ r=0; g=1; b=-(wl-510)/(510-490); }
+    else if (wl>=510 && wl<580){ r=(wl-510)/(580-510); g=1; b=0; }
+    else if (wl>=580 && wl<645){ r=1; g=-(wl-645)/(645-580); b=0; }
+    else if (wl>=645 && wl<=780){ r=1; g=0; b=0; }
+    else { r=0.5;g=0.5;b=0.5; }
+    let factor;
+    if (wl>=380 && wl<420) factor=0.3+0.7*(wl-380)/(420-380);
+    else if (wl>=420 && wl<701) factor=1;
+    else if (wl>=701 && wl<=780) factor=0.3+0.7*(780-wl)/(780-700);
+    else factor=0.5;
+    const gamma=0.8;
+    function adj(c){ return c<=0?0:Math.round(255*Math.pow(c*factor,gamma)); }
+    return {r:adj(r),g:adj(g),b:adj(b), css:`rgb(${adj(r)},${adj(g)},${adj(b)})`};
+  }
+
+  // ---------- Core physics ----------
+  function maxOrder(d_um, lambda_nm){
+    const d_nm = d_um*1000;
+    return Math.floor(d_nm/lambda_nm);
+  }
+  function angleForOrder(n, d_um, lambda_nm){
+    const d_nm = d_um*1000;
+    const s = (n*lambda_nm)/d_nm;
+    if (Math.abs(s)>1) return null;
+    return Math.asin(s)*180/Math.PI;
+  }
+  // Intensity via ACTUAL summation of N coherent point-source contributions (not the closed-form shortcut)
+  function gratingIntensity(thetaDeg, d_um, lambda_nm, N){
+    const d_nm = d_um*1000;
+    const k = 2*Math.PI/lambda_nm;
+    const pathDiffPerSlit = d_nm*Math.sin(thetaDeg*Math.PI/180);
+    let sumRe=0, sumIm=0;
+    const nEff = Math.min(N, 220); // cap for performance; visually indistinguishable beyond this
+    for(let i=0;i<nEff;i++){
+      const phase = k*i*pathDiffPerSlit;
+      sumRe += Math.cos(phase);
+      sumIm += Math.sin(phase);
+    }
+    const amp = Math.sqrt(sumRe*sumRe+sumIm*sumIm)/nEff;
+    return amp*amp; // normalised 0..1 (1 at principal maxima)
+  }
+
+  // Real screen-geometry: y = L·tanθ. θ depends only on d,λ,n. y depends on L too — this is the
+  // distinction the simulator must respect (changing L moves y, never θ).
+  function screenPositionMetres(theta_deg, L_m){
+    return L_m * Math.tan(theta_deg*Math.PI/180);
+  }
+
+  // ==================================================================
+  // STAGE 1 — Diffraction Pattern
+  // ==================================================================
+  const PRESETS = {
+    default:   { d:2.0, N:8,  L:1.5, lambda:550 },
+    wideSpec:  { d:1.0, N:8,  L:2.0, lambda:550 },
+    highRes:   { d:2.0, N:60, L:1.5, lambda:550 },
+    fewSlit:   { d:2.0, N:3,  L:1.5, lambda:550 },
+    largeL:    { d:2.0, N:8,  L:3.0, lambda:550 },
+    smallD:    { d:0.8, N:8,  L:1.5, lambda:550 }
+  };
+
+  function renderControlsPattern(){
+    const nmax = maxOrder(state.d, state.lambda);
+    let orderButtons = '';
+    for(let n=-Math.min(nmax,5); n<=Math.min(nmax,5); n++){
+      orderButtons += `<div class="order-btn ${n===state.selectedOrder?'active':''}" data-n="${n}">n=${n}</div>`;
+    }
+    controlsBox.innerHTML = `
+      <div class="toggle-row">
+        <div class="toggle-btn ${state.lightType==='mono'?'active':''}" data-lt="mono">Monochromatic</div>
+        <div class="toggle-btn ${state.lightType==='white'?'active':''}" data-lt="white">White Light</div>
+      </div>
+      ${state.lightType==='mono' ? `
+      <div class="field"><label>Wavelength (λ) <span class="v" id="v_lam">${state.lambda} nm</span></label>
+        <input type="range" id="s_lam" min="400" max="700" step="5" value="${state.lambda}"></div>` : ''}
+      <div class="field"><label>Grating Spacing (d) <span class="v" id="v_d">${state.d.toFixed(2)} µm</span></label>
+        <input type="range" id="s_d" min="0.5" max="5" step="0.05" value="${state.d}"></div>
+      <div class="field"><label>Number of Slits (N) <span class="v" id="v_N">${state.N}</span></label>
+        <input type="range" id="s_N" min="2" max="60" step="1" value="${state.N}"></div>
+      <div class="field"><label>Screen Distance (L) <span class="v" id="v_L">${state.L.toFixed(1)} m</span></label>
+        <input type="range" id="s_L" min="0.3" max="3" step="0.1" value="${state.L}"></div>
+      <label style="font-size:12.5px;color:var(--text-dim);display:block;margin-bottom:6px;">Select Order (n):</label>
+      <div class="order-row">${orderButtons}</div>
+      <div class="toggle-row">
+        <div class="toggle-btn ${state.showWaves?'active':''}" data-toggle="waves">Show Waves</div>
+        <div class="toggle-btn ${state.showPathDiff?'active':''}" data-toggle="pathdiff">Show Path Difference</div>
+        <div class="toggle-btn ${state.paused?'active':''}" data-toggle="pause">${state.paused?'▶ Play':'⏸ Pause'}</div>
+      </div>
+      <label style="font-size:12.5px;color:var(--text-dim);display:block;margin-bottom:6px;">Preset Experiments:</label>
+      <div class="exp-grid">
+        <div class="exp-btn" data-preset="default">Default Experiment</div>
+        <div class="exp-btn" data-preset="wideSpec">Wide Spectral Separation</div>
+        <div class="exp-btn" data-preset="highRes">High-Resolution Grating (N=60)</div>
+        <div class="exp-btn" data-preset="fewSlit">Few-Slit Experiment (N=3)</div>
+        <div class="exp-btn" data-preset="largeL">Large Screen Distance</div>
+        <div class="exp-btn" data-preset="smallD">Small Grating Spacing</div>
+      </div>
+      <div class="note" style="margin-top:0;border-top:none;padding-top:0;">Click a bright spot on the screen to measure θ and y, and compare with theory.</div>`;
+
+    if (state.lightType==='mono'){
+      document.getElementById('s_lam').addEventListener('input', e=>{
+        state.lambda=parseFloat(e.target.value); document.getElementById('v_lam').textContent=state.lambda+' nm';
+        renderControlsPattern();
+      });
+    }
+    document.querySelectorAll('[data-lt]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ state.lightType=btn.dataset.lt; renderControlsPattern(); });
+    });
+    document.getElementById('s_d').addEventListener('input', e=>{
+      state.d=parseFloat(e.target.value); document.getElementById('v_d').textContent=state.d.toFixed(2)+' µm';
+      renderControlsPattern();
+    });
+    document.getElementById('s_N').addEventListener('input', e=>{
+      state.N=parseFloat(e.target.value); document.getElementById('v_N').textContent=state.N;
+    });
+    document.getElementById('s_L').addEventListener('input', e=>{
+      state.L=parseFloat(e.target.value); document.getElementById('v_L').textContent=state.L.toFixed(1)+' m';
+    });
+    document.querySelectorAll('[data-n]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ state.selectedOrder=parseInt(btn.dataset.n); renderControlsPattern(); });
+    });
+    document.querySelectorAll('[data-toggle]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const t = btn.dataset.toggle;
+        if (t==='waves') state.showWaves=!state.showWaves;
+        else if (t==='pathdiff') state.showPathDiff=!state.showPathDiff;
+        else if (t==='pause') state.paused=!state.paused;
+        renderControlsPattern();
+      });
+    });
+    document.querySelectorAll('[data-preset]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const p = PRESETS[btn.dataset.preset];
+        state.d=p.d; state.N=p.N; state.L=p.L; state.lambda=p.lambda;
+        state.measureClick=null;
+        renderControlsPattern();
+      });
+    });
+  }
+
+  function renderReadoutsPattern(){
+    const nmax = maxOrder(state.d, state.lambda);
+    const theta = angleForOrder(state.selectedOrder, state.d, state.lambda);
+    const yMetres = theta!==null ? screenPositionMetres(theta, state.L) : null;
+    let measureHtml = '';
+    if (state.measureClick){
+      const mc = state.measureClick;
+      measureHtml = `
+        <div class="readout"><div class="lbl">Measured θ</div><div class="val">${mc.thetaMeasured.toFixed(2)}°</div></div>
+        <div class="readout"><div class="lbl">Theoretical θ (n=${mc.n})</div><div class="val">${mc.thetaTheory===null?'—':mc.thetaTheory.toFixed(2)+'°'}</div></div>
+        <div class="readout"><div class="lbl">Measured y</div><div class="val">${(mc.yMeasured*1000).toFixed(1)} mm</div></div>
+        <div class="readout"><div class="lbl">Theoretical y = L tanθ</div><div class="val">${mc.yTheory===null?'—':(mc.yTheory*1000).toFixed(1)+' mm'}</div></div>`;
+    }
+    readoutsBox.innerHTML = `
+      <div class="readout wide"><div class="lbl">Grating Equation</div><div class="val">d sinθ = nλ</div></div>
+      <div class="readout"><div class="lbl">Selected Order</div><div class="val">n = ${state.selectedOrder}</div></div>
+      <div class="readout"><div class="lbl">Diffraction Angle</div><div class="val">θ = ${theta===null?'—':theta.toFixed(2)+'°'}</div></div>
+      <div class="readout"><div class="lbl">Screen Position</div><div class="val">y = L tanθ = ${yMetres===null?'—':(yMetres*1000).toFixed(1)+' mm'}</div></div>
+      <div class="readout"><div class="lbl">Max Possible Order</div><div class="val">n_max = ${nmax}</div></div>
+      <div class="readout wide"><div class="lbl">Central Maximum</div><div class="val">θ=0° → d sinθ=0 → n=0 (always present, fixed at centre)</div></div>
+      ${measureHtml}
+    `;
+  }
+
+  function drawPattern(){
+    const W=canvas.width, H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+    const srcX=40, gratingX=W*0.24;
+    const midY=H*0.48;
+    // REAL geometry: screen distance is driven by L (metres) via a fixed px-per-metre scale
+    const screenX = Math.min(W*0.97, gratingX + state.L*PX_PER_METRE);
+
+    // incident beam (normal incidence)
+    const beamCol = state.lightType==='mono' ? wavelengthToRGB(state.lambda).css : '#ffffff';
+    ctx.strokeStyle=beamCol; ctx.lineWidth=2;
+    for(let i=0;i<3;i++){ ctx.beginPath(); ctx.moveTo(srcX,midY); ctx.lineTo(gratingX-4,midY); ctx.stroke(); }
+    ctx.fillStyle=beamCol; ctx.beginPath(); ctx.arc(srcX,midY,8,0,Math.PI*2); ctx.fill();
+    ctx.font='10px JetBrains Mono, monospace'; ctx.fillStyle='rgba(200,210,230,0.8)'; ctx.textAlign='center';
+    ctx.fillText(state.lightType==='mono'?'Monochromatic Source':'White Light Source', srcX, midY-18);
+    ctx.fillStyle='rgba(138,147,184,0.6)';
+    ctx.fillText('θᵢ = 0° (normal incidence)', srcX, midY+22);
+
+    // grating with visible individual slits
+    const nSlitsToDraw = Math.min(state.N, 15);
+    const slitSpacingPx = Math.min(20, (H*0.5)/nSlitsToDraw);
+    const gratingTop = midY - (nSlitsToDraw-1)*slitSpacingPx/2;
+    const slitPositions = [];
+    for(let i=0;i<nSlitsToDraw;i++) slitPositions.push(gratingTop + i*slitSpacingPx);
+
+    ctx.strokeStyle='rgba(200,210,230,0.7)'; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.moveTo(gratingX,10); ctx.lineTo(gratingX,slitPositions[0]-6); ctx.stroke();
+    for(let i=1;i<slitPositions.length;i++){
+      ctx.beginPath(); ctx.moveTo(gratingX,slitPositions[i-1]+3); ctx.lineTo(gratingX,slitPositions[i]-3); ctx.stroke();
+    }
+    ctx.beginPath(); ctx.moveTo(gratingX,slitPositions[slitPositions.length-1]+6); ctx.lineTo(gratingX,H-10); ctx.stroke();
+    ctx.font='9px JetBrains Mono, monospace'; ctx.fillStyle='rgba(138,147,184,0.7)'; ctx.textAlign='center';
+    ctx.fillText(state.N>15 ? 'N='+state.N+' slits (representative view)' : 'N='+state.N+' slits', gratingX, slitPositions[0]-14);
+    ctx.fillStyle='rgba(232,207,122,0.8)';
+    ctx.fillText('d', gratingX+16, (slitPositions[0]+slitPositions[1])/2+3);
+
+    // ---- WAVE VISUALIZATION: coherent circular wavefronts from each slit ----
+    if (state.showWaves){
+      const waveSpeedPxPerSec = 90;
+      const wavelengthPx = 14; // visual wavelength (px), independent of real nm scale, for clarity
+      const t = state.paused ? 0 : animT;
+      slitPositions.forEach(sy=>{
+        for(let ring=0; ring<5; ring++){
+          const r = ((t*waveSpeedPxPerSec + ring*wavelengthPx*3) % (screenX-gratingX+60));
+          if (r<3) continue;
+          ctx.globalAlpha = Math.max(0,1-r/(screenX-gratingX+60))*0.45;
+          ctx.strokeStyle=beamCol; ctx.lineWidth=1.3;
+          ctx.beginPath(); ctx.arc(gratingX,sy,r,-Math.PI/2.4,Math.PI/2.4); ctx.stroke();
+        }
+      });
+      ctx.globalAlpha=1;
+    }
+
+    // ---- PATH DIFFERENCE VISUALIZATION between two adjacent slits, for the selected order ----
+    if (state.showPathDiff && state.lightType==='mono' && slitPositions.length>=2){
+      const theta = angleForOrder(state.selectedOrder, state.d, state.lambda);
+      if (theta!==null){
+        const thetaRad = theta*Math.PI/180;
+        const a = {x:gratingX, y:slitPositions[0]};
+        const b = {x:gratingX, y:slitPositions[1]};
+        const dirX = Math.cos(thetaRad), dirY = -Math.sin(thetaRad);
+        const rayLen = 90;
+        const aEnd = {x:a.x+dirX*rayLen, y:a.y+dirY*rayLen};
+        const bEnd = {x:b.x+dirX*rayLen, y:b.y+dirY*rayLen};
+        ctx.strokeStyle='#5fd0a3'; ctx.lineWidth=1.6;
+        ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(aEnd.x,aEnd.y); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(b.x,b.y); ctx.lineTo(bEnd.x,bEnd.y); ctx.stroke();
+        // perpendicular foot from a onto the ray from b (constructs the extra path length d sinθ)
+        const abx=b.x-a.x, aby=b.y-a.y;
+        const proj = abx*dirX+aby*dirY;
+        const foot = {x:a.x+dirX*proj, y:a.y+dirY*proj};
+        ctx.strokeStyle='rgba(232,207,122,0.7)'; ctx.setLineDash([3,3]); ctx.lineWidth=1.3;
+        ctx.beginPath(); ctx.moveTo(b.x,b.y); ctx.lineTo(foot.x,foot.y); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.font='10px JetBrains Mono, monospace'; ctx.fillStyle='#5fd0a3'; ctx.textAlign='left';
+        ctx.fillText('path difference = d sinθ = '+state.selectedOrder+'λ', (b.x+foot.x)/2+8, (b.y+foot.y)/2);
+      }
+    }
+
+    // diffracted beams to each valid order, + screen pattern (REAL y = L·tanθ geometry)
+    const nmax = maxOrder(state.d, state.lambda);
+
+    function yToPx(theta_deg){
+      const yM = screenPositionMetres(theta_deg, state.L);
+      return midY - yM*PX_PER_METRE;
+    }
+
+    if (state.lightType==='mono'){
+      const col = wavelengthToRGB(state.lambda);
+      for(let n=-nmax; n<=nmax; n++){
+        const theta = angleForOrder(n, state.d, state.lambda);
+        if (theta===null) continue;
+        const yPx = Math.max(20, Math.min(H-20, yToPx(theta)));
+        const highlighted = n===state.selectedOrder;
+        ctx.strokeStyle = highlighted? col.css : `rgba(${col.r},${col.g},${col.b},0.35)`;
+        ctx.lineWidth = highlighted?2:1;
+        ctx.beginPath(); ctx.moveTo(gratingX,midY); ctx.lineTo(screenX,yPx); ctx.stroke();
+        ctx.fillStyle=col.css;
+        ctx.beginPath(); ctx.arc(screenX,yPx, highlighted?7:5,0,Math.PI*2); ctx.fill();
+        if (highlighted){ ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.stroke(); }
+        ctx.font='9px JetBrains Mono, monospace'; ctx.fillStyle='rgba(220,225,240,0.85)'; ctx.textAlign='left';
+        ctx.fillText('n='+n, screenX+12, yPx+3);
+      }
+    } else {
+      // white light: continuous spectrum band per order, positioned via real d sinθ=nλ then y=Ltanθ
+      for(let n=-nmax; n<=nmax; n++){
+        if (n===0){
+          const yPx=midY;
+          ctx.fillStyle='#ffffff'; ctx.beginPath(); ctx.arc(screenX,yPx,6,0,Math.PI*2); ctx.fill();
+          ctx.font='9px JetBrains Mono, monospace'; ctx.fillStyle='rgba(220,225,240,0.85)'; ctx.textAlign='left';
+          ctx.fillText('n=0 — all λ overlap (white)', screenX+12, yPx+3);
+          continue;
+        }
+        for(let wl=400; wl<=700; wl+=4){
+          const theta = angleForOrder(n, state.d, wl);
+          if (theta===null) continue;
+          const yPx = yToPx(theta);
+          if (yPx<15||yPx>H-15) continue;
+          const col = wavelengthToRGB(wl);
+          ctx.fillStyle=col.css;
+          ctx.fillRect(screenX-3, yPx, 10, 3);
+        }
+        const thetaMid = angleForOrder(n, state.d, 550);
+        if (thetaMid!==null){
+          const yMidPx = yToPx(thetaMid);
+          ctx.font='9px JetBrains Mono, monospace'; ctx.fillStyle='rgba(220,225,240,0.7)'; ctx.textAlign='left';
+          ctx.fillText('n='+n, screenX+14, yMidPx+3);
+        }
+      }
+    }
+
+    // screen line
+    ctx.strokeStyle='rgba(200,210,230,0.5)'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(screenX,10); ctx.lineTo(screenX,H-10); ctx.stroke();
+    ctx.font='10px JetBrains Mono, monospace'; ctx.fillStyle='rgba(200,210,230,0.7)'; ctx.textAlign='center';
+    ctx.fillText('Screen (L='+state.L.toFixed(1)+'m)', screenX, H-2);
+
+    // measurement marker
+    if (state.measureClick){
+      ctx.strokeStyle='#ffffff'; ctx.lineWidth=1.5; ctx.setLineDash([2,2]);
+      ctx.beginPath(); ctx.moveTo(screenX-14, midY-state.measureClick.yMeasured*PX_PER_METRE); ctx.lineTo(screenX+14, midY-state.measureClick.yMeasured*PX_PER_METRE); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    ctx.font='600 12px Poppins'; ctx.fillStyle='#e8cf7a'; ctx.textAlign='center';
+    ctx.fillText('Light Source → Diffraction Grating (N slits) → Screen', W/2, 20);
+
+    // store geometry for click handling
+    patternGeom.gratingX=gratingX; patternGeom.screenX=screenX; patternGeom.midY=midY;
+  }
+
+  const patternGeom = {};
+  canvas.addEventListener('click', (e)=>{
+    if (stage!=='pattern') return;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width/rect.width, scaleY = canvas.height/rect.height;
+    const px = (e.clientX-rect.left)*scaleX;
+    const py = (e.clientY-rect.top)*scaleY;
+    if (!patternGeom.screenX || Math.abs(px-patternGeom.screenX)>25) return;
+
+    const yMeasured = (patternGeom.midY - py)/PX_PER_METRE; // metres
+    const thetaMeasured = Math.atan2(yMeasured, state.L)*180/Math.PI;
+    const nmax = maxOrder(state.d, state.lambda);
+    let bestN=0, bestDiff=Infinity;
+    for(let n=-nmax;n<=nmax;n++){
+      const th = angleForOrder(n, state.d, state.lambda);
+      if (th===null) continue;
+      const diff = Math.abs(th-thetaMeasured);
+      if (diff<bestDiff){ bestDiff=diff; bestN=n; }
+    }
+    const thetaTheory = angleForOrder(bestN, state.d, state.lambda);
+    const yTheory = thetaTheory!==null ? screenPositionMetres(thetaTheory, state.L) : null;
+    state.measureClick = { n:bestN, yMeasured, thetaMeasured, thetaTheory, yTheory };
+  });
+
+  // ==================================================================
+  // STAGE 2 — Effect of N (Sharpness)
+  // ==================================================================
+  function renderControlsSharpness(){
+    controlsBox.innerHTML = `
+      <div class="field"><label>Number of Slits (N) <span class="v" id="v_Ns">${state.Nsharpness}</span></label>
+        <input type="range" id="s_Ns" min="2" max="60" step="1" value="${state.Nsharpness}"></div>
+      <div class="field"><label>Wavelength (λ) <span class="v" id="v_lams">${state.lambda} nm</span></label>
+        <input type="range" id="s_lams" min="400" max="700" step="5" value="${state.lambda}"></div>
+      <div class="field"><label>Grating Spacing (d) <span class="v" id="v_ds">${state.d.toFixed(2)} µm</span></label>
+        <input type="range" id="s_ds" min="0.5" max="5" step="0.05" value="${state.d}"></div>
+      <div class="exp-grid">
+        <div class="exp-btn" data-preset="2">Show N = 2 (double-slit-like)</div>
+        <div class="exp-btn" data-preset="10">Show N = 10</div>
+        <div class="exp-btn" data-preset="60">Show N = 60 (sharp grating)</div>
+      </div>`;
+    document.getElementById('s_Ns').addEventListener('input', e=>{
+      state.Nsharpness=parseFloat(e.target.value); document.getElementById('v_Ns').textContent=state.Nsharpness;
+    });
+    document.getElementById('s_lams').addEventListener('input', e=>{
+      state.lambda=parseFloat(e.target.value); document.getElementById('v_lams').textContent=state.lambda+' nm';
+    });
+    document.getElementById('s_ds').addEventListener('input', e=>{
+      state.d=parseFloat(e.target.value); document.getElementById('v_ds').textContent=state.d.toFixed(2)+' µm';
+    });
+    document.querySelectorAll('[data-preset]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ state.Nsharpness=parseInt(btn.dataset.preset); renderControlsSharpness(); });
+    });
+  }
+
+  function renderReadoutsSharpness(){
+    readoutsBox.innerHTML = `
+      <div class="readout"><div class="lbl">Number of Slits</div><div class="val">N = ${state.Nsharpness}</div></div>
+      <div class="readout"><div class="lbl">Peak Intensity (relative)</div><div class="val">∝ N² </div></div>
+      <div class="readout wide"><div class="lbl">Effect</div><div class="val" style="font-size:11.5px;">${state.Nsharpness<8 ? 'Few slits → broad, fuzzy principal maxima with prominent secondary peaks.' : state.Nsharpness<25 ? 'More slits → maxima noticeably sharper, secondary peaks weaker.' : 'Many slits → very sharp, narrow bright lines — this is why real gratings resolve spectral lines precisely.'}</div></div>
+      <div class="readout wide"><div class="lbl">Secondary Maxima</div><div class="val" style="font-size:11px;">N−2 secondary maxima appear between each pair of principal maxima.</div></div>
+    `;
+  }
+
+  function drawSharpness(){
+    const W=canvas.width, H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+    const midY=H*0.55, amp=H*0.4;
+
+    ctx.strokeStyle='rgba(138,147,184,0.15)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(0,midY); ctx.lineTo(W,midY); ctx.stroke();
+
+    const col = wavelengthToRGB(state.lambda);
+    ctx.strokeStyle=col.css; ctx.lineWidth=2;
+    ctx.beginPath();
+    const thetaRange = 6; // degrees shown either side
+    for(let x=0;x<W;x++){
+      const thetaDeg = ((x/W)*2-1)*thetaRange;
+      const I = gratingIntensity(thetaDeg, state.d, state.lambda, state.Nsharpness);
+      const y = midY - I*amp;
+      if (x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+
+    // mark principal maxima positions (n=0,±1,±2 within range)
+    const nmax = maxOrder(state.d, state.lambda);
+    for(let n=-Math.min(nmax,4); n<=Math.min(nmax,4); n++){
+      const theta = angleForOrder(n, state.d, state.lambda);
+      if (theta===null || Math.abs(theta)>thetaRange) continue;
+      const x = ((theta/thetaRange)+1)/2*W;
+      ctx.strokeStyle='rgba(255,255,255,0.25)'; ctx.setLineDash([3,3]); ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(x,10); ctx.lineTo(x,midY); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.font='10px JetBrains Mono, monospace'; ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.textAlign='center';
+      ctx.fillText('n='+n, x, midY+16);
+    }
+
+    ctx.font='600 12px Poppins'; ctx.fillStyle='#e8cf7a'; ctx.textAlign='center';
+    ctx.fillText('Intensity Profile — N = '+state.Nsharpness+' slits (computed from actual superposition of '+Math.min(state.Nsharpness,220)+' coherent sources)', W/2, 20);
+  }
+
+  // ==================================================================
+  // STAGE 3 — White Light Spectrum
+  // ==================================================================
+  function renderControlsSpectrum(){
+    controlsBox.innerHTML = `
+      <div class="field"><label>Grating Spacing (d) <span class="v" id="v_dw">${state.d.toFixed(2)} µm</span></label>
+        <input type="range" id="s_dw" min="0.5" max="5" step="0.05" value="${state.d}"></div>
+      <div class="field"><label>Screen Distance (L) <span class="v" id="v_Lw">${state.L.toFixed(1)} m</span></label>
+        <input type="range" id="s_Lw" min="0.3" max="3" step="0.1" value="${state.L}"></div>
+      <div class="note" style="margin-top:0;border-top:none;padding-top:0;">Click anywhere on a coloured spectral band to identify its wavelength, order and angle — like using a real spectrometer.</div>`;
+    document.getElementById('s_dw').addEventListener('input', e=>{
+      state.d=parseFloat(e.target.value); document.getElementById('v_dw').textContent=state.d.toFixed(2)+' µm';
+    });
+    document.getElementById('s_Lw').addEventListener('input', e=>{
+      state.L=parseFloat(e.target.value); document.getElementById('v_Lw').textContent=state.L.toFixed(1)+' m';
+    });
+  }
+
+  function renderReadoutsSpectrum(){
+    let clickHtml = '';
+    if (state.clickInfo){
+      clickHtml = `
+        <div class="readout"><div class="lbl">Identified λ</div><div class="val" style="color:${state.clickInfo.col}">${state.clickInfo.lambda} nm</div></div>
+        <div class="readout"><div class="lbl">Order</div><div class="val">n = ${state.clickInfo.n}</div></div>
+        <div class="readout"><div class="lbl">Angle</div><div class="val">θ = ${state.clickInfo.theta.toFixed(2)}°</div></div>
+        <div class="readout wide"><div class="lbl">Screen Position</div><div class="val">y = L tanθ = ${(state.clickInfo.y*1000).toFixed(1)} mm</div></div>`;
+    }
+    readoutsBox.innerHTML = `
+      <div class="readout wide"><div class="lbl">n = 0</div><div class="val">Central maximum — ALL wavelengths overlap → appears WHITE</div></div>
+      <div class="readout wide"><div class="lbl">n = ±1, ±2, ...</div><div class="val" style="font-size:11.5px;">Position genuinely computed from d sinθ=nλ, then y=Ltanθ — violet closest to centre, red farthest.</div></div>
+      ${clickHtml}
+    `;
+  }
+
+  const spectrumGeom = {}; // cache last-drawn geometry for click mapping
+
+  function drawSpectrum(){
+    const W=canvas.width, H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+    const gratingX=W*0.12;
+    const screenX = Math.min(W*0.9, gratingX + state.L*PX_PER_METRE);
+    const midY=H*0.5;
+
+    ctx.font='10px JetBrains Mono, monospace'; ctx.fillStyle='rgba(200,210,230,0.8)'; ctx.textAlign='center';
+    ctx.fillText('Grating', gratingX, midY-20);
+    ctx.strokeStyle='#ffffff'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(0,midY); ctx.lineTo(gratingX,midY); ctx.stroke();
+    ctx.fillStyle='#ffffff'; ctx.beginPath(); ctx.arc(gratingX,midY,5,0,Math.PI*2); ctx.fill();
+
+    const nmax = maxOrder(state.d, 550);
+
+    function yToPx(theta_deg){
+      const yM = screenPositionMetres(theta_deg, state.L);
+      return midY - yM*PX_PER_METRE;
+    }
+
+    // central maximum (white) — genuinely at y=0 regardless of d, L
+    ctx.fillStyle='#ffffff';
+    ctx.fillRect(screenX-6, midY-6, 24, 12);
+    ctx.font='10px JetBrains Mono, monospace'; ctx.fillStyle='rgba(220,225,240,0.85)'; ctx.textAlign='left';
+    ctx.fillText('n=0 (white)', screenX+34, midY+4);
+
+    // continuous spectrum for each non-zero order — every wavelength gets its own real y=Ltanθ position
+    const orderRanges = [];
+    for(let n=-Math.min(nmax,4); n<=Math.min(nmax,4); n++){
+      if (n===0) continue;
+      let yMin=Infinity, yMax=-Infinity;
+      for(let wl=400; wl<=700; wl+=3){
+        const theta = angleForOrder(n, state.d, wl);
+        if (theta===null) continue;
+        const yPx = yToPx(theta);
+        if (yPx<15||yPx>H-15) continue;
+        yMin=Math.min(yMin,yPx); yMax=Math.max(yMax,yPx);
+        const col = wavelengthToRGB(wl);
+        ctx.fillStyle=col.css;
+        ctx.fillRect(screenX-6, yPx, 22, 2);
+      }
+      if (yMin<Infinity) orderRanges.push({n, yTop:Math.min(yMin,yMax), yBottom:Math.max(yMin,yMax)});
+      const thetaMid = angleForOrder(n, state.d, 550);
+      if (thetaMid!==null){
+        const yMidPx = yToPx(thetaMid);
+        if (yMidPx>15 && yMidPx<H-15){
+          ctx.font='9px JetBrains Mono, monospace'; ctx.fillStyle='rgba(220,225,240,0.75)'; ctx.textAlign='left';
+          ctx.fillText('n='+n, screenX+20, yMidPx+3);
+        }
+      }
+    }
+    spectrumGeom.orderRanges = orderRanges;
+    spectrumGeom.screenX = screenX;
+    spectrumGeom.midY = midY;
+
+    if (state.clickInfo){
+      ctx.strokeStyle='#ffffff'; ctx.lineWidth=2;
+      const yPx = yToPx(state.clickInfo.theta);
+      ctx.beginPath(); ctx.moveTo(screenX-12,yPx); ctx.lineTo(screenX+12,yPx); ctx.stroke();
+    }
+
+    ctx.font='600 12px Poppins'; ctx.fillStyle='#e8cf7a'; ctx.textAlign='center';
+    ctx.fillText('White Light Spectrum (real geometry) — click a band to identify wavelength/angle', W/2, 20);
+  }
+
+  canvas.addEventListener('click', (e)=>{
+    if (stage!=='spectrum') return;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width/rect.width, scaleY = canvas.height/rect.height;
+    const px = (e.clientX-rect.left)*scaleX;
+    const py = (e.clientY-rect.top)*scaleY;
+    if (!spectrumGeom.orderRanges || Math.abs(px-spectrumGeom.screenX)>20) return;
+    const hit = spectrumGeom.orderRanges.find(r => py>=r.yTop-2 && py<=r.yBottom+2);
+    if (!hit) return;
+    const yM = (spectrumGeom.midY-py)/PX_PER_METRE;
+    const thetaMeasured = Math.atan2(yM, state.L)*180/Math.PI;
+    const d_nm = state.d*1000;
+    const lambda = Math.round((d_nm*Math.sin(thetaMeasured*Math.PI/180))/hit.n);
+    if (lambda<380 || lambda>780) return;
+    const col = wavelengthToRGB(lambda);
+    state.clickInfo = { lambda, n:hit.n, theta: thetaMeasured, y: yM, col: col.css };
+  });
+
+  // ==================================================================
+  const titles = {
+    pattern:'Stage 1 — Diffraction Pattern',
+    sharpness:'Stage 2 — Effect of Number of Slits',
+    spectrum:'Stage 3 — White Light Spectrum'
+  };
+  const notes = {
+    pattern:'d sinθ = nλ gives the angles of the principal maxima. Only orders with |nλ/d| ≤ 1 physically exist.',
+    sharpness:'As N increases, principal maxima become dramatically sharper and brighter (∝N²) — this is why real diffraction gratings (with thousands of lines) produce razor-sharp spectral lines.',
+    spectrum:'At n=0 all wavelengths coincide (white). For n≠0, each wavelength bends at its own angle, spreading into a continuous spectrum.'
+  };
+
+  function switchStage(newStage){
+    stage = newStage;
+    vizTitle.textContent = titles[stage];
+    vizNote.innerHTML = '<b>Note:</b> ' + notes[stage];
+    if (stage==='pattern') renderControlsPattern();
+    else if (stage==='sharpness') renderControlsSharpness();
+    else renderControlsSpectrum();
+  }
+
+  stageTabs.forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      stageTabs.forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      switchStage(tab.dataset.stage);
+    });
+  });
+
+  function render(){
+    if (stage==='pattern'){ renderReadoutsPattern(); drawPattern(); }
+    else if (stage==='sharpness'){ renderReadoutsSharpness(); drawSharpness(); }
+    else { renderReadoutsSpectrum(); drawSpectrum(); }
+  }
+
+  let lastTime=null;
+  function loop(ts){
+    if (lastTime===null) lastTime=ts;
+    const dt=(ts-lastTime)/1000; lastTime=ts;
+    animT+=dt;
+    render();
+    requestAnimationFrame(loop);
+  }
+
+  switchStage('pattern');
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
