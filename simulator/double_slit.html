@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>QUANTAIP Simulator — Young's Double-Slit Interference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-deep:#060c1c; --navy:#0b1530; --navy-panel:#101c3d; --navy-line:#1e2c54;
+    --gold:#d4af37; --gold-soft:#e8cf7a; --text:#eef1fb; --text-dim:#8a93b8;
+    --good:#5fd0a3; --red:#e0715f; --blue:#6fa8dc; --purple:#c084fc;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: radial-gradient(1200px 600px at 15% -10%, #12234f 0%, transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, #14183a 0%, transparent 55%), var(--navy-deep);
+    color:var(--text); font-family:'Poppins',sans-serif; min-height:100vh;
+    display:flex; flex-direction:column; align-items:center; padding:28px 16px 60px;
+  }
+  .header{ width:100%; max-width:1120px; display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom:20px; flex-wrap:wrap; gap:8px; border-bottom:1px solid var(--navy-line); padding-bottom:18px; }
+  .brand{ display:flex; align-items:baseline; gap:10px; }
+  .brand .mark{ font-weight:700; letter-spacing:0.14em; font-size:13px; color:var(--gold); text-transform:uppercase; }
+  .brand .name{ font-weight:300; font-size:22px; letter-spacing:0.01em; }
+  .brand .name b{ font-weight:600; color:var(--gold-soft); }
+  .exp-label{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); letter-spacing:0.08em; }
+
+  .container{ width:100%; max-width:1120px; }
+
+  .stage-tabs{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px; }
+  .stage-tab{
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.02em;
+    padding:9px 15px; border-radius:999px; border:1px solid var(--navy-line);
+    background:var(--navy-deep); color:var(--text-dim); cursor:pointer;
+  }
+  .stage-tab:hover{ color:var(--text); border-color:#33407a; }
+  .stage-tab.active{ background:var(--gold); color:#191204; border-color:var(--gold); font-weight:600; }
+
+  .layout{ display:grid; grid-template-columns:1.5fr 1fr; gap:20px; }
+  @media (max-width:920px){ .layout{ grid-template-columns:1fr; } }
+
+  .panel{
+    background:linear-gradient(180deg, var(--navy-panel), var(--navy));
+    border:1px solid var(--navy-line); border-radius:14px; padding:20px; margin-bottom:20px;
+  }
+  .panel h2{ margin:0 0 14px; font-size:12px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-dim); }
+
+  #mainCanvas{ width:100%; aspect-ratio:16/11; border-radius:10px; background:linear-gradient(180deg, #0a1330 0%, #060c1c 100%); border:1px solid var(--navy-line); display:block; cursor:pointer; }
+
+  .field{ display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
+  .field label{ display:flex; justify-content:space-between; font-size:12.5px; color:var(--text-dim); }
+  .field label span.v{ font-family:'JetBrains Mono',monospace; color:var(--gold-soft); }
+  input[type=range]{ -webkit-appearance:none; width:100%; height:4px; border-radius:2px; background:var(--navy-line); outline:none; }
+  input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:15px; height:15px; border-radius:50%; background:var(--gold); cursor:pointer; border:2px solid var(--navy-deep); }
+
+  .toggle-row{ display:flex; gap:8px; margin-bottom:14px; }
+  .toggle-btn{
+    flex:1; font-family:'JetBrains Mono',monospace; font-size:11px; text-align:center;
+    padding:9px 4px; border-radius:8px; border:1px solid var(--navy-line);
+    background:var(--navy-deep); color:var(--text-dim); cursor:pointer;
+  }
+  .toggle-btn.active{ background:var(--gold); color:#191204; border-color:var(--gold); font-weight:600; }
+
+  .exp-grid{ display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }
+  .exp-btn{
+    font-family:'JetBrains Mono',monospace; font-size:11px; text-align:left;
+    padding:10px 12px; border-radius:8px; border:1px solid var(--navy-line);
+    background:var(--navy-deep); color:var(--text-dim); cursor:pointer;
+  }
+  .exp-btn:hover{ color:var(--gold-soft); border-color:var(--gold); }
+
+  .readouts{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+  .readout{ background:var(--navy-deep); border:1px solid var(--navy-line); border-radius:8px; padding:10px 12px; }
+  .readout .lbl{ font-size:10px; color:var(--text-dim); letter-spacing:0.06em; text-transform:uppercase; }
+  .readout .val{ font-family:'JetBrains Mono',monospace; font-size:14px; color:var(--gold-soft); margin-top:4px; }
+  .readout .val.bright{ color:var(--good); }
+  .readout .val.dark{ color:var(--red); }
+  .readout.wide{ grid-column:1/-1; }
+
+  .note{ font-size:11.5px; color:var(--text-dim); line-height:1.6; margin-top:14px; border-top:1px solid var(--navy-line); padding-top:14px; }
+  .note b{ color:var(--gold-soft); font-weight:600; }
+
+  footer{ margin-top:6px; font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--text-dim); letter-spacing:0.06em; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">
+    <span class="mark">QUANTAIP</span>
+    <span class="name">Simulator — <b>Young's Double-Slit Interference</b></span>
+  </div>
+  <div class="exp-label">EXPERIMENT / WAVE OPTICS &amp; INTERFERENCE</div>
+</div>
+
+<div class="container">
+
+  <div class="stage-tabs" id="stageTabs">
+    <div class="stage-tab active" data-stage="coherence">1 · Coherent Sources</div>
+    <div class="stage-tab" data-stage="setup">2 · Setup &amp; Fringe Pattern</div>
+    <div class="stage-tab" data-stage="superposition">3 · Wave Superposition</div>
+  </div>
+
+  <div class="layout">
+
+    <div class="panel">
+      <h2 id="vizTitle">Visualization</h2>
+      <canvas id="mainCanvas" width="760" height="522"></canvas>
+      <div class="note" id="vizNote"></div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h2>Controls</h2>
+        <div id="controlsBox"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Readouts</h2>
+        <div class="readouts" id="readoutsBox"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>QUANTAIP EDUOS · VIRTUAL LAB MODULE · PROTOTYPE BUILD</footer>
+
+<script>
+(function(){
+  const canvas = document.getElementById('mainCanvas');
+  const ctx = canvas.getContext('2d');
+  const controlsBox = document.getElementById('controlsBox');
+  const readoutsBox = document.getElementById('readoutsBox');
+  const vizTitle = document.getElementById('vizTitle');
+  const vizNote = document.getElementById('vizNote');
+  const stageTabs = document.querySelectorAll('.stage-tab');
+
+  let stage = 'coherence';
+  let animT = 0;
+
+  const state = {
+    lambda: 550,      // nm
+    d: 0.4,            // mm (slit separation)
+    L: 1.2,             // m (slit-to-screen distance)
+    theta: 0.3,          // degrees, observation angle for stage 2/3
+    coherentMode: true,   // stage 1 toggle
+    measureA: null, measureB: null // stage 4 measurement clicks (fringe order m)
+  };
+
+  // ---------- Wavelength -> visible colour ----------
+  function wavelengthToRGB(wl){
+    let r,g,b;
+    if (wl>=380 && wl<440){ r=-(wl-440)/(440-380); g=0; b=1; }
+    else if (wl>=440 && wl<490){ r=0; g=(wl-440)/(490-440); b=1; }
+    else if (wl>=490 && wl<510){ r=0; g=1; b=-(wl-510)/(510-490); }
+    else if (wl>=510 && wl<580){ r=(wl-510)/(580-510); g=1; b=0; }
+    else if (wl>=580 && wl<645){ r=1; g=-(wl-645)/(645-580); b=0; }
+    else if (wl>=645 && wl<=780){ r=1; g=0; b=0; }
+    else { r=0.6;g=0.6;b=0.6; }
+    let factor;
+    if (wl>=380 && wl<420) factor=0.3+0.7*(wl-380)/(420-380);
+    else if (wl>=420 && wl<701) factor=1;
+    else if (wl>=701 && wl<=780) factor=0.3+0.7*(780-wl)/(780-700);
+    else factor=0.5;
+    const gamma=0.8;
+    function adj(c){ return c<=0?0:Math.round(255*Math.pow(c*factor,gamma)); }
+    return {r:adj(r),g:adj(g),b:adj(b), css:`rgb(${adj(r)},${adj(g)},${adj(b)})`};
+  }
+  function colourName(wl){
+    if (wl<450) return 'Violet';
+    if (wl<495) return 'Blue';
+    if (wl<570) return 'Green';
+    if (wl<590) return 'Yellow';
+    if (wl<620) return 'Orange';
+    return 'Red';
+  }
+
+  // ---------- Core physics ----------
+  function pathDifference(thetaDeg){ // d sinθ, returned in nm (d in mm -> nm: *1e6)
+    return state.d*1e6*Math.sin(thetaDeg*Math.PI/180);
+  }
+  function fringeOrder(thetaDeg){ return pathDifference(thetaDeg)/state.lambda; } // m (can be fractional)
+  function fringeSpacingMm(){ return (state.lambda*1e-6*state.L)/(state.d) *1000; } // Δy in mm: λ(m)*L(m)/d(m) *1000 for mm... let's do carefully below
+  // careful unit handling done in dedicated function:
+  function fringeSpacingMeters(){
+    const lambdaM = state.lambda*1e-9;
+    const dM = state.d*1e-3;
+    return (lambdaM*state.L)/dM; // metres
+  }
+  function yOnScreen(thetaDeg){ return state.L*Math.tan(thetaDeg*Math.PI/180); } // metres, exact (not small-angle) for drawing
+
+  function classify(m){
+    const rem = m - Math.round(m);
+    if (Math.abs(rem) < 0.06) return {type:'bright', m:Math.round(m)};
+    if (Math.abs(Math.abs(rem)-0.5) < 0.06) return {type:'dark', m:Math.floor(m)};
+    return {type:'partial', m:null};
+  }
+
+  // ==================================================================
+  // STAGE 1 — Coherent Sources
+  // ==================================================================
+  function renderControlsCoherence(){
+    controlsBox.innerHTML = `
+      <div class="toggle-row">
+        <div class="toggle-btn ${state.coherentMode?'active':''}" data-coh="1">Coherent (Δφ = constant)</div>
+        <div class="toggle-btn ${!state.coherentMode?'active':''}" data-coh="0">Incoherent (Δφ = random)</div>
+      </div>
+      <div class="field"><label>Wavelength (λ) <span class="v" id="v_lam1">${state.lambda} nm</span></label>
+        <input type="range" id="s_lam1" min="400" max="700" step="5" value="${state.lambda}"></div>`;
+    document.querySelectorAll('[data-coh]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ state.coherentMode = btn.dataset.coh==='1'; renderControlsCoherence(); });
+    });
+    document.getElementById('s_lam1').addEventListener('input', e=>{
+      state.lambda=parseFloat(e.target.value); document.getElementById('v_lam1').textContent=state.lambda+' nm';
+    });
+  }
+
+  function renderReadoutsCoherence(){
+    const col = wavelengthToRGB(state.lambda);
+    readoutsBox.innerHTML = `
+      <div class="readout wide"><div class="lbl">Phase Relationship</div><div class="val" style="color:${state.coherentMode?'var(--good)':'var(--red)'}">${state.coherentMode?'Δφ = constant (COHERENT)':'Δφ = random (INCOHERENT)'}</div></div>
+      <div class="readout"><div class="lbl">Wavelength</div><div class="val" style="color:${col.css}">λ = ${state.lambda} nm</div></div>
+      <div class="readout"><div class="lbl">Colour</div><div class="val" style="color:${col.css}">${colourName(state.lambda)} region</div></div>
+      <div class="readout wide"><div class="lbl">Result</div><div class="val" style="font-size:11.5px;">${state.coherentMode ? 'A STABLE interference pattern forms — bright/dark regions stay fixed in place.' : 'The interference pattern washes out — bright/dark regions shift randomly and average to uniform brightness.'}</div></div>
+    `;
+  }
+
+  let randomPhaseOffset = 0, lastRandomUpdate = 0;
+  function drawCoherence(){
+    const W=canvas.width, H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+    const s1 = {x:W*0.28, y:H*0.38}, s2 = {x:W*0.28, y:H*0.62};
+    const k = 2*Math.PI/40;
+    const col = wavelengthToRGB(state.lambda);
+
+    if (!state.coherentMode && animT-lastRandomUpdate>0.4){
+      randomPhaseOffset = Math.random()*Math.PI*2;
+      lastRandomUpdate = animT;
+    }
+    const phi2 = state.coherentMode ? 0 : randomPhaseOffset;
+
+    function drawWavefronts(src, phase, color){
+      for(let i=0;i<7;i++){
+        const r = ((animT*90 + i*40 - phase*6)%320);
+        if (r<4) continue;
+        ctx.globalAlpha = Math.max(0,1-r/320)*0.55;
+        ctx.strokeStyle=color; ctx.lineWidth=2;
+        ctx.beginPath(); ctx.arc(src.x,src.y,r,-Math.PI/2,Math.PI/2); ctx.stroke();
+      }
+      ctx.globalAlpha=1;
+    }
+    drawWavefronts(s1,0,col.css);
+    drawWavefronts(s2,phi2,col.css);
+
+    // overlap interference shading region (right side)
+    const regionX0 = W*0.32, regionX1 = W*0.94;
+    const imgData_w = regionX1-regionX0;
+    for(let px=0; px<imgData_w; px+=3){
+      const x = regionX0+px;
+      for(let py=0; py<H; py+=3){
+        const y=py;
+        const r1 = Math.hypot(x-s1.x,y-s1.y);
+        const r2 = Math.hypot(x-s2.x,y-s2.y);
+        const ph1 = k*r1;
+        const ph2 = k*r2+phi2*6;
+        const amp = Math.cos(ph1-animT*8)+Math.cos(ph2-animT*8);
+        const bright = Math.max(0,(amp/2))*0.5;
+        if (bright>0.05){
+          ctx.globalAlpha = bright*0.5;
+          ctx.fillStyle = col.css;
+          ctx.fillRect(x,y,3,3);
+        }
+      }
+    }
+    ctx.globalAlpha=1;
+
+    ctx.fillStyle='#ffffff'; ctx.beginPath(); ctx.arc(s1.x,s1.y,5,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(s2.x,s2.y,5,0,Math.PI*2); ctx.fill();
+    ctx.font='600 11px JetBrains Mono, monospace'; ctx.fillStyle='rgba(255,255,255,0.85)'; ctx.textAlign='right';
+    ctx.fillText('S₁', s1.x-10, s1.y+4);
+    ctx.fillText('S₂', s2.x-10, s2.y+4);
+
+    ctx.font='600 13px Poppins'; ctx.fillStyle=state.coherentMode?'#5fd0a3':'#e0715f'; ctx.textAlign='center';
+    ctx.fillText(state.coherentMode ? 'Δφ = constant — stable pattern' : 'Δφ = random — pattern washes out', W/2, 26);
+  }
+
+  // ==================================================================
+  // STAGE 2 — Experimental Setup
+  // ==================================================================
+  function renderControlsSetup(){
+    controlsBox.innerHTML = `
+      <div class="field"><label>Wavelength (λ) <span class="v" id="v_lam2">${state.lambda} nm</span></label>
+        <input type="range" id="s_lam2" min="400" max="700" step="5" value="${state.lambda}"></div>
+      <div class="field"><label>Slit Separation (d) <span class="v" id="v_d2">${state.d.toFixed(2)} mm</span></label>
+        <input type="range" id="s_d2" min="0.1" max="1" step="0.01" value="${state.d}"></div>
+      <div class="field"><label>Screen Distance (L) <span class="v" id="v_L2">${state.L.toFixed(1)} m</span></label>
+        <input type="range" id="s_L2" min="0.3" max="3" step="0.1" value="${state.L}"></div>
+      <div class="field"><label>Observation Angle (θ) <span class="v" id="v_th2">${state.theta.toFixed(2)}°</span></label>
+        <input type="range" id="s_th2" min="-60" max="60" step="0.1" value="${state.theta}"></div>
+      <div class="exp-grid">
+        <div class="exp-btn" data-q="lam">What happens if λ increases?</div>
+        <div class="exp-btn" data-q="d">What happens if d increases?</div>
+        <div class="exp-btn" data-q="L">What happens if L increases?</div>
+        <div class="exp-btn" id="clearMeasure">Clear Measurement</div>
+      </div>
+      <div class="note" style="margin-top:0;border-top:none;padding-top:0;">Click a fringe on the screen (right side of diagram) to measure spacing between two fringes.</div>`;
+    ['lam2','d2','L2','th2'].forEach(id=>{
+      document.getElementById('s_'+id).addEventListener('input', e=>{
+        const v=parseFloat(e.target.value);
+        if(id==='lam2'){state.lambda=v; document.getElementById('v_lam2').textContent=v+' nm';}
+        if(id==='d2'){state.d=v; document.getElementById('v_d2').textContent=v.toFixed(2)+' mm';}
+        if(id==='L2'){state.L=v; document.getElementById('v_L2').textContent=v.toFixed(1)+' m';}
+        if(id==='th2'){state.theta=v; document.getElementById('v_th2').textContent=v.toFixed(2)+'°';}
+      });
+    });
+    document.querySelectorAll('[data-q]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        if (btn.dataset.q==='lam') state.lambda = Math.min(700, state.lambda+80);
+        if (btn.dataset.q==='d') state.d = Math.min(1, state.d+0.15);
+        if (btn.dataset.q==='L') state.L = Math.min(3, state.L+0.6);
+        renderControlsSetup();
+      });
+    });
+    document.getElementById('clearMeasure').addEventListener('click', ()=>{
+      state.measureA=null; state.measureB=null;
+    });
+  }
+
+  function renderReadoutsSetup(){
+    const pd = pathDifference(state.theta);
+    const m = fringeOrder(state.theta);
+    const cls = classify(m);
+    const col = wavelengthToRGB(state.lambda);
+    const dy = fringeSpacingMeters();
+    const dyMm = dy*1000;
+    let measuredHtml = '';
+    if (state.measureA!==null && state.measureB!==null){
+      const measured = Math.abs(state.measureB-state.measureA)*dyMm;
+      measuredHtml = `<div class="readout wide"><div class="lbl">Measured Δy (between selected fringes)</div><div class="val">${measured.toFixed(3)} mm</div></div>`;
+    }
+    readoutsBox.innerHTML = `
+      <div class="readout"><div class="lbl">Wavelength</div><div class="val" style="color:${col.css}">λ = ${state.lambda} nm</div></div>
+      <div class="readout"><div class="lbl">Observation Angle</div><div class="val">θ = ${state.theta.toFixed(2)}°</div></div>
+      <div class="readout wide"><div class="lbl">Path Difference</div><div class="val">d sinθ = ${pd.toFixed(1)} nm</div></div>
+      <div class="readout"><div class="lbl">Fringe Order at P</div><div class="val">m = ${m.toFixed(2)}</div></div>
+      <div class="readout"><div class="lbl">Result at P</div><div class="val ${cls.type==='bright'?'bright':(cls.type==='dark'?'dark':'')}">${cls.type==='bright'?'BRIGHT (m='+cls.m+')':cls.type==='dark'?'DARK (m='+cls.m+')':'Partial'}</div></div>
+      <div class="readout wide"><div class="lbl">θ = 0° (Central Axis)</div><div class="val">d sinθ = 0 → Central Maximum (always bright)</div></div>
+      <div class="readout wide"><div class="lbl">Fringe Spacing</div><div class="val">Δy = λL/d = ${dyMm.toFixed(3)} mm</div></div>
+      <div class="readout"><div class="lbl">λ increases →</div><div class="val bright">Δy increases</div></div>
+      <div class="readout"><div class="lbl">d increases →</div><div class="val dark">Δy decreases</div></div>
+      ${measuredHtml}
+    `;
+  }
+
+  function drawSetup(){
+    const W=canvas.width, H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+    const col = wavelengthToRGB(state.lambda);
+    const srcX=50;
+    const slitX = W*0.30;
+    // screen distance grows visually with L (0.3m -> close, 3m -> far, mapped across available width)
+    const screenX = slitX + ((state.L-0.3)/(3-0.3))*(W*0.95-slitX);
+    // slit separation grows visually with d (0.1mm -> narrow, 1mm -> wide)
+    const slitGap = 16 + ((state.d-0.1)/(1-0.1))*130;
+    const midY=H*0.5;
+    const s1={x:slitX,y:midY-slitGap/2}, s2={x:slitX,y:midY+slitGap/2};
+
+    // source
+    ctx.fillStyle=col.css; ctx.beginPath(); ctx.arc(srcX,midY,10,0,Math.PI*2); ctx.fill();
+    ctx.font='10px JetBrains Mono, monospace'; ctx.fillStyle='rgba(200,210,230,0.8)'; ctx.textAlign='center';
+    ctx.fillText('Source', srcX, midY-20);
+    ctx.strokeStyle=col.css; ctx.lineWidth=1.5;
+    for(let i=0;i<3;i++){ ctx.beginPath(); ctx.moveTo(srcX+10,midY); ctx.lineTo(slitX-6,midY); ctx.stroke(); }
+
+    // barrier with slits
+    ctx.strokeStyle='rgba(200,210,230,0.6)'; ctx.lineWidth=6;
+    ctx.beginPath(); ctx.moveTo(slitX,10); ctx.lineTo(slitX,s1.y-4); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(slitX,s1.y+4); ctx.lineTo(slitX,s2.y-4); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(slitX,s2.y+4); ctx.lineTo(slitX,H-10); ctx.stroke();
+
+    // wavefronts from slits
+    function wavefronts(src){
+      for(let i=0;i<6;i++){
+        const r = ((animT*90+i*45)%(screenX-slitX+40));
+        ctx.globalAlpha=Math.max(0,1-r/(screenX-slitX+40))*0.4;
+        ctx.strokeStyle=col.css; ctx.lineWidth=1.5;
+        ctx.beginPath(); ctx.arc(src.x,src.y,r,-Math.PI/2.3,Math.PI/2.3); ctx.stroke();
+      }
+      ctx.globalAlpha=1;
+    }
+    wavefronts(s1); wavefronts(s2);
+
+    ctx.font='10px JetBrains Mono, monospace'; ctx.fillStyle='rgba(200,210,230,0.8)'; ctx.textAlign='right';
+    ctx.fillText('S₁', slitX-8, s1.y+3);
+    ctx.fillText('S₂', slitX-8, s2.y+3);
+    ctx.textAlign='left';
+    ctx.fillStyle='rgba(232,207,122,0.85)';
+    ctx.fillText('d = '+state.d.toFixed(2)+' mm', slitX+6, midY+3);
+    ctx.strokeStyle='rgba(232,207,122,0.5)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(slitX-16,s1.y); ctx.lineTo(slitX-16,s2.y); ctx.stroke();
+
+    // screen — painted with the ACTUAL fringe pattern. Uses a FIXED physical screen extent (mm),
+    // so changing d, L or λ correctly changes how many fringes fit in view — denser when d↑ or L↓ or λ↓,
+    // wider-spaced when d↓ or L↑ or λ↑ — exactly matching Δy = λL/d.
+    const screenTop=20, screenBottom=H-10;
+    const halfHeight=(screenBottom-screenTop)/2;
+    const screenHalfExtentM = 0.006; // fixed physical half-height shown: 6 mm on each side of centre
+    const dyMetersLocal = fringeSpacingMeters();
+    for(let py=screenTop; py<=screenBottom; py+=2){
+      const yMetres = ((midY-py)/halfHeight)*screenHalfExtentM;
+      const pdApprox = state.d*1e6 * (yMetres/state.L); // nm, small-angle: sinθ ≈ y/L
+      const cycles = pdApprox/state.lambda;
+      const bright = Math.pow(Math.cos(Math.PI*cycles), 2);
+      ctx.fillStyle = `rgba(${col.r},${col.g},${col.b},${bright})`;
+      ctx.fillRect(screenX-8, py, 16, 2);
+    }
+    ctx.strokeStyle='rgba(200,210,230,0.5)'; ctx.lineWidth=1.5;
+    ctx.strokeRect(screenX-8, screenTop, 16, screenBottom-screenTop);
+    ctx.font='9px JetBrains Mono, monospace'; ctx.fillStyle='rgba(138,147,184,0.6)'; ctx.textAlign='left';
+    ctx.fillText('(±6mm window shown)', screenX+30, screenTop+8);
+
+    ctx.font='10px JetBrains Mono, monospace'; ctx.fillStyle='rgba(200,210,230,0.7)'; ctx.textAlign='center';
+    ctx.fillText('Screen', screenX, H-2);
+    ctx.fillStyle='rgba(232,207,122,0.85)';
+    ctx.fillText('L = '+state.L.toFixed(1)+' m', (slitX+screenX)/2, H*0.08);
+    ctx.strokeStyle='rgba(232,207,122,0.4)'; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(slitX,H*0.12); ctx.lineTo(screenX,H*0.12); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // central maximum marker directly on the pattern (m=0 always bright)
+    ctx.strokeStyle='#5fd0a3'; ctx.lineWidth=1; ctx.setLineDash([3,3]);
+    ctx.beginPath(); ctx.moveTo(screenX-24,midY); ctx.lineTo(screenX+24,midY); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.font='9px JetBrains Mono, monospace'; ctx.fillStyle='#5fd0a3'; ctx.textAlign='left';
+    ctx.fillText('Central Max (m=0)', screenX+30, midY+3);
+
+    // measurement markers (from clicking the pattern) — now based on real fringe order via Δy
+    function fringeYFromM(m){
+      const yMetres = m*dyMetersLocal;
+      return midY - (yMetres/screenHalfExtentM)*halfHeight;
+    }
+    if (state.measureA!==null){ ctx.strokeStyle='#5fd0a3'; ctx.lineWidth=1.5; const y=fringeYFromM(state.measureA); ctx.beginPath(); ctx.moveTo(screenX-16,y); ctx.lineTo(screenX+16,y); ctx.stroke(); }
+    if (state.measureB!==null){ ctx.strokeStyle='#e8cf7a'; ctx.lineWidth=1.5; const y=fringeYFromM(state.measureB); ctx.beginPath(); ctx.moveTo(screenX-16,y); ctx.lineTo(screenX+16,y); ctx.stroke(); }
+
+    // central axis
+    ctx.strokeStyle='rgba(138,147,184,0.25)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(slitX,midY); ctx.lineTo(screenX,midY); ctx.stroke();
+
+    // observation point P and angle theta — schematic mapping (theta linear in vertical position)
+    // NOTE: real double-slit fringe angles are tiny fractions of a degree; this diagram exaggerates
+    // the angle schematically (like a textbook diagram) so ±60° stays visible and usable on screen.
+    const pX = screenX;
+    const pY = midY - (state.theta/60)*(H*0.42);
+    const midSlitY = (s1.y+s2.y)/2;
+    ctx.strokeStyle='rgba(95,208,163,0.7)'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(slitX,midSlitY); ctx.lineTo(pX,pY); ctx.stroke();
+    ctx.fillStyle='#5fd0a3'; ctx.beginPath(); ctx.arc(pX,pY,5,0,Math.PI*2); ctx.fill();
+    ctx.font='11px JetBrains Mono, monospace'; ctx.fillStyle='#5fd0a3'; ctx.textAlign='left';
+    ctx.fillText('P', pX+8, pY+4);
+    // lines S1P, S2P
+    ctx.strokeStyle='rgba(200,210,230,0.4)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(s1.x,s1.y); ctx.lineTo(pX,pY); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(s2.x,s2.y); ctx.lineTo(pX,pY); ctx.stroke();
+    // theta arc at slits midpoint
+    ctx.strokeStyle='rgba(95,208,163,0.6)'; ctx.lineWidth=1.3;
+    ctx.beginPath(); ctx.arc(slitX,midSlitY, 26, -Math.PI/2, Math.atan2(pY-midSlitY,pX-slitX)); ctx.stroke();
+    ctx.font='10px JetBrains Mono, monospace'; ctx.fillStyle='#5fd0a3';
+    ctx.fillText('θ', slitX+30, midSlitY - (pY<midSlitY?18:-18));
+
+    ctx.font='600 12px Poppins'; ctx.fillStyle='#e8cf7a'; ctx.textAlign='center';
+    ctx.fillText('Monochromatic Source → Double Slit (S₁,S₂) → Screen (showing real fringe pattern)', W/2, 20);
+    ctx.font='9.5px JetBrains Mono, monospace'; ctx.fillStyle='rgba(138,147,184,0.6)';
+    ctx.fillText('(green P/θ indicator is exaggerated schematically — real fringe angles are a small fraction of a degree; the coloured band shows the actual uniform pattern)', W/2, H-16);
+  }
+
+  // ==================================================================
+  // STAGE 3 — Wave Superposition (MOST IMPORTANT)
+  // ==================================================================
+  function renderControlsSuperposition(){
+    controlsBox.innerHTML = `
+      <div class="field"><label>Observation Angle (θ) <span class="v" id="v_th3">${state.theta.toFixed(2)}°</span></label>
+        <input type="range" id="s_th3" min="-60" max="60" step="0.1" value="${state.theta}"></div>
+      <div class="field"><label>Wavelength (λ) <span class="v" id="v_lam3">${state.lambda} nm</span></label>
+        <input type="range" id="s_lam3" min="400" max="700" step="5" value="${state.lambda}"></div>
+      <div class="exp-grid">
+        <div class="exp-btn" data-jump="bright">Jump to nearest Bright Fringe</div>
+        <div class="exp-btn" data-jump="dark">Jump to nearest Dark Fringe</div>
+        <div class="exp-btn" data-jump="central">Jump to Central Maximum (θ=0)</div>
+      </div>`;
+    document.getElementById('s_th3').addEventListener('input', e=>{
+      state.theta=parseFloat(e.target.value); document.getElementById('v_th3').textContent=state.theta.toFixed(2)+'°';
+    });
+    document.getElementById('s_lam3').addEventListener('input', e=>{
+      state.lambda=parseFloat(e.target.value); document.getElementById('v_lam3').textContent=state.lambda+' nm';
+    });
+    document.querySelectorAll('[data-jump]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const m = fringeOrder(state.theta);
+        let targetM;
+        if (btn.dataset.jump==='bright') targetM = Math.round(m);
+        else if (btn.dataset.jump==='dark') targetM = Math.floor(m)+0.5;
+        else targetM = 0;
+        const pd = targetM*state.lambda;
+        const sinTheta = pd/(state.d*1e6);
+        state.theta = Math.max(-2,Math.min(2, Math.asin(Math.max(-1,Math.min(1,sinTheta)))*180/Math.PI));
+        renderControlsSuperposition();
+      });
+    });
+  }
+
+  function renderReadoutsSuperposition(){
+    const pd = pathDifference(state.theta);
+    const m = fringeOrder(state.theta);
+    const cls = classify(m);
+    const phaseDiffCycles = pd/state.lambda;
+    readoutsBox.innerHTML = `
+      <div class="readout wide"><div class="lbl">Path Difference</div><div class="val">d sinθ = ${pd.toFixed(1)} nm</div></div>
+      <div class="readout"><div class="lbl">In units of λ</div><div class="val">${phaseDiffCycles.toFixed(2)} λ</div></div>
+      <div class="readout"><div class="lbl">Fringe Order</div><div class="val">m = ${m.toFixed(2)}</div></div>
+      <div class="readout wide"><div class="lbl">Superposition Result</div>
+        <div class="val ${cls.type==='bright'?'bright':(cls.type==='dark'?'dark':'')}">
+          ${cls.type==='bright' ? 'CONSTRUCTIVE — A + A → 2A (Bright Fringe)' : cls.type==='dark' ? 'DESTRUCTIVE — A + (−A) → 0 (Dark Fringe)' : 'Partial interference (between max and min)'}
+        </div>
+      </div>
+      <div class="readout wide"><div class="lbl">Condition</div><div class="val" style="font-size:11px;">${cls.type==='bright' ? 'd sinθ = mλ' : cls.type==='dark' ? 'd sinθ = (m + 1/2)λ' : 'neither condition exactly met'}</div></div>
+    `;
+  }
+
+  function drawSuperposition(){
+    const W=canvas.width, H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+    const col = wavelengthToRGB(state.lambda);
+    const pd = pathDifference(state.theta); // nm
+    const phaseShift = (pd/state.lambda)*2*Math.PI; // radians
+
+    const rows = [
+      {label:'Wave from S₁', y:H*0.2, color:'#e8cf7a', phase:0},
+      {label:'Wave from S₂', y:H*0.44, color:'#6fa8dc', phase:phaseShift},
+      {label:'Resultant (S₁ + S₂)', y:H*0.72, color:'#5fd0a3', phase:null}
+    ];
+    const amp=H*0.09, kk=0.05;
+
+    rows.forEach(r=>{
+      if (r.phase===null) return;
+      ctx.strokeStyle=r.color; ctx.lineWidth=2.2;
+      ctx.beginPath();
+      for(let x=0;x<W;x++){
+        const y = r.y - Math.sin(kk*x - animT*4 + r.phase)*amp;
+        if (x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+      ctx.font='600 11px JetBrains Mono, monospace'; ctx.fillStyle=r.color; ctx.textAlign='left';
+      ctx.fillText(r.label, 14, r.y-amp-8);
+    });
+
+    // resultant = sum
+    const resRow = rows[2];
+    ctx.strokeStyle=resRow.color; ctx.lineWidth=2.6;
+    ctx.shadowColor=resRow.color; ctx.shadowBlur=6;
+    ctx.beginPath();
+    for(let x=0;x<W;x++){
+      const y1v = Math.sin(kk*x - animT*4 + rows[0].phase);
+      const y2v = Math.sin(kk*x - animT*4 + rows[1].phase);
+      const sum = y1v+y2v;
+      const y = resRow.y - sum*amp*0.5;
+      if (x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+    ctx.shadowBlur=0;
+    ctx.font='600 11px JetBrains Mono, monospace'; ctx.fillStyle=resRow.color; ctx.textAlign='left';
+    ctx.fillText(resRow.label, 14, resRow.y-amp-8);
+
+    const m = fringeOrder(state.theta);
+    const cls = classify(m);
+    ctx.font='600 13px Poppins'; ctx.textAlign='center';
+    if (cls.type==='bright'){ ctx.fillStyle='#5fd0a3'; ctx.fillText('Constructive Interference — A + A → 2A (Bright Fringe)', W/2, H*0.92); }
+    else if (cls.type==='dark'){ ctx.fillStyle='#e0715f'; ctx.fillText('Destructive Interference — A + (−A) → 0 (Dark Fringe)', W/2, H*0.92); }
+    else { ctx.fillStyle='#e8cf7a'; ctx.fillText('Partial interference (in between)', W/2, H*0.92); }
+  }
+
+  // ==================================================================
+  // STAGE 4 — Fringe Spacing Lab
+  // ==================================================================
+  canvas.addEventListener('click', (e)=>{
+    if (stage!=='setup') return;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width/rect.width;
+    const scaleY = canvas.height/rect.height;
+    const px = (e.clientX-rect.left)*scaleX;
+    const py = (e.clientY-rect.top)*scaleY;
+
+    const W=canvas.width, H=canvas.height;
+    const slitX = W*0.30;
+    const screenX = slitX + ((state.L-0.3)/(3-0.3))*(W*0.95-slitX);
+    if (Math.abs(px-screenX) > 20) return; // only respond to clicks near the screen pattern
+
+    const midY = H*0.5;
+    const screenTop=20, screenBottom=H-10;
+    const halfHeight=(screenBottom-screenTop)/2;
+    const screenHalfExtentM = 0.006;
+    const dy = fringeSpacingMeters();
+    const yMetres = ((midY-py)/halfHeight)*screenHalfExtentM;
+    const mClicked = Math.round(yMetres/dy);
+    if (state.measureA===null) state.measureA=mClicked;
+    else if (state.measureB===null) state.measureB=mClicked;
+    else { state.measureA=mClicked; state.measureB=null; }
+  });
+
+  // ==================================================================
+  const titles = {
+    coherence:'Stage 1 — Coherent Sources',
+    setup:'Stage 2 — Setup & Fringe Pattern',
+    superposition:'Stage 3 — Wave Superposition'
+  };
+  const notes = {
+    coherence:'Coherent sources maintain a constant phase difference — this is REQUIRED for a stable interference pattern. Toggle to Incoherent and watch the pattern wash out.',
+    setup:'Light passes through two slits S₁, S₂ onto a screen — the screen shows the ACTUAL fringe pattern. Change d/L/λ and watch both the apparatus and the pattern respond together. Δy = λL/d.',
+    superposition:'At any point P, two waves arrive — one from each slit. Whether they add constructively or destructively depends entirely on the path difference d sinθ.'
+  };
+
+  function switchStage(newStage){
+    stage = newStage;
+    vizTitle.textContent = titles[stage];
+    vizNote.innerHTML = '<b>Note:</b> ' + notes[stage];
+    if (stage==='coherence') renderControlsCoherence();
+    else if (stage==='setup') renderControlsSetup();
+    else renderControlsSuperposition();
+  }
+
+  stageTabs.forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      stageTabs.forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      switchStage(tab.dataset.stage);
+    });
+  });
+
+  function render(){
+    if (stage==='coherence'){ renderReadoutsCoherence(); drawCoherence(); }
+    else if (stage==='setup'){ renderReadoutsSetup(); drawSetup(); }
+    else { renderReadoutsSuperposition(); drawSuperposition(); }
+  }
+
+  let lastTime=null;
+  function loop(ts){
+    if (lastTime===null) lastTime=ts;
+    const dt=(ts-lastTime)/1000; lastTime=ts;
+    animT+=dt;
+    render();
+    requestAnimationFrame(loop);
+  }
+
+  switchStage('coherence');
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
